@@ -132,63 +132,63 @@
                         temperatures.push(getRndInteger(20, 35));
                         humidity.push(getRndInteger(70, 85));
                     }
-                // Line chart
-                new Chart(document.getElementById("chartjs-dashboard-line"), {
-                    type: "line",
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: "Temperature (&deg;C)",
-                            fill: true,
-                            backgroundColor: gradient,
-                            borderColor: 'red',
-                            data: temperatures
+                    // Line chart
+                    new Chart(document.getElementById("chartjs-dashboard-line"), {
+                        type: "line",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Temperature (&deg;C)",
+                                fill: true,
+                                backgroundColor: gradient,
+                                borderColor: 'red',
+                                data: temperatures
+                            },
+                            {
+                                label: "Humidity (%)",
+                                fill: true,
+                                backgroundColor: gradient,
+                                borderColor: window.theme.primary,
+                                data: humidity
+                            },
+                            ]
                         },
-                        {
-                            label: "Humidity (%)",
-                            fill: true,
-                            backgroundColor: gradient,
-                            borderColor: window.theme.primary,
-                            data: humidity
-                        },
-                        ]
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        legend: {
-                            display: false
-                        },
-                        tooltips: {
-                            intersect: false
-                        },
-                        hover: {
-                            intersect: true
-                        },
-                        plugins: {
-                            filler: {
-                                propagate: false
+                        options: {
+                            maintainAspectRatio: false,
+                            legend: {
+                                display: false
+                            },
+                            tooltips: {
+                                intersect: false
+                            },
+                            hover: {
+                                intersect: true
+                            },
+                            plugins: {
+                                filler: {
+                                    propagate: false
+                                }
+                            },
+                            scales: {
+                                xAxes: [{
+                                    reverse: true,
+                                    gridLines: {
+                                        color: "rgba(0,0,0,0.0)"
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        stepSize: 1000
+                                    },
+                                    display: true,
+                                    borderDash: [3, 3],
+                                    gridLines: {
+                                        color: "rgba(0,0,0,0.0)"
+                                    }
+                                }]
                             }
-                        },
-                        scales: {
-                            xAxes: [{
-                                reverse: true,
-                                gridLines: {
-                                    color: "rgba(0,0,0,0.0)"
-                                }
-                            }],
-                            yAxes: [{
-                                ticks: {
-                                    stepSize: 1000
-                                },
-                                display: true,
-                                borderDash: [3, 3],
-                                gridLines: {
-                                    color: "rgba(0,0,0,0.0)"
-                                }
-                            }]
                         }
-                    }
-                });
+                    });
                 });
             </script>
         </div>
@@ -262,6 +262,45 @@
                     <div class="card-header">
                         <h5 class="card-title mb-0">Details Data</h5>
                     </div>
+                    <div>
+                        <form method="GET" action="/dashboard/search" class="row g-3 mb-4 p-2">
+                            <!-- Factory Filter -->
+                            <div class="col-md-3">
+                                <label for="factory" class="form-label">Factory</label>
+                                <select name="factory" id="factory" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="Factory 1">Factory 1</option>
+                                    <option value="Factory 2">Factory 2</option>
+                                    <option value="Factory 3">Factory 3</option>
+                                    <option value="Factory 4">Factory 4</option>
+                                </select>
+                            </div>
+
+                            <!-- Location Filter -->
+                            <div class="col-md-3">
+                                <label for="location" class="form-label">Location</label>
+                                <select name="location" id="location" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="Zone1">Zone1</option>
+                                    <option value="Zone2">Zone2</option>
+                                    <option value="Zone3">Zone3</option>
+                                    <option value="Zone4">Zone4</option>
+                                </select>
+                            </div>
+
+                            <!-- Date Filter -->
+                            <div class="col-md-4">
+                                <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
+                                <div class="input-group date">
+                                    <input type="text" name="time" id="time" class="form-control"
+                                        placeholder="Date">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                                        Filter</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <table class="table table-hover my-0">
                         <thead>
                             <tr>
@@ -305,3 +344,13 @@
 
     </div>
 </main>
+
+<script>
+    $(document).ready(function () {
+        $('#time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+</script>
