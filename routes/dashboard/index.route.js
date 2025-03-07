@@ -189,7 +189,7 @@ router.get('/', (req, res, next) => {
     });
 });
 
-router.get("/dashboard/search", (req, res) => {
+router.get("/dashboard/filter", (req, res) => {
     let { factory, location, time } = req.query;
 
     console.log("Filters received:", req.query);
@@ -219,7 +219,7 @@ router.get("/dashboard/search", (req, res) => {
         detail.timestamp = formatTimestamp(detail.timestamp);
     });
 
-    res.render("dashboard", { details: data });
+    res.json({ details: data });
 });
 
 export default router;

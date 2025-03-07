@@ -263,7 +263,7 @@
                         <h5 class="card-title mb-0">Details Data</h5>
                     </div>
                     <div>
-                        <form method="GET" action="/dashboard/search" class="row g-3 mb-4 p-2">
+                        <form method="GET" id="filterForm" class="row g-3 mb-4 p-2">
                             <!-- Factory Filter -->
                             <div class="col-md-3">
                                 <label for="factory" class="form-label">Factory</label>
@@ -312,10 +312,10 @@
                                 <th>Time</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tableBody">
                             {{#each details}}
                             <tr>
-                                <td>{{id}}</td>
+                                <td>{{increment @index}}</td>
                                 <td class="d-none d-xl-table-cell">{{factory}}</td>
                                 <td class="d-none d-xl-table-cell">{{location}}</td>
                                 <td class="d-none d-md-table-cell">{{temperature}}</td>
@@ -351,6 +351,41 @@
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
             todayHighlight: true
+        });
+
+        $("#filterForm").submit(function (e) {
+            e.preventDefault(); // Prevent page reload
+
+            let factory = $("#factory").val();
+            let location = $("#location").val();
+            let date = $("#date").val();
+
+            $.ajax({
+                url: "/dashboard/filter",
+                method: "GET",
+                data: { factory, location, date },
+                success: function (response) {
+                    $("#tableBody").html(""); // Clear existing rows
+                    console.log(response);
+                    if (response.details.length > 0) {
+                        var i = 0;
+                        response.details.forEach(item => {
+                            $("#tableBody").append(`
+                                <tr>
+                                    <td>${++i}</td>
+                                    <td class="d-none d-xl-table-cell">${item.factory}</td>
+                                    <td class="d-none d-xl-table-cell">${item.location}</td>
+                                    <td class="d-none d-md-table-cell">${item.temperature}</td>
+                                    <td class="d-none d-md-table-cell">${item.humidity}</td>
+                                    <td class="d-none d-md-table-cell">${item.timestamp}</td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        $("#tableBody").append(`<tr><td colspan="6" class="text-center">No data found</td></tr>`);
+                    }
+                }
+            });
         });
     });
 </script>

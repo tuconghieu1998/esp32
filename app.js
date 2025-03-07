@@ -1,5 +1,6 @@
 import express from 'express';
 import { engine } from 'express-handlebars';
+import exphbs from 'express-handlebars';
 import path from 'path';
 
 const app = express();
@@ -9,9 +10,14 @@ app.use('/', express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
 
 app.set('view engine', 'hbs');  
-app.engine("hbs", engine({
+app.engine("hbs",engine({
     defaultLayout: 'main.hbs',
     layoutsDir: 'views/_layouts',
+    helpers: {
+        increment: function (index) {
+            return index + 1; // Convert 0-based index to 1-based
+        }
+    }
 }));
 
 app.set('views', './views');
