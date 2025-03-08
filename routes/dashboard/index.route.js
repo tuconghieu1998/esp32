@@ -1,6 +1,6 @@
 import express from 'express';
 var router = express.Router();
-import ExcelJS from "exceljs";
+import ExcelJS from 'exceljs/dist/exceljs';
 
 var details = [
     {
