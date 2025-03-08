@@ -2,7 +2,6 @@
     <div class="container-fluid p-0">
 
         <h1 class="h3 mb-3"><strong>Analytics</strong> Dashboard</h1>
-
         <div class="row">
             <div class="col-xl-6 col-xxl-5 d-flex">
                 <div class="w-100">
@@ -36,7 +35,6 @@
                                         <div class="col mt-0">
                                             <h5 class="card-title">Factory 2 </h5>
                                         </div>
-
                                         <div class="col-auto">
                                             <div class="stat text-primary">
                                                 <i class="align-middle" data-feather="home"></i>
@@ -102,7 +100,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-xl-6 col-xxl-7">
                 <div class="card flex-fill w-100">
                     <div class="card-header">
@@ -115,86 +112,125 @@
                     </div>
                 </div>
             </div>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    var ctx = document.getElementById("chartjs-dashboard-line").getContext("2d");
-                    var gradient = ctx.createLinearGradient(0, 0, 0, 225);
-                    gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
-                    gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
-                    var labels = [];
-                    var temperatures = [];
-                    var humidity = [];
-                    function getRndInteger(min, max) {
-                        return Math.floor(Math.random() * (max - min)) + min;
-                    }
-                    for (var i = 0; i < 24; i++) {
-                        labels.push(i + "h");
-                        temperatures.push(getRndInteger(20, 35));
-                        humidity.push(getRndInteger(70, 85));
-                    }
-                    // Line chart
-                    new Chart(document.getElementById("chartjs-dashboard-line"), {
-                        type: "line",
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: "Temperature (&deg;C)",
-                                fill: true,
-                                backgroundColor: gradient,
-                                borderColor: 'red',
-                                data: temperatures
-                            },
-                            {
-                                label: "Humidity (%)",
-                                fill: true,
-                                backgroundColor: gradient,
-                                borderColor: window.theme.primary,
-                                data: humidity
-                            },
-                            ]
-                        },
-                        options: {
-                            maintainAspectRatio: false,
-                            legend: {
-                                display: false
-                            },
-                            tooltips: {
-                                intersect: false
-                            },
-                            hover: {
-                                intersect: true
-                            },
-                            plugins: {
-                                filler: {
-                                    propagate: false
-                                }
-                            },
-                            scales: {
-                                xAxes: [{
-                                    reverse: true,
-                                    gridLines: {
-                                        color: "rgba(0,0,0,0.0)"
-                                    }
-                                }],
-                                yAxes: [{
-                                    ticks: {
-                                        stepSize: 1000
-                                    },
-                                    display: true,
-                                    borderDash: [3, 3],
-                                    gridLines: {
-                                        color: "rgba(0,0,0,0.0)"
-                                    }
-                                }]
-                            }
-                        }
-                    });
-                });
-            </script>
-        </div>
 
+        </div>
+        <div class="row">
+            <div class="col-12 col-lg-8 col-xxl-9 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Details Data</h5>
+                    </div>
+                    <div>
+                        <form method="GET" id="filterForm" class="row g-3 p-2">
+                            <!-- Factory Filter -->
+                            <div class="col-md-3">
+                                <label for="factory" class="form-label">Factory</label>
+                                <select name="factory" id="factory" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="Factory 1">Factory 1</option>
+                                    <option value="Factory 2">Factory 2</option>
+                                    <option value="Factory 3">Factory 3</option>
+                                    <option value="Factory 4">Factory 4</option>
+                                </select>
+                            </div>
+
+                            <!-- Location Filter -->
+                            <div class="col-md-3">
+                                <label for="location" class="form-label">Location</label>
+                                <select name="location" id="location" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="Zone1">Zone1</option>
+                                    <option value="Zone2">Zone2</option>
+                                    <option value="Zone3">Zone3</option>
+                                    <option value="Zone4">Zone4</option>
+                                </select>
+                            </div>
+
+                            <!-- Date Filter -->
+                            <div class="col-md-4">
+                                <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
+                                <div class="input-group date">
+                                    <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                                        Filter</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="p-2">
+                        <a href="/dashboard/export-excel" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                    </div>
+                    <table class="table table-hover my-0">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th class="d-none d-xl-table-cell">Factory</th>
+                                <th class="d-none d-xl-table-cell">Location</th>
+                                <th class="d-none d-md-table-cell">Temperature</th>
+                                <th class="d-none d-md-table-cell">Humidity</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {{#each details}}
+                            <tr>
+                                <td>{{increment @index}}</td>
+                                <td class="d-none d-xl-table-cell">{{factory}}</td>
+                                <td class="d-none d-xl-table-cell">{{location}}</td>
+                                <td class="d-none d-md-table-cell">{{temperature}}&deg;C</td>
+                                <td class="d-none d-md-table-cell">{{humidity}}%</td>
+                                <td class="d-none d-md-table-cell">{{timestamp}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                    <!-- Pagination Buttons -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-3" id="pagination">
+                            <!-- Previous Button -->
+                            {{#if (gt currentPage 1)}}
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="{{sub currentPage 1}}">&laquo;</a>
+                            </li>
+                            {{/if}}
+
+                            <!-- Page Numbers -->
+                            {{#each (range 1 totalPages)}}
+                            <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
+                                <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
+                            </li>
+                            {{/each}}
+
+                            <!-- Next Button -->
+                            {{#if (lt currentPage totalPages)}}
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="{{add currentPage 1}}">&raquo;</a>
+                            </li>
+                            {{/if}}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-1">
+                <div class="card flex-fill" style="height: 500px;">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Calendar</h5>
+                    </div>
+                    <div class="card-body d-flex">
+                        <div class="align-self-center w-100">
+                            <div class="chart">
+                                <div id="datetimepicker-dashboard"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12 col-md-6 col-xxl-3 d-flex order-2 order-xxl-3">
+
                 <div class="card flex-fill w-100">
                     <div class="card-header">
 
@@ -239,94 +275,6 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-1">
-                <div class="card flex-fill">
-                    <div class="card-header">
-
-                        <h5 class="card-title mb-0">Calendar</h5>
-                    </div>
-                    <div class="card-body d-flex">
-                        <div class="align-self-center w-100">
-                            <div class="chart">
-                                <div id="datetimepicker-dashboard"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 col-lg-8 col-xxl-9 d-flex">
-                <div class="card flex-fill">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Details Data</h5>
-                    </div>
-                    <div>
-                        <form method="GET" id="filterForm" class="row g-3 mb-4 p-2">
-                            <!-- Factory Filter -->
-                            <div class="col-md-3">
-                                <label for="factory" class="form-label">Factory</label>
-                                <select name="factory" id="factory" class="form-select">
-                                    <option value="">All</option>
-                                    <option value="Factory 1">Factory 1</option>
-                                    <option value="Factory 2">Factory 2</option>
-                                    <option value="Factory 3">Factory 3</option>
-                                    <option value="Factory 4">Factory 4</option>
-                                </select>
-                            </div>
-
-                            <!-- Location Filter -->
-                            <div class="col-md-3">
-                                <label for="location" class="form-label">Location</label>
-                                <select name="location" id="location" class="form-select">
-                                    <option value="">All</option>
-                                    <option value="Zone1">Zone1</option>
-                                    <option value="Zone2">Zone2</option>
-                                    <option value="Zone3">Zone3</option>
-                                    <option value="Zone4">Zone4</option>
-                                </select>
-                            </div>
-
-                            <!-- Date Filter -->
-                            <div class="col-md-4">
-                                <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
-                                <div class="input-group date">
-                                    <input type="text" name="time" id="time" class="form-control"
-                                        placeholder="Date">
-                                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
-                                        Filter</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <table class="table table-hover my-0">
-                        <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th class="d-none d-xl-table-cell">Factory</th>
-                                <th class="d-none d-xl-table-cell">Location</th>
-                                <th class="d-none d-md-table-cell">Temperature</th>
-                                <th class="d-none d-md-table-cell">Humidity</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            {{#each details}}
-                            <tr>
-                                <td>{{increment @index}}</td>
-                                <td class="d-none d-xl-table-cell">{{factory}}</td>
-                                <td class="d-none d-xl-table-cell">{{location}}</td>
-                                <td class="d-none d-md-table-cell">{{temperature}}</td>
-                                <td class="d-none d-md-table-cell">{{humidity}}</td>
-                                <td class="d-none d-md-table-cell">{{timestamp}}</td>
-                            </tr>
-                            {{/each}}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             <div class="col-12 col-lg-4 col-xxl-3 d-flex">
                 <div class="card flex-fill w-100">
                     <div class="card-header">
@@ -355,37 +303,170 @@
 
         $("#filterForm").submit(function (e) {
             e.preventDefault(); // Prevent page reload
+            loadPage(1);
+        });
+
+        function loadPage(page) {
 
             let factory = $("#factory").val();
             let location = $("#location").val();
-            let date = $("#date").val();
+            let time = $("#time").val();
 
             $.ajax({
-                url: "/dashboard/filter",
+                url: `/dashboard/filter`,
                 method: "GET",
-                data: { factory, location, date },
+                data: { factory, location, time, page },
+                dataType: "json",
                 success: function (response) {
-                    $("#tableBody").html(""); // Clear existing rows
-                    console.log(response);
-                    if (response.details.length > 0) {
-                        var i = 0;
-                        response.details.forEach(item => {
-                            $("#tableBody").append(`
-                                <tr>
-                                    <td>${++i}</td>
-                                    <td class="d-none d-xl-table-cell">${item.factory}</td>
-                                    <td class="d-none d-xl-table-cell">${item.location}</td>
-                                    <td class="d-none d-md-table-cell">${item.temperature}</td>
-                                    <td class="d-none d-md-table-cell">${item.humidity}</td>
-                                    <td class="d-none d-md-table-cell">${item.timestamp}</td>
-                                </tr>
-                            `);
-                        });
-                    } else {
-                        $("#tableBody").append(`<tr><td colspan="6" class="text-center">No data found</td></tr>`);
+                    let tableBody = $("#tableBody");
+                    let pagination = $("#pagination");
+
+                    // Clear old data
+                    tableBody.empty();
+                    pagination.empty();
+
+                    // Populate table with new data
+                    response.details.forEach((item, index) => {
+                        tableBody.append(`
+                        <tr>
+                            <td>${(response.currentPage - 1) * response.limit + index + 1}</td>
+                            <td class="d-none d-xl-table-cell">${item.factory}</td>
+                            <td class="d-none d-xl-table-cell">${item.location}</td>
+                            <td class="d-none d-md-table-cell">${item.temperature}&deg;C</td>
+                            <td class="d-none d-md-table-cell">${item.humidity}%</td>
+                            <td class="d-none d-md-table-cell">${item.timestamp}</td>
+                        </tr>
+                    `);
+                    });
+
+                    // Create pagination buttons
+                    if (response.currentPage > 1) {
+                        pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${response.currentPage - 1}">&laquo;</a>
+                        </li>
+                    `);
+                    }
+
+                    for (let i = 1; i <= response.totalPages; i++) {
+                        pagination.append(`
+                        <li class="page-item ${i === response.currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                    }
+
+                    if (response.currentPage < response.totalPages) {
+                        pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${response.currentPage + 1}">&raquo;</a>
+                        </li>
+                    `);
                     }
                 }
             });
+            // Rebind click event after updating pagination
+            $(".page-link").click(function (event) {
+                event.preventDefault();
+                let page = $(this).data("page");
+                loadPage(page);
+            });
+        }
+
+        // Handle Pagination Clicks
+        $(document).on("click", ".page-link", function (event) {
+            event.preventDefault();
+            let page = $(this).data("page");
+            loadPage(page);
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById("chartjs-dashboard-line").getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, 225);
+        gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
+        gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
+        var labels = [];
+        var temperatures = [];
+        var humidity = [];
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+        for (var i = 0; i < 24; i++) {
+            labels.push(i + "h");
+            temperatures.push(getRndInteger(20, 35));
+            humidity.push(getRndInteger(70, 85));
+        }
+        // Line chart
+        new Chart(document.getElementById("chartjs-dashboard-line"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Temperature (&deg;C)",
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: 'red',
+                    data: temperatures
+                },
+                {
+                    label: "Humidity (%)",
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: window.theme.primary,
+                    data: humidity
+                },
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    intersect: false
+                },
+                hover: {
+                    intersect: true
+                },
+                plugins: {
+                    filler: {
+                        propagate: false
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        reverse: true,
+                        gridLines: {
+                            color: "rgba(0,0,0,0.0)"
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 1000
+                        },
+                        display: true,
+                        borderDash: [3, 3],
+                        gridLines: {
+                            color: "rgba(0,0,0,0.0)"
+                        }
+                    }]
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var date = new Date(Date.now());
+        var defaultDate = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
+        document.getElementById("datetimepicker-dashboard").flatpickr({
+            inline: true,
+            prevArrow: "<span title=\"Previous month\">&laquo;</span>",
+            nextArrow: "<span title=\"Next month\">&raquo;</span>",
+            defaultDate: defaultDate
         });
     });
 </script>

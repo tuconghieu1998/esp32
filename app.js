@@ -16,6 +16,14 @@ app.engine("hbs",engine({
     helpers: {
         increment: function (index) {
             return index + 1; // Convert 0-based index to 1-based
+        },
+        add: (a, b) => a + b,
+        subtract: (a, b) => a - b,
+        eq: (a, b) => a === b,
+        gt: (a, b) => a > b,
+        lt: (a, b) => a < b,
+        range: (start, end) => {
+            return Array.from({ length: end - start + 1 }, (_, i) => start + i);
         }
     }
 }));
