@@ -1,6 +1,6 @@
 import express from 'express';
 var router = express.Router();
-import ExcelJS from 'exceljs/dist/exceljs';
+// import ExcelJS from 'exceljs';
 
 var details = [
     {
@@ -241,33 +241,33 @@ router.get("/dashboard/filter", (req, res) => {
 });
 
 router.get("/dashboard/export-excel", async (req, res) => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Factory Data");
+  // const workbook = new ExcelJS.Workbook();
+  // const worksheet = workbook.addWorksheet("Factory Data");
 
-  // Define columns
-  worksheet.columns = [
-      { header: "ID", key: "id", width: 10 },
-      { header: "Factory", key: "factory", width: 15 },
-      { header: "Location", key: "location", width: 15 },
-      { header: "Temperature (°C)", key: "temperature", width: 15 },
-      { header: "Humidity (%)", key: "humidity", width: 15 },
-      { header: "Timestamp", key: "timestamp", width: 20 },
-  ];
+  // // Define columns
+  // worksheet.columns = [
+  //     { header: "ID", key: "id", width: 10 },
+  //     { header: "Factory", key: "factory", width: 15 },
+  //     { header: "Location", key: "location", width: 15 },
+  //     { header: "Temperature (°C)", key: "temperature", width: 15 },
+  //     { header: "Humidity (%)", key: "humidity", width: 15 },
+  //     { header: "Timestamp", key: "timestamp", width: 20 },
+  // ];
 
-  let sampleData = JSON.parse(JSON.stringify(details));
-  // Add rows
-  sampleData.forEach((row) => worksheet.addRow(row));
+  // let sampleData = JSON.parse(JSON.stringify(details));
+  // // Add rows
+  // sampleData.forEach((row) => worksheet.addRow(row));
 
-  // Set response headers
-  res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader("Content-Disposition", "attachment; filename=data.xlsx");
+  // // Set response headers
+  // res.setHeader(
+  //     "Content-Type",
+  //     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  // );
+  // res.setHeader("Content-Disposition", "attachment; filename=data.xlsx");
 
-  // Send Excel file
-  await workbook.xlsx.write(res);
-  res.end();
+  // // Send Excel file
+  // await workbook.xlsx.write(res);
+  // res.end();
 });
 
 // Sample sensor data (replace with database query)
