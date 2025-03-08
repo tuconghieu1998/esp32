@@ -33,6 +33,9 @@ app.set('views', './views');
 import dashboardRoute from './routes/dashboard/index.route.js'
 app.use('/', dashboardRoute);
 
+import sensorsRoute from './routes/sensors/index.route.js'
+app.use('/sensors', sensorsRoute);
+
 
 app.get('/', (req, res)=>{
     res.status(200);
