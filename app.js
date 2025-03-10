@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { urlencoded } from 'express';
 import { engine } from 'express-handlebars';
 import exphbs from 'express-handlebars';
 import path from 'path';
+import { fileURLToPath } from "url";
 
 const app = express();
 const PORT = 3000;
@@ -35,6 +36,9 @@ app.use('/', dashboardRoute);
 
 import sensorsRoute from './routes/sensors/index.route.js'
 app.use('/sensors', sensorsRoute);
+
+import cameraRoute from './routes/camera/index.route.js'
+app.use('/camera', cameraRoute);
 
 
 app.get('/', (req, res)=>{

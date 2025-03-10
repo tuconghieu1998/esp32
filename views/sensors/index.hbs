@@ -31,7 +31,7 @@
                     <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor8"></div>
 
                     <!-- Sensor Info Box -->
-                    <div id="sensor-info"
+                    <div class="sensor-info" id="sensor-info1"
                         style="position: absolute; display: none; background: white; padding: 10px; border: 1px solid black; z-index: 10;">
                         <p><strong>Temperature:</strong> <span id="temp"></span>°C</p>
                         <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
@@ -68,7 +68,7 @@
                     <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor16"></div>
 
                     <!-- Sensor Info Box -->
-                    <div id="sensor-info"
+                    <div  class="sensor-info" id="sensor-info2"
                         style="position: absolute; display: none; background: white; padding: 10px; border: 1px solid black; z-index: 10;">
                         <p><strong>Temperature:</strong> <span id="temp"></span>°C</p>
                         <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
@@ -105,7 +105,7 @@
                     <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor24"></div>
 
                     <!-- Sensor Info Box -->
-                    <div id="sensor-info"
+                    <div class="sensor-info" id="sensor-info3"
                         style="position: absolute; display: none; background: white; padding: 10px; border: 1px solid black; z-index: 10;">
                         <p><strong>Temperature:</strong> <span id="temp"></span>°C</p>
                         <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
@@ -142,7 +142,7 @@
                     <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor32"></div>
 
                     <!-- Sensor Info Box -->
-                    <div id="sensor-info"
+                    <div class="sensor-info" id="sensor-info4"
                         style="position: absolute; display: none; background: white; padding: 10px; border: 1px solid black; z-index: 10;">
                         <p><strong>Temperature:</strong> <span id="temp"></span>°C</p>
                         <p><strong>Humidity:</strong> <span id="humidity"></span>%</p>
@@ -153,7 +153,6 @@
 
     </div>
 </main>
-
 <script>
     $(document).ready(function () {
         $(".sensor").hover(
@@ -164,6 +163,13 @@
                 $(this).removeClass("hover-effect");
             }
         );
+
+        var sensors = [
+            [1,2,3,4,5,6,7,8],
+            [9,10,11,12,13,14,15,16],
+            [17,18,19,20,21,22,23,24],
+            [25,26,27,28,29,30,31,32]
+        ];
 
         $(".sensor").click(function (e) {
             let sensorId = $(this).data("id");
@@ -182,7 +188,8 @@
 
                 console.log("=========== data   ", data, { top: e.pageY + 10, left: e.pageX + 10 });
                 // Show info box near the sensor
-                $("#sensor-info").css({
+                let index = sensors.findIndex(value => 'sensor' + value.toString() == sensorId);
+                $("#sensor-info" + (index+1).toString()).css({
                     top: sensorOffset.top + 20,  // Adjust positioning
                     left: sensorOffset.left + 20,
                     opacity: 1,
@@ -238,9 +245,15 @@
 
         // Hide info when clicking outside
         $(document).click(function (e) {
-            if (!$(e.target).closest(".sensor, #sensor-info").length) {
-                $("#sensor-info").css("opacity", 0);
-                setTimeout(() => $("#sensor-info").hide(), 300);
+            if (!$(e.target).closest(".sensor, .sensor-info").length) {
+                $("#sensor-info1").css("opacity", 0);
+                $("#sensor-info2").css("opacity", 0);
+                $("#sensor-info3").css("opacity", 0);
+                $("#sensor-info4").css("opacity", 0);
+                setTimeout(() => $("#sensor-info1").hide(), 300);
+                setTimeout(() => $("#sensor-info2").hide(), 300);
+                setTimeout(() => $("#sensor-info3").hide(), 300);
+                setTimeout(() => $("#sensor-info4").hide(), 300);
             }
         });
 

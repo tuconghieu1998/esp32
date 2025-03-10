@@ -1,0 +1,71 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <div class="row justify-content-between">
+            <h1>Live Camera Feed</h1>
+            <div style="position: relative; width: 750px;">
+                <h5 class="card-title mb-0 pd-2">Factory 1</h5>
+                <div id="factory-container" style="position: relative; width: 750px; height: 600px;">
+                    <img id="factory-layout" src="/img/photos/factory_layout_1.png" style="width: 100%; height: auto;">
+
+                    <!-- Sensor 1 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://admin:@dmin12sd@192.168.10.165/doc/page/preview.asp">
+                        <div class="sensor" style="top: 10%; left: 20%;" data-id="sensor1"></div>
+                    </a>
+                    <!-- Sensor 2 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.166/doc/page/preview.asp">
+                        <div class="sensor" style="top: 10%; left: 40%;" data-id="sensor2"></div>
+                    </a>
+
+                    <!-- Sensor 3 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.167/doc/page/preview.asp">
+                        <div class="sensor" style="top: 10%; left: 60%;" data-id="sensor3"></div>
+                    </a>
+
+                    <!-- Sensor 4 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.168/doc/page/preview.asp">
+                        <div class="sensor" style="top: 10%; left: 80%;" data-id="sensor4"></div>
+                    </a>
+
+                    <!-- Sensor 5 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.169/doc/page/preview.asp">
+                        <div class="sensor" style="top: 80%; left: 20%;" data-id="sensor5"></div>
+                    </a>
+
+                    <!-- Sensor 6 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.170/doc/page/preview.asp">
+                        <div class="sensor" style="top: 80%; left: 40%;" data-id="sensor6"></div>
+                    </a>
+
+                    <!-- Sensor 7 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.171/doc/page/preview.asp">
+                        <div class="sensor" style="top: 80%; left: 60%;" data-id="sensor7"></div>
+                    </a>
+
+                    <!-- Sensor 8 -->
+                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.172/doc/page/preview.asp">
+                        <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor8"></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    $(document).ready(function () {
+        $(".sensor").hover(
+            function () {
+                $(this).addClass("hover-effect");
+            },
+            function () {
+                $(this).removeClass("hover-effect");
+            }
+        );
+
+        var sensors = [
+            [1, 2, 3, 4, 5, 6, 7, 8],
+            [9, 10, 11, 12, 13, 14, 15, 16],
+            [17, 18, 19, 20, 21, 22, 23, 24],
+            [25, 26, 27, 28, 29, 30, 31, 32]
+        ];
+    });
+</script>
