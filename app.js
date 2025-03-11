@@ -49,7 +49,7 @@ app.get('/camera/stream/:cameraIP', (req, res) =>
   <script src='${scriptUrl}'></script>
   <script>
     loadPlayer({
-      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
+      url: 'wss://' + location.host + '/api/stream/${req.params.cameraIP}',
       canvas: document.getElementById('canvas-camera')
     });
     console.log('loaded Player ${req.params.cameraIP}', location.host);
