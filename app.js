@@ -92,7 +92,7 @@ app.post('/', (req, res)=>{
     res.send(`Welcome ${name}`);
 })
 
-server.listen(PORT, (error) =>{
+app.listen(PORT, (error) =>{
     if(!error)
         console.log("Server is Successfully Running, and App is listening on port "+ PORT)
     else 
