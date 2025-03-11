@@ -4,6 +4,12 @@ import exphbs from 'express-handlebars';
 import path from 'path';
 import { fileURLToPath } from "url";
 import rtspRelay from 'rtsp-relay';
+import https from 'https';
+import fs from 'fs';
+
+const key = fs.readFileSync('./privatekey.pem', 'utf8');
+const cert = fs.readFileSync('./fullchain.pem', 'utf8');
+const ca = fs.readFileSync('./chain.pem', 'utf8'); // required for iOS 15+
 
 const app = express();
 const PORT = 3000;
@@ -26,7 +32,7 @@ app.get('/camera/stream/:cameraIP', (req, res) =>
   <script src='${scriptUrl}'></script>
   <script>
     loadPlayer({
-      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
+      url: 'wss://' + location.host + '/api/stream/${req.params.cameraIP}',
       canvas: document.getElementById('canvas-camera')
     });
     console.log('loaded Player ${req.params.cameraIP}', location.host);
@@ -84,7 +90,9 @@ app.post('/', (req, res)=>{
     res.send(`Welcome ${name}`);
 })
 
-app.listen(PORT, (error) =>{
+const server = https.createServer({ key, cert, ca }, app);
+
+server.listen(PORT, (error) =>{
     if(!error)
         console.log("Server is Successfully Running, and App is listening on port "+ PORT)
     else 
