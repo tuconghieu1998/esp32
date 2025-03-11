@@ -6,21 +6,27 @@ import { fileURLToPath } from "url";
 import rtspRelay from 'rtsp-relay';
 import https from 'https';
 import fs from 'fs';
+import dotenv from 'dotenv';
 
+
+dotenv.config();
 const key = fs.readFileSync('./privatekey.pem', 'utf8');
 const cert = fs.readFileSync('./fullchain.pem', 'utf8');
 const ca = fs.readFileSync('./chain.pem', 'utf8'); // required for iOS 15+
 
+const RTSP_USER = process.env.RTSP_USER;
+const RTSP_PASS = encodeURIComponent(process.env.RTSP_PASS); // encode special characters
+const PORT = process.env.PORT;
+
 const app = express();
-const PORT = 443;
 
 const server = https.createServer({ key, cert, ca }, app);
 const { proxy, scriptUrl } = rtspRelay(app, server);
 
 app.ws('/api/stream/:cameraIP', (ws, req) => {
-    console.log(`rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`);
+    console.log(`rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`);
     return proxy({
-      url: `rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`,
+      url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
       transport: 'tcp'
     })(ws)
 }
@@ -92,7 +98,7 @@ app.post('/', (req, res)=>{
     res.send(`Welcome ${name}`);
 })
 
-app.listen(PORT, (error) =>{
+server.listen(PORT, (error) =>{
     if(!error)
         console.log("Server is Successfully Running, and App is listening on port "+ PORT)
     else 
