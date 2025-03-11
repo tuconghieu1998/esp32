@@ -36,7 +36,8 @@ app.ws('/api/stream/:cameraIP', (ws, req) => {
     console.log(`rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`);
     return proxy({
       url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
-      transport: 'tcp'
+      transport: 'tcp',
+      additionalFlags: ['-q', '1']
     })(ws)
 }
   );
@@ -49,8 +50,12 @@ app.get('/camera/stream/:cameraIP', (req, res) =>
   <script src='${scriptUrl}'></script>
   <script>
     loadPlayer({
-      url: 'wss://' + location.host + '/api/stream/${req.params.cameraIP}',
-      canvas: document.getElementById('canvas-camera')
+      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
+      canvas: document.getElementById('canvas-camera'),
+      wasmMemorySize: 64 * 1024 * 1024, // Increase WebAssembly memory
+        disableGl: true, // Fallback to Canvas rendering (helps with frame errors)
+        chunkSize: 512 * 1024, // Prevents buffering overflow
+        videoBufferSize: 1024*1024*8
     });
     console.log('loaded Player ${req.params.cameraIP}', location.host);
   </script>
