@@ -8,48 +8,64 @@
                     <img id="factory-layout" src="/img/photos/factory_layout_1.png" style="width: 100%; height: auto;">
 
                     <!-- Sensor 1 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://admin:@dmin12sd@192.168.10.165/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.165')">
                         <div class="sensor" style="top: 10%; left: 20%;" data-id="sensor1"></div>
                     </a>
                     <!-- Sensor 2 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.166/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.166')">
                         <div class="sensor" style="top: 10%; left: 40%;" data-id="sensor2"></div>
                     </a>
 
                     <!-- Sensor 3 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.167/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.167')">
                         <div class="sensor" style="top: 10%; left: 60%;" data-id="sensor3"></div>
                     </a>
 
                     <!-- Sensor 4 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.168/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.168')">
                         <div class="sensor" style="top: 10%; left: 80%;" data-id="sensor4"></div>
                     </a>
 
                     <!-- Sensor 5 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.169/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.169')">
                         <div class="sensor" style="top: 80%; left: 20%;" data-id="sensor5"></div>
                     </a>
 
                     <!-- Sensor 6 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.170/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.170')">
                         <div class="sensor" style="top: 80%; left: 40%;" data-id="sensor6"></div>
                     </a>
 
                     <!-- Sensor 7 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.171/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.171')">
                         <div class="sensor" style="top: 80%; left: 60%;" data-id="sensor7"></div>
                     </a>
 
                     <!-- Sensor 8 -->
-                    <a target="_blank" rel="noopener noreferrer" href="http://192.168.10.172/doc/page/preview.asp">
+                    <a href="#" onclick="openModal('192.168.10.172')">
                         <div class="sensor" style="top: 80%; left: 80%;" data-id="sensor8"></div>
                     </a>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Fullscreen Bootstrap Modal -->
+    <div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Camera Stream</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <canvas id="canvas"></canvas> <!-- Camera Stream Canvas -->
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/rtsp-relay@1.9.0/browser/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function () {
         $(".sensor").hover(
@@ -68,4 +84,49 @@
             [25, 26, 27, 28, 29, 30, 31, 32]
         ];
     });
+
+    function resizeCanvas() {
+        const modalBody = document.getElementById('modalBody');
+        const canvas = document.getElementById('canvas-camera');
+        canvas.width = modalBody.clientWidth;  // Fit modal width
+        canvas.height = modalBody.clientHeight; // Fit modal height
+    }
+
+    // Resize on load & window resize
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function openModal(cameraIP) {
+        const modalBody = document.getElementById("modalBody");
+
+        // Show loading text before fetching
+        modalBody.innerHTML = "<p>Loading camera stream...</p>";
+
+        // Fetch camera stream from the API
+        fetch(`/camera/stream/${cameraIP}`)
+            .then(response => response.text()) // Get response as text (HTML)
+            .then(html => {
+                modalBody.innerHTML = html; // Inject the response inside the modal
+
+                // Manually execute scripts after injecting HTML
+                let scripts = modalBody.getElementsByTagName("script");
+                for (let script of scripts) {
+                    let newScript = document.createElement("script");
+                    if (script.src) {
+                        newScript.src = script.src; // Copy script src if external
+                    } else {
+                        newScript.textContent = script.textContent; // Copy inline script
+                    }
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => {
+                modalBody.innerHTML = `<p class='text-danger'>Failed to load camera stream.</p>`;
+                console.error("Error loading camera:", error);
+            });
+
+        // Show the modal
+        let modal = new bootstrap.Modal(document.getElementById("cameraModal"));
+        modal.show();
+    }
 </script>

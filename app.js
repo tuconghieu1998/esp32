@@ -3,9 +3,36 @@ import { engine } from 'express-handlebars';
 import exphbs from 'express-handlebars';
 import path from 'path';
 import { fileURLToPath } from "url";
+import rtspRelay from 'rtsp-relay';
 
 const app = express();
 const PORT = 3000;
+
+const { proxy, scriptUrl } = rtspRelay(app);
+
+app.ws('/api/stream/:cameraIP', (ws, req) => {
+    console.log(`rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`);
+    return proxy({
+      url: `rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`,
+    })(ws)
+}
+  );
+
+// this is an example html page to view the stream
+app.get('/camera/stream/:cameraIP', (req, res) =>
+  res.send(`
+  <canvas id='canvas-camera'></canvas>
+
+  <script src='${scriptUrl}'></script>
+  <script>
+    loadPlayer({
+      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
+      canvas: document.getElementById('canvas-camera')
+    });
+    console.log('loaded Player ${req.params.cameraIP}', location.host);
+  </script>
+`),
+);
 
 app.use('/', express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
