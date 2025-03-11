@@ -58,7 +58,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="modalBody">
-                    <canvas id="canvas"></canvas> <!-- Camera Stream Canvas -->
+                    <canvas id='canvas-camera'></canvas> <!-- Camera Stream Canvas -->
                 </div>
             </div>
         </div>
@@ -95,38 +95,45 @@
     // Resize on load & window resize
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('beforeunload', closeWebSocket);
 
-    function openModal(cameraIP) {
-        const modalBody = document.getElementById("modalBody");
+    let socket = null; // Store WebSocket instance globally
 
-        // Show loading text before fetching
-        modalBody.innerHTML = "<p>Loading camera stream...</p>";
+    function closeWebSocket() {
+        console.log("closeWebSocket");
+        if (socket) {
+            console.log("close");
+            socket.destroy();
+        }
+    }
 
-        // Fetch camera stream from the API
-        fetch(`/camera/stream/${cameraIP}`)
-            .then(response => response.text()) // Get response as text (HTML)
-            .then(html => {
-                modalBody.innerHTML = html; // Inject the response inside the modal
+    async function openModal(cameraIP) {
+        console.log('openModal', cameraIP);
 
-                // Manually execute scripts after injecting HTML
-                let scripts = modalBody.getElementsByTagName("script");
-                for (let script of scripts) {
-                    let newScript = document.createElement("script");
-                    if (script.src) {
-                        newScript.src = script.src; // Copy script src if external
-                    } else {
-                        newScript.textContent = script.textContent; // Copy inline script
-                    }
-                    document.body.appendChild(newScript);
-                }
-            })
-            .catch(error => {
-                modalBody.innerHTML = `<p class='text-danger'>Failed to load camera stream.</p>`;
-                console.error("Error loading camera:", error);
+        try {
+            const canvas = document.getElementById('canvas-camera');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            socket = await loadPlayer({
+                url: `ws://${location.host}/api/stream/${cameraIP}`,
+                canvas: canvas,
+                wasmMemorySize: 64 * 1024 * 1024,
+                disableGl: true,
+                chunkSize: 512 * 1024,
+                videoBufferSize: 1024 * 1024 * 8
             });
 
-        // Show the modal
-        let modal = new bootstrap.Modal(document.getElementById("cameraModal"));
-        modal.show();
+            console.log('🎥 Player loaded:', cameraIP);
+
+            // Show the modal
+            let modal = new bootstrap.Modal(document.getElementById("cameraModal"));
+            modal.show();
+
+            // Close WebSocket when modal is hidden
+            document.getElementById("cameraModal").addEventListener("hidden.bs.modal", closeWebSocket);
+        } catch (error) {
+            console.error('❌ Failed to load player:', error);
+        }
     }
+
 </script>

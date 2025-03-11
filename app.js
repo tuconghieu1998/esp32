@@ -32,15 +32,32 @@ const server = app.listen(PORT, (error) =>{
 
 const { proxy, scriptUrl } = rtspRelay(app, server);
 
+const activeStreams = new Map(); // Store active FFmpeg processes
+
 app.ws('/api/stream/:cameraIP', (ws, req) => {
-    console.log(`rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`);
-    return proxy({
-      url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
+    const cameraIP = req.params.cameraIP;
+    console.log(`Starting stream for: ${cameraIP}`);
+
+    if (activeStreams.has(cameraIP)) {
+        console.log(`Reusing existing stream for: ${cameraIP}`);
+        return activeStreams.get(cameraIP)(ws);
+    }
+
+    const stream = proxy({
+        url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
       transport: 'tcp',
       additionalFlags: ['-q', '1']
-    })(ws)
-}
-  );
+    });
+
+    activeStreams.set(cameraIP, stream);
+
+    ws.on('close', () => {
+        console.log(`Closing stream for: ${cameraIP}`);
+        activeStreams.delete(cameraIP);
+    });
+
+    return stream(ws);
+});
 
 // this is an example html page to view the stream
 app.get('/camera/stream/:cameraIP', (req, res) =>
