@@ -12,14 +12,16 @@ const cert = fs.readFileSync('./fullchain.pem', 'utf8');
 const ca = fs.readFileSync('./chain.pem', 'utf8'); // required for iOS 15+
 
 const app = express();
-const PORT = 3000;
+const PORT = 443;
 
-const { proxy, scriptUrl } = rtspRelay(app);
+const server = https.createServer({ key, cert, ca }, app);
+const { proxy, scriptUrl } = rtspRelay(app, server);
 
 app.ws('/api/stream/:cameraIP', (ws, req) => {
     console.log(`rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`);
     return proxy({
       url: `rtsp://admin:%40dmin12sd@${req.params.cameraIP}/Streaming/Channels/101`,
+      transport: 'tcp'
     })(ws)
 }
   );
@@ -90,9 +92,7 @@ app.post('/', (req, res)=>{
     res.send(`Welcome ${name}`);
 })
 
-const server = https.createServer({ key, cert, ca }, app);
-
-app.listen(PORT, (error) =>{
+server.listen(PORT, (error) =>{
     if(!error)
         console.log("Server is Successfully Running, and App is listening on port "+ PORT)
     else 
