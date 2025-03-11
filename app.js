@@ -22,7 +22,15 @@ const app = express();
 
 //const server = https.createServer({ key, cert, ca }, app);
 // const { proxy, scriptUrl } = rtspRelay(app, server);
-const { proxy, scriptUrl } = rtspRelay(app);
+const server = app.listen(PORT, (error) =>{
+    if(!error)
+        console.log("Server is Successfully Running, and App is listening on port "+ PORT)
+    else 
+        console.log("Error occurred, server can't start", error);
+    }
+);
+
+const { proxy, scriptUrl } = rtspRelay(app, server);
 
 app.ws('/api/stream/:cameraIP', (ws, req) => {
     console.log(`rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`);
@@ -41,7 +49,7 @@ app.get('/camera/stream/:cameraIP', (req, res) =>
   <script src='${scriptUrl}'></script>
   <script>
     loadPlayer({
-      url: 'wss://' + location.host + '/api/stream/${req.params.cameraIP}',
+      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
       canvas: document.getElementById('canvas-camera')
     });
     console.log('loaded Player ${req.params.cameraIP}', location.host);
@@ -99,10 +107,3 @@ app.post('/', (req, res)=>{
     res.send(`Welcome ${name}`);
 })
 
-app.listen(PORT, (error) =>{
-    if(!error)
-        console.log("Server is Successfully Running, and App is listening on port "+ PORT)
-    else 
-        console.log("Error occurred, server can't start", error);
-    }
-);
