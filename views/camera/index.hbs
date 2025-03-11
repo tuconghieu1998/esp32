@@ -105,12 +105,25 @@
             console.log("close");
             socket.destroy();
         }
+        clearCanvas();
     }
+
+    function clearCanvas() {
+    const canvas = document.getElementById('canvas-camera');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "grey"; // Set background color
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
+        console.log("🧹 Canvas Cleared & Reset to Black!");
+    }
+}
 
     async function openModal(cameraIP) {
         console.log('openModal', cameraIP);
 
         try {
+            clearCanvas();
+
             const canvas = document.getElementById('canvas-camera');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
