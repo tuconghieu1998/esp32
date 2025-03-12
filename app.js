@@ -17,12 +17,13 @@ dotenv.config();
 const RTSP_USER = process.env.RTSP_USER;
 const RTSP_PASS = encodeURIComponent(process.env.RTSP_PASS); // encode special characters
 const PORT = process.env.PORT || 10000;
+const HOST = "0.0.0.0"; // Allows access from any IP
 
 const app = express();
 
 //const server = https.createServer({ key, cert, ca }, app);
 // const { proxy, scriptUrl } = rtspRelay(app, server);
-const server = app.listen(PORT, (error) =>{
+const server = app.listen(PORT, HOST, (error) =>{
     if(!error)
         console.log("Server is Successfully Running, and App is listening on port "+ PORT)
     else 
