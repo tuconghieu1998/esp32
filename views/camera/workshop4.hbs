@@ -1,0 +1,128 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <div class="row justify-content-between">
+            <h1>Live Camera Workshop 4</h1>
+            <div style="position: relative; width: auto;">
+                <div id="factory-container" style="position: relative; width: auto; height: auto;">
+                    <img id="factory-layout" src="/img/photos/ws4.png" style="width: 100%; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fullscreen Bootstrap Modal -->
+    <div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Camera Stream</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <canvas id='canvas-camera'></canvas> <!-- Camera Stream Canvas -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    var cameras = {
+    '11.4': {
+        position: [6.76, 15.07],
+        ip: "192.168.10.177"
+    },
+    '11.5': {
+        position: [22.90, 9.57],
+        ip: "192.168.10.185"
+    },
+    '11.3': {
+        position: [59.23, 9.57],
+        ip: "192.168.10.125"
+    },
+    '12.6': {
+        position: [7.05, 64.78],
+        ip: "192.168.10.171"
+    },
+    '12.5': {
+        position: [58.94, 64.06],
+        ip: "192.168.10.170"
+    },
+    '11.1': {
+        position: [20.68, 4.49],
+        ip: "192.168.10.137"
+    },
+    '11.2': {
+        position: [62.80, 8.84],
+        ip: "192.168.10.138"
+    },
+    '12.4': {
+        position: [63.09, 33.91],
+        ip: "192.168.10.169"
+    },
+    '12.3': {
+        position: [60.00, 69.71],
+        ip: "192.168.10.168"
+    },
+    '12.2': {
+        position: [38.94, 69.71],
+        ip: "192.168.10.172"
+    },
+    '12.1': {
+        position: [8.79, 69.71],
+        ip: "192.168.10.173"
+    },
+    '14.1': {
+        position: [63.09, 77.83],
+        ip: "192.168.10.123"
+    },
+    '14.2': {
+        position: [89.47, 77.25],
+        ip: "192.168.10.119"
+    },
+    '14.3': {
+        position: [89.18, 93.91],
+        ip: "192.168.10.122"
+    },
+    '14.4': {
+        position: [62.42, 93.91],
+        ip: "192.168.10.120"
+    },
+    '14.5': {
+        position: [65.12, 84.78],
+        ip: "192.168.10.165"
+    },
+    '14.6': {
+        position: [75.65, 80.72],
+        ip: "192.168.10.176"
+    },
+    '14.7': {
+        position: [86.76, 83.91],
+        ip: "192.168.10.166"
+    },
+    '14.8': {
+        position: [76.43, 92.61],
+        ip: "192.168.10.167"
+    },
+    '14.9': {
+        position: [84.93, 89.86],
+        ip: "192.168.10.187"
+    },
+    '14.10': {
+        position: [68.89, 87.10],
+        ip: "192.168.10.174"
+    },
+    '14.11': {
+        position: [76.52, 87.25],
+        ip: "192.168.10.175"
+    },
+    '14.12': {
+        position: [83.38, 86.81],
+        ip: "192.168.10.186"
+    }
+};
+$(document).ready(function () {
+    loadCameras(cameras);
+});
+</script>
+<script src="/js/rtsp-relay.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/camera.js"></script>

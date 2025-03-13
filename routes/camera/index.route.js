@@ -12,6 +12,24 @@ router.get('/', (req, res, next) => {
     res.render('camera');
 });
 
+router.get('/workshop1', (req, res, next) => {
+    res.render('camera/workshop1.hbs');
+});
+
+router.get('/workshop2', (req, res, next) => {
+    res.render('camera/workshop2.hbs');
+});
+
+router.get('/workshop3', (req, res, next) => {
+    res.render('camera/workshop3.hbs');
+});
+
+router.get('/workshop4', (req, res, next) => {
+    res.render('camera/workshop4.hbs');
+});
+
+
+
 // Sample sensor data (replace with database query)
 function generateSensorData(numSensors = 32) {
     const sensors = [];

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Position Percentage</title>
+    <style>
+        #image-container {
+            position: relative;
+            display: inline-block;
+        }
+        #coords {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            transform: translate(-50%, -100%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="image-container">
+        <img id="image" src="ws4.png" alt="Sample Image">
+        <div id="coords" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById("image").addEventListener("click", function(event) {
+            let img = event.target;
+            let rect = img.getBoundingClientRect();
+
+            // Calculate click position relative to the image
+            let x = event.clientX - rect.left;
+            let y = event.clientY - rect.top;
+
+            // Convert to percentages
+            let xPercent = ((x / rect.width) * 100).toFixed(2);
+            let yPercent = ((y / rect.height) * 100).toFixed(2);
+
+            // Display the position
+            let coords = document.getElementById("coords");
+            coords.style.left = `${xPercent}%`;
+            coords.style.top = `${yPercent}%`;
+            coords.innerText = `${xPercent}%, ${yPercent}%`;
+            coords.style.display = "block";
+
+            const textToCopy = `[${xPercent}, ${yPercent}]`;
+    
+            navigator.clipboard.writeText(textToCopy);
+        });
+    </script>
+
+</body>
+</html>

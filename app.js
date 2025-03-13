@@ -19,7 +19,10 @@ const RTSP_PASS = encodeURIComponent(process.env.RTSP_PASS); // encode special c
 const PORT = process.env.PORT || 10000;
 const HOST = "0.0.0.0"; // Allows access from any IP
 
+
 const app = express();
+
+app.use(express.static('public'));
 
 //const server = https.createServer({ key, cert, ca }, app);
 // const { proxy, scriptUrl } = rtspRelay(app, server);
