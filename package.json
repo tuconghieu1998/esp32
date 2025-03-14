@@ -19,6 +19,7 @@
     "hbs": "^4.2.0",
     "moment": "^2.30.1",
     "node-rtsp-stream": "^0.0.9",
+    "ping": "^0.4.4",
     "rtsp-relay": "^1.9.0"
   }
 }

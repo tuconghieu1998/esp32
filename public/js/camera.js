@@ -17,7 +17,6 @@ function removeAllChildElementsByClass(parent, className) {
 
 function loadCameras(cameras) {
     let container = document.getElementById('factory-container');
-    console.log(cameras);
     removeAllChildElementsByClass(container, 'cameraElement');
     for (let key in cameras) {
         container.innerHTML += createCamera({ ...cameras[key], key });
@@ -26,17 +25,25 @@ function loadCameras(cameras) {
 
 function createCamera(camera) {
     if(camera.key == '14.10' || camera.key == '14.11' || camera.key == '14.12') {
-        return `<a class="cameraElement" href="javascript:void(0)" onclick="openModal('${camera.ip}')">
-                        <div class="camera floor2" style="left: ${camera.position[0]}%; top: ${camera.position[1]}%;" data-id="${camera.key}">
+        return `<a class="cameraElement" href="javascript:void(0)" onclick="handleCameraClick('${camera.key}')">
+                        <div id=${camera.ip} class="camera floor2" style="left: ${camera.position[0]}%; top: ${camera.position[1]}%;" data-id="${camera.key}">
                         <span class="camera-text">${camera.key}</span>
                         </div>
                     </a>`;
     }
-    return `<a class="cameraElement" href="javascript:void(0)" onclick="openModal('${camera.ip}')">
-                        <div class="camera" style="left: ${camera.position[0]}%; top: ${camera.position[1]}%;" data-id="${camera.key}">
+    return `<a class="cameraElement" href="javascript:void(0)" onclick="handleCameraClick('${camera.key}')">
+                        <div id=${camera.ip} class="camera" style="left: ${camera.position[0]}%; top: ${camera.position[1]}%;" data-id="${camera.key}">
                         <span class="camera-text">${camera.key}</span>
                         </div>
                     </a>`;
+}
+
+function handleCameraClick(key) {
+    if (cameras[key].status == "Offline") {
+        alert("Camera Offline: " + cameras[key].ip); // Show IP if offline
+    } else {
+        openModal(cameras[key].ip); // Open modal if online
+    }
 }
 
 function resizeCanvas() {
@@ -101,3 +108,43 @@ async function openModal(cameraIP) {
         console.error('❌ Failed to load player:', error);
     }
 }
+
+$(document).ready(function () {
+    const ipAddresses = [];
+    for(let key in cameras) {
+        ipAddresses.push(cameras[key].ip);
+    }
+
+    $.ajax({
+        url: `http://${location.host}/check-ping`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(ipAddresses),
+        success: function (response) {
+            for (let ping of response) {
+                let element = document.getElementById(ping.ip);
+                //set status
+                for(let key in cameras) {
+                    if(cameras[key].ip == ping.ip){
+                        cameras[key].status = ping.status;
+                    }
+                }
+    
+                if (element) { // Ensure element exists
+                    element.classList.remove("ip-online");
+                    element.classList.remove("ip-offline");
+                    if (ping.status === "Online") {
+                        element.classList.add("ip-online");
+                    } else {
+                        element.classList.add("ip-offline"); // ✅ Adds class
+                    }
+                } else {
+                    console.warn("Element not found:", ping.ip);
+                }
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching ping results:", error);
+        }
+    });
+  });

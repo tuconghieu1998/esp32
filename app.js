@@ -7,6 +7,7 @@ import rtspRelay from 'rtsp-relay';
 import https from 'https';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import ping from 'ping';
 
 
 dotenv.config();
@@ -26,12 +27,12 @@ app.use(express.static('public'));
 
 //const server = https.createServer({ key, cert, ca }, app);
 // const { proxy, scriptUrl } = rtspRelay(app, server);
-const server = app.listen(PORT, HOST, (error) =>{
-    if(!error)
-        console.log("Server is Successfully Running, and App is listening on port "+ PORT)
-    else 
+const server = app.listen(PORT, HOST, (error) => {
+    if (!error)
+        console.log("Server is Successfully Running, and App is listening on port " + PORT)
+    else
         console.log("Error occurred, server can't start", error);
-    }
+}
 );
 
 const { proxy, scriptUrl } = rtspRelay(app, server);
@@ -49,8 +50,8 @@ app.ws('/api/stream/:cameraIP', (ws, req) => {
 
     const stream = proxy({
         url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
-      transport: 'tcp',
-      additionalFlags: ['-q', '1']
+        transport: 'tcp',
+        additionalFlags: ['-q', '1']
     });
 
     activeStreams.set(cameraIP, stream);
@@ -65,7 +66,7 @@ app.ws('/api/stream/:cameraIP', (ws, req) => {
 
 // this is an example html page to view the stream
 app.get('/camera/stream/:cameraIP', (req, res) =>
-  res.send(`
+    res.send(`
   <canvas id='canvas-camera'></canvas>
 
   <script src='${scriptUrl}'></script>
@@ -86,8 +87,8 @@ app.get('/camera/stream/:cameraIP', (req, res) =>
 app.use('/', express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
 
-app.set('view engine', 'hbs');  
-app.engine("hbs",engine({
+app.set('view engine', 'hbs');
+app.engine("hbs", engine({
     defaultLayout: 'main.hbs',
     layoutsDir: 'views/_layouts',
     helpers: {
@@ -117,19 +118,51 @@ import cameraRoute from './routes/camera/index.route.js'
 app.use('/camera', cameraRoute);
 
 
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     res.status(200);
     res.send("Welcome to root URL of Server");
 });
 
-app.get('/hello', (req, res)=>{
+app.get('/hello', (req, res) => {
     res.set('Content-Type', 'text/html');
     res.status(200).send("<h1>Hello GFG Learner!</h1>");
 });
 
-app.post('/', (req, res)=>{
-    const {name} = req.body;
-    
+app.post('/', (req, res) => {
+    const { name } = req.body;
+
     res.send(`Welcome ${name}`);
-})
+});
+
+async function checkPing(ip) {
+    try {
+        const res = await ping.promise.probe(ip, { timeout: 2 });
+        return res.alive ? 'Online' : 'Offline';
+    } catch (error) {
+        return 'Offline';
+    }
+}
+
+// Route to check multiple IPs
+app.post('/check-ping', async (req, res) => {
+    const ipAddresses = req.body; // Expecting an array of IPs from the request body
+
+    if (!Array.isArray(ipAddresses)) {
+        return res.status(400).json({ error: "Invalid input, expected an array of IPs." });
+    }
+
+    try {
+        // Use Promise.all() to check all IPs concurrently
+        const result = await Promise.all(
+            ipAddresses.map(async (ip) => ({
+                ip,
+                status: await checkPing(ip),
+            }))
+        );
+
+        return res.json(result);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
+});
 
