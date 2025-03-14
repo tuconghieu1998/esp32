@@ -21,7 +21,9 @@ function generateSensorData(numSensors = 32) {
         sensors.push({
             sensorId: `sensor${i}`,
             temperature: (Math.random() * (50 - 20) + 20).toFixed(1), // Random temperature between 20°C and 50°C
-            humidity: (Math.random() * (80 - 40) + 40).toFixed(1) // Random humidity between 40% and 80%
+            humidity: (Math.random() * (80 - 40) + 40).toFixed(1), // Random humidity between 40% and 80%
+            sound: (Math.random() * (80 - 30) + 30).toFixed(1), // Random sound level between 30dB and 80dB
+            light: (Math.random() * (1000 - 100) + 100).toFixed(1) // Random light intensity between 100 Lux and 1000 Lux
         });
     }
 
