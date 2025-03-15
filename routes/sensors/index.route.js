@@ -1,7 +1,6 @@
 import express from 'express';
 var router = express.Router();
-
-
+import { getConnection, closeConnection, sql } from "../../db.js";
 import moment from "moment";
 
 const formatTimestamp = (date) => {
@@ -42,8 +41,36 @@ router.get("/sensor-data/:id", (req, res) => {
 // API to get sensor data
 router.get("/sensor-data", (req, res) => {
     let { factory } = req.query;
-    console.log(factory);
     res.json({ sensors: sensorData });
 });
+
+
+router.get("/api/sensor-last-data", async (req, res) => {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+        WITH LatestData AS (
+            SELECT *, 
+                ROW_NUMBER() OVER (PARTITION BY sensor_id ORDER BY timestamp DESC) AS rn
+            FROM sensor_data
+        )
+        SELECT id, sensor_id, temperature, humidity, sound, light, factory, location, timestamp
+        FROM LatestData
+        WHERE rn = 1
+        ORDER BY factory;
+        `);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+});
+
+
 
 export default router;

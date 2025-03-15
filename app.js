@@ -9,7 +9,6 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import ping from 'ping';
 
-
 dotenv.config();
 // const key = fs.readFileSync('./privatekey.pem', 'utf8');
 // const cert = fs.readFileSync('./fullchain.pem', 'utf8');
@@ -34,6 +33,8 @@ const server = app.listen(PORT, HOST, (error) => {
         console.log("Error occurred, server can't start", error);
 }
 );
+
+getConnection();
 
 const { proxy, scriptUrl } = rtspRelay(app, server);
 
@@ -115,6 +116,7 @@ import sensorsRoute from './routes/sensors/index.route.js'
 app.use('/sensors', sensorsRoute);
 
 import cameraRoute from './routes/camera/index.route.js'
+import { getConnection } from './db.js';
 app.use('/camera', cameraRoute);
 
 

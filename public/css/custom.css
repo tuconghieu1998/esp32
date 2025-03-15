@@ -105,7 +105,7 @@
 /* Make modal larger */
 .modal-dialog {
     max-width: 90vw; /* 90% of viewport width */
-    max-height: 90vh; /* 90% of viewport height */
+    max-height: auto; /* 90% of viewport height */
 }
 .modal-content {
     width: 100%;

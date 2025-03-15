@@ -297,7 +297,6 @@ router.get("/api/sensor-data/:id", (req, res) => {
 // API to get sensor data
 router.get("/api/sensor-data", (req, res) => {
   let { factory } = req.query;
-  console.log(factory);
   res.json({sensors: sensorData});
 });
 
