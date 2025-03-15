@@ -62,6 +62,11 @@ function adjustCameraPositions() {
     const factoryImage = document.getElementById("factory-layout");
     const cameraElements = document.querySelectorAll(".camera");
 
+    if (!factoryImage.complete) {
+        factoryImage.onload = adjustCameraPositions; // Ensure the function runs after image loads
+        return;
+    }
+
     cameraElements.forEach(camera => {
         const dataId = camera.getAttribute("data-id");
         const position = cameras[dataId].position; // Assume cameraPositions is an object storing original positions
