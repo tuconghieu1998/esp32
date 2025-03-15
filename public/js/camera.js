@@ -58,9 +58,23 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('beforeunload', closeWebSocket);
 
-function adjustCameraPositions() {
+async function waitForImageLoad(img) {
+    if (img.complete && img.naturalWidth !== 0) {
+        return; // Image is already loaded
+    }
+    try {
+        await img.decode(); // Wait for image to be fully decoded
+    } catch (e) {
+        console.warn("Image decode failed, falling back to onload event");
+        await new Promise(resolve => (img.onload = resolve));
+    }
+}
+
+async function adjustCameraPositions() {
     const factoryImage = document.getElementById("factory-layout");
     const cameraElements = document.querySelectorAll(".camera");
+
+    await waitForImageLoad(factoryImage); // Ensure image is loaded
 
     if (!factoryImage.complete) {
         factoryImage.onload = adjustCameraPositions; // Ensure the function runs after image loads
@@ -95,12 +109,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Update positions when window resizes
+    window.addEventListener("load", adjustCameraPositions);
     window.addEventListener("resize", adjustCameraPositions);
 });
-
-// Recalculate positions on window resize
-window.addEventListener("resize", adjustCameraPositions);
-window.addEventListener("load", adjustCameraPositions);
 
 let socket = null; // Store WebSocket instance globally
 
