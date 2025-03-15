@@ -103,15 +103,37 @@ router.get("/dashboard/export-excel", async (req, res) => {
 
     // Define columns
     worksheet.columns = [
-        { header: "ID", key: "id", width: 10 },
+        { header: "", key: "id", width: 10 },
+        { header: "Sensor ID", key: "sensor_id", width: 10 },
         { header: "Factory", key: "factory", width: 15 },
         { header: "Location", key: "location", width: 15 },
         { header: "Temperature (°C)", key: "temperature", width: 15 },
         { header: "Humidity (%)", key: "humidity", width: 15 },
+        { header: "Sound (dB)", key: "sound", width: 10 },
+        { header: "Light (Lux)", key: "light", width: 10 },
         { header: "Timestamp", key: "timestamp", width: 20 },
     ];
 
-    let sampleData = JSON.parse(JSON.stringify(details));
+    let { factory, location, time } = req.query;
+
+    console.log("dashboard/export-excel", factory, location, time);
+
+    // get data today
+    let date = '2025-03-14';//new Date().toISOString().split('T')[0];
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    let sampleData = await getDataByDate(date);
+
+    // Apply filters if they are selected
+    if (factory && factory !== "") {
+        sampleData = sampleData.filter(item => item.factory.trim() == factory);
+    }
+
+    if (location && location !== "") {
+        sampleData = sampleData.filter(item => item.location.trim() == location);
+    }
+
     // Add rows
     sampleData.forEach((row) => worksheet.addRow(row));
 

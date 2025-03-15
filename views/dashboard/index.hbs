@@ -291,7 +291,7 @@
                         </form>
                     </div>
                     <div class="p-2">
-                        <a href="/dashboard/export-excel" class="btn btn-success">
+                        <a href="javascript:void(0)" onclick="exportExcel()" class="btn btn-success">
                             <i class="fas fa-file-excel"></i> Export to Excel
                         </a>
                     </div>
@@ -593,7 +593,7 @@
                     createPageNumber('pagination', response.currentPage, response.totalPages);
                 }
             });
-            
+
         }
 
         // Handle Pagination Clicks
@@ -619,6 +619,19 @@
 
         });
     });
+    function exportExcel() {
+        let factory = $("#factory").val();
+        let location = $("#location").val();
+        let time = $("#time").val();
+
+        console.log("Exporting...");
+
+        // Construct query string
+        let queryString = $.param({ factory, location, time });
+
+        // Trigger file download
+        window.location.href = `/dashboard/export-excel?${queryString}`;
+    }
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
