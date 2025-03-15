@@ -58,6 +58,31 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('beforeunload', closeWebSocket);
 
+function adjustCameraPositions() {
+    const factoryImage = document.getElementById("factory-layout");
+    const cameraElements = document.querySelectorAll(".camera");
+
+    cameraElements.forEach(camera => {
+        const dataId = camera.getAttribute("data-id");
+        const position = cameras[dataId].position; // Assume cameraPositions is an object storing original positions
+
+        if (factoryImage) {
+            const imageWidth = factoryImage.clientWidth;
+            const imageHeight = factoryImage.clientHeight;
+
+            const xPos = (position[0] / 100) * imageWidth;
+            const yPos = (position[1] / 100) * imageHeight;
+
+            camera.style.left = `${xPos}px`;
+            camera.style.top = `${yPos}px`;
+        }
+    });
+}
+
+// Recalculate positions on window resize
+window.addEventListener("resize", adjustCameraPositions);
+window.addEventListener("load", adjustCameraPositions);
+
 let socket = null; // Store WebSocket instance globally
 
 function closeWebSocket() {

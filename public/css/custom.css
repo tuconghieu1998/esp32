@@ -209,7 +209,7 @@
 /* Responsive Camera Indicators */
 @media (max-width: 480px) {
     .camera {
-        width: 12px; /* Even smaller for extra small screens */
-        height: 12px;
+        width: 20px; /* Even smaller for extra small screens */
+        height: 20px;
     }
 }
