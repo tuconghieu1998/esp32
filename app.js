@@ -34,8 +34,6 @@ const server = app.listen(PORT, HOST, (error) => {
 }
 );
 
-getConnection();
-
 const { proxy, scriptUrl } = rtspRelay(app, server);
 
 const activeStreams = new Map(); // Store active FFmpeg processes
@@ -93,17 +91,22 @@ app.engine("hbs", engine({
     defaultLayout: 'main.hbs',
     layoutsDir: 'views/_layouts',
     helpers: {
-        increment: function (index) {
-            return index + 1; // Convert 0-based index to 1-based
-        },
-        add: (a, b) => a + b,
-        subtract: (a, b) => a - b,
-        eq: (a, b) => a === b,
-        gt: (a, b) => a > b,
-        lt: (a, b) => a < b,
+        sub: (a, b) => a - b, // Subtract helper
+        add: (a, b) => a + b, // Add helper
+        eq: (a, b) => a === b, // Equality check
+        gt: (a, b) => a > b,   // Greater than check
+        lt: (a, b) => a < b,   // Less than check
+        max: (a, b) => Math.max(a, b), // Get max value
+        min: (a, b) => Math.min(a, b), // Get min value
         range: (start, end) => {
-            return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-        }
+            let result = [];
+            for (let i = start; i <= end; i++) {
+                result.push(i);
+            }
+            return result;
+        },
+        increment: (value) => value + 1, // Increments value by 1
+        decrement: (value) => value - 1, // Optional: Decrement helper
     }
 }));
 

@@ -23,7 +23,6 @@ const config = {
 // Function to get a connection pool
 async function getConnection() {
     try {
-        console.log(config);
         const pool = await sql.connect(config);
         return pool;
     } catch (err) {
@@ -36,7 +35,6 @@ async function getConnection() {
 async function closeConnection() {
     try {
         await sql.close();
-        console.log("SQL Server connection closed.");
     } catch (err) {
         console.error("Error closing connection", err);
     }

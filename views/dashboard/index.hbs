@@ -20,15 +20,43 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">32&deg;C</h3>
-                                        <h3 class="col mt-1 mb-3">85%</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if factoryLastData.length}}
+                                            {{factoryLastData.0.avg_temperature}}&deg;C
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if factoryLastData.length}}
+                                            {{factoryLastData.0.avg_humidity}}%
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">20DB</h3>
-                                        <h3 class="col mt-1 mb-3">300Lux</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if factoryLastData.length}}
+                                            {{factoryLastData.0.avg_sound}}DB
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if factoryLastData.length}}
+                                            {{factoryLastData.0.avg_light}}Lux
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: 12:30 12/03/2025</span>
+                                        <span class="text-muted">Last: {{#if factoryLastData.length}}
+                                            {{factoryLastData.0.max_timestamp}}
+                                            {{else}}
+                                            No Data
+                                            {{/if}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -47,15 +75,43 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">30&deg;C</h3>
-                                        <h3 class="col mt-1 mb-3">82%</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 1) }}
+                                            {{factoryLastData.1.avg_temperature}}&deg;C
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 1)}}
+                                            {{factoryLastData.1.avg_humidity}}%
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">20DB</h3>
-                                        <h3 class="col mt-1 mb-3">300Lux</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 1)}}
+                                            {{factoryLastData.1.avg_sound}}DB
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 1)}}
+                                            {{factoryLastData.1.avg_light}}Lux
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: 12:30 12/03/2025</span>
+                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 1)}}
+                                            {{factoryLastData.1.max_timestamp}}
+                                            {{else}}
+                                            No Data
+                                            {{/if}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -77,15 +133,43 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">31&deg;C</h3>
-                                        <h3 class="col mt-1 mb-3">80%</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 2)}}
+                                            {{factoryLastData.2.avg_temperature}}&deg;C
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 2)}}
+                                            {{factoryLastData.2.avg_humidity}}%
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">20DB</h3>
-                                        <h3 class="col mt-1 mb-3">300Lux</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 2)}}
+                                            {{factoryLastData.2.avg_sound}}DB
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 2)}}
+                                            {{factoryLastData.2.avg_light}}Lux
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: 12:30 12/03/2025</span>
+                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 2)}}
+                                            {{factoryLastData.2.max_timestamp}}
+                                            {{else}}
+                                            No Data
+                                            {{/if}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -105,15 +189,43 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">29&deg;C</h3>
-                                        <h3 class="col mt-1 mb-3">75%</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 3)}}
+                                            {{factoryLastData.3.avg_temperature}}&deg;C
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 3)}}
+                                            {{factoryLastData.3.avg_humidity}}%
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="row">
-                                        <h3 class="col mt-1 mb-3">20DB</h3>
-                                        <h3 class="col mt-1 mb-3">300Lux</h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 3)}}
+                                            {{factoryLastData.3.avg_sound}}DB
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
+                                        <h3 class="col mt-1 mb-3">
+                                            {{#if (gt factoryLastData.length 3)}}
+                                            {{factoryLastData.3.avg_light}}Lux
+                                            {{else}}
+                                            No Data
+                                            {{/if}}
+                                        </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: 12:30 12/03/2025</span>
+                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 3)}}
+                                            {{factoryLastData.3.max_timestamp}}
+                                            {{else}}
+                                            No Data
+                                            {{/if}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -149,10 +261,10 @@
                                 <label for="factory" class="form-label">Factory</label>
                                 <select name="factory" id="factory" class="form-select">
                                     <option value="">All</option>
-                                    <option value="Factory 1">Factory 1</option>
-                                    <option value="Factory 2">Factory 2</option>
-                                    <option value="Factory 3">Factory 3</option>
-                                    <option value="Factory 4">Factory 4</option>
+                                    <option value="F1">Factory 1</option>
+                                    <option value="F2">Factory 2</option>
+                                    <option value="F3">Factory 3</option>
+                                    <option value="F4">Factory 4</option>
                                 </select>
                             </div>
 
@@ -161,10 +273,9 @@
                                 <label for="location" class="form-label">Location</label>
                                 <select name="location" id="location" class="form-select">
                                     <option value="">All</option>
-                                    <option value="Zone1">Zone1</option>
-                                    <option value="Zone2">Zone2</option>
-                                    <option value="Zone3">Zone3</option>
-                                    <option value="Zone4">Zone4</option>
+                                    <option value="L0">L0</option>
+                                    <option value="L1">L1</option>
+                                    <option value="L2">L2</option>
                                 </select>
                             </div>
 
@@ -187,11 +298,14 @@
                     <table class="table table-hover my-0">
                         <thead>
                             <tr>
-                                <th>Id</th>
+                                <th></th>
+                                <th class="d-none d-xl-table-cell">Sensor ID</th>
                                 <th class="d-none d-xl-table-cell">Factory</th>
                                 <th class="d-none d-xl-table-cell">Location</th>
-                                <th class="d-none d-md-table-cell">Temperature</th>
-                                <th class="d-none d-md-table-cell">Humidity</th>
+                                <th class="d-none d-md-table-cell">Temperature(&deg;C)</th>
+                                <th class="d-none d-md-table-cell">Humidity(%)</th>
+                                <th class="d-none d-md-table-cell">Sound(dB)</th>
+                                <th class="d-none d-md-table-cell">Light(Lux)</th>
                                 <th>Time</th>
                             </tr>
                         </thead>
@@ -199,10 +313,13 @@
                             {{#each details}}
                             <tr>
                                 <td>{{increment @index}}</td>
+                                <td class="d-none d-xl-table-cell">{{sensor_id}}</td>
                                 <td class="d-none d-xl-table-cell">{{factory}}</td>
                                 <td class="d-none d-xl-table-cell">{{location}}</td>
-                                <td class="d-none d-md-table-cell">{{temperature}}&deg;C</td>
-                                <td class="d-none d-md-table-cell">{{humidity}}%</td>
+                                <td class="d-none d-md-table-cell">{{temperature}}</td>
+                                <td class="d-none d-md-table-cell">{{humidity}}</td>
+                                <td class="d-none d-md-table-cell">{{sound}}</td>
+                                <td class="d-none d-md-table-cell">{{light}}</td>
                                 <td class="d-none d-md-table-cell">{{timestamp}}</td>
                             </tr>
                             {{/each}}
@@ -218,12 +335,34 @@
                             </li>
                             {{/if}}
 
-                            <!-- Page Numbers -->
-                            {{#each (range 1 totalPages)}}
+                            <!-- First Page -->
+                            <li class="page-item {{#if (eq 1 currentPage)}}active{{/if}}">
+                                <a class="page-link" href="#" data-page="1">1</a>
+                            </li>
+
+                            <!-- Left Ellipsis -->
+                            {{#if (gt currentPage 4)}}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {{/if}}
+
+                            <!-- Page Numbers Around Current -->
+                            {{#each (range (max 2 (sub currentPage 2)) (min totalPages (add currentPage 2)))}}
                             <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
                                 <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
                             </li>
                             {{/each}}
+
+                            <!-- Right Ellipsis -->
+                            {{#if (lt currentPage (sub totalPages 3))}}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {{/if}}
+
+                            <!-- Last Page -->
+                            {{#if (gt totalPages 1)}}
+                            <li class="page-item {{#if (eq totalPages currentPage)}}active{{/if}}">
+                                <a class="page-link" href="#" data-page="{{totalPages}}">{{totalPages}}</a>
+                            </li>
+                            {{/if}}
 
                             <!-- Next Button -->
                             {{#if (lt currentPage totalPages)}}
@@ -231,6 +370,11 @@
                                 <a class="page-link" href="#" data-page="{{add currentPage 1}}">&raquo;</a>
                             </li>
                             {{/if}}
+                            <li class="page-item">
+                                <input type="number" id="gotoPage" min="1" max="{{totalPages}}" class="form-control"
+                                    placeholder="Page"
+                                    style="width: 80px; margin-left: 20px; display: inline-block; text-align: center;">
+                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -329,7 +473,87 @@
             loadPage(1);
         });
 
+        function createPageItem(page, currentPage) {
+            return `<li class="page-item ${page === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${page}">${page}</a>
+            </li>`;
+        }
+
+        function createPageNumber(pageId, currentPage, totalPages) {
+            const pagination = $("#" + pageId); // Ensure #pagination exists
+            pagination.empty();
+
+            // Previous Button
+            if (currentPage > 1) {
+                pagination.append(`<li class="page-item">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+                </li>`);
+            }
+
+            // First Page
+            pagination.append(createPageItem(1, currentPage));
+
+            // Left Ellipsis (if needed)
+            if (currentPage > 4) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+
+            // Page Numbers Around Current
+            const startPage = Math.max(2, currentPage - 2);
+            const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                pagination.append(createPageItem(i, currentPage));
+            }
+
+            // Right Ellipsis (if needed)
+            if (currentPage < totalPages - 3) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+
+            // Last Page
+            if (totalPages > 1) {
+                pagination.append(createPageItem(totalPages, currentPage));
+            }
+
+            // Next Button
+            if (currentPage < totalPages) {
+                pagination.append(`<li class="page-item">
+               <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+               </li>`);
+            }
+
+            // Add "Go to Page" Input
+            pagination.append(`
+                <li class="page-item">
+                    <input type="number" id="gotoPage" min="1" max="${totalPages}" class="form-control" 
+                           placeholder="Page" style="width: 80px; margin-left: 20px; display: inline-block; text-align: center;">
+                </li>
+            `);
+
+            // Rebind click event after updating pagination
+            $(".page-link").click(function (event) {
+                event.preventDefault();
+                let page = $(this).data("page");
+                loadPage(page);
+            });
+
+            $("#gotoPage").keypress(function (e) {
+                if (e.which === 13) { // Enter key
+                    let page = parseInt($(this).val());
+                    let minPage = parseInt($(this).attr("min"), 10);
+                    let maxPage = parseInt($(this).attr("max"), 10);
+                    if (page >= minPage && page <= maxPage) {
+                        loadPage(page); // Function to load the selected page
+                    } else {
+                        alert("Invalid page number!");
+                    }
+                }
+            });
+        }
+
         function loadPage(page) {
+            console.log('loadPage', page);
 
             let factory = $("#factory").val();
             let location = $("#location").val();
@@ -353,47 +577,23 @@
                         tableBody.append(`
                         <tr>
                             <td>${(response.currentPage - 1) * response.limit + index + 1}</td>
+                            <td class="d-none d-xl-table-cell">${item.sensor_id}</td>
                             <td class="d-none d-xl-table-cell">${item.factory}</td>
                             <td class="d-none d-xl-table-cell">${item.location}</td>
-                            <td class="d-none d-md-table-cell">${item.temperature}&deg;C</td>
-                            <td class="d-none d-md-table-cell">${item.humidity}%</td>
+                            <td class="d-none d-md-table-cell">${item.temperature}</td>
+                            <td class="d-none d-md-table-cell">${item.humidity}</td>
+                            <td class="d-none d-md-table-cell">${item.sound}</td>
+                            <td class="d-none d-md-table-cell">${item.light}</td>
                             <td class="d-none d-md-table-cell">${item.timestamp}</td>
                         </tr>
                     `);
                     });
 
                     // Create pagination buttons
-                    if (response.currentPage > 1) {
-                        pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${response.currentPage - 1}">&laquo;</a>
-                        </li>
-                    `);
-                    }
-
-                    for (let i = 1; i <= response.totalPages; i++) {
-                        pagination.append(`
-                        <li class="page-item ${i === response.currentPage ? 'active' : ''}">
-                            <a class="page-link" href="#" data-page="${i}">${i}</a>
-                        </li>
-                    `);
-                    }
-
-                    if (response.currentPage < response.totalPages) {
-                        pagination.append(`
-                        <li class="page-item">
-                            <a class="page-link" href="#" data-page="${response.currentPage + 1}">&raquo;</a>
-                        </li>
-                    `);
-                    }
+                    createPageNumber('pagination', response.currentPage, response.totalPages);
                 }
             });
-            // Rebind click event after updating pagination
-            $(".page-link").click(function (event) {
-                event.preventDefault();
-                let page = $(this).data("page");
-                loadPage(page);
-            });
+            
         }
 
         // Handle Pagination Clicks
@@ -401,6 +601,22 @@
             event.preventDefault();
             let page = $(this).data("page");
             loadPage(page);
+        });
+
+        // Handle "Enter" Key Press
+        $("#gotoPage").on("keypress", function (e) {
+            console.log('keypress', $(this).min, $(this).max, e.which)
+            if (e.which === 13) { // Enter key
+                let page = parseInt($(this).val());
+                let minPage = parseInt($(this).attr("min"), 10);
+                let maxPage = parseInt($(this).attr("max"), 10);
+                if (page >= minPage && page <= maxPage) {
+                    loadPage(page); // Function to load the selected page
+                } else {
+                    alert("Invalid page number!");
+                }
+            }
+
         });
     });
 </script>
