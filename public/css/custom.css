@@ -170,3 +170,46 @@
     white-space: nowrap;
     opacity: 0.8;
 }
+
+/* Responsive Modal */
+@media (max-width: 768px) { 
+    .modal-dialog {
+        max-width: 95vw; /* Slightly smaller for mobile */
+        max-height: 95vh;
+        margin: 0 auto;
+    }
+
+    .modal-content {
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal-body {
+        height: 70vh; /* Reduce height slightly for mobile */
+        padding: 0;
+    }
+
+    #canvas-camera {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+/* Responsive Factory Layout */
+#factory-container {
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+}
+
+#factory-layout {
+    min-width: 600px; /* Adjust this value as needed */
+    height: auto;
+}
+
+/* Responsive Camera Indicators */
+@media (max-width: 480px) {
+    .camera {
+        width: 12px; /* Even smaller for extra small screens */
+        height: 12px;
+    }
+}
