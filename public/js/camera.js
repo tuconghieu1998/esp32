@@ -7,6 +7,7 @@ $(document).ready(function () {
             $(this).removeClass("hover-effect");
         }
     );
+    adjustCameraPositions();
 });
 
 function removeAllChildElementsByClass(parent, className) {
@@ -58,28 +59,9 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('beforeunload', closeWebSocket);
 
-async function waitForImageLoad(img) {
-    if (img.complete && img.naturalWidth !== 0) {
-        return; // Image is already loaded
-    }
-    try {
-        await img.decode(); // Wait for image to be fully decoded
-    } catch (e) {
-        console.warn("Image decode failed, falling back to onload event");
-        await new Promise(resolve => (img.onload = resolve));
-    }
-}
-
 async function adjustCameraPositions() {
     const factoryImage = document.getElementById("factory-layout");
     const cameraElements = document.querySelectorAll(".camera");
-
-    await waitForImageLoad(factoryImage); // Ensure image is loaded
-
-    if (!factoryImage.complete) {
-        factoryImage.onload = adjustCameraPositions; // Ensure the function runs after image loads
-        return;
-    }
 
     cameraElements.forEach(camera => {
         const dataId = camera.getAttribute("data-id");
