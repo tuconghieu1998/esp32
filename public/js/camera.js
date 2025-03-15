@@ -84,6 +84,20 @@ function adjustCameraPositions() {
     });
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const factoryImage = document.getElementById("factory-layout");
+
+    // Run after image is loaded
+    if (factoryImage.complete) {
+        adjustCameraPositions();
+    } else {
+        factoryImage.onload = adjustCameraPositions;
+    }
+
+    // Update positions when window resizes
+    window.addEventListener("resize", adjustCameraPositions);
+});
+
 // Recalculate positions on window resize
 window.addEventListener("resize", adjustCameraPositions);
 window.addEventListener("load", adjustCameraPositions);
