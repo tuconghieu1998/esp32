@@ -1,13 +1,15 @@
 import express, { urlencoded } from 'express';
 import { engine } from 'express-handlebars';
-import exphbs from 'express-handlebars';
 import path from 'path';
-import { fileURLToPath } from "url";
 import rtspRelay from 'rtsp-relay';
-import https from 'https';
-import fs from 'fs';
 import dotenv from 'dotenv';
 import ping from 'ping';
+
+import dashboardRoute from './routes/dashboard/index.route.js';
+import sensorsRoute from './routes/sensors/index.route.js';
+import cameraRoute from './routes/camera/index.route.js';
+import accountRoute from './routes/account/index.route.js';
+import session from 'express-session';
 
 dotenv.config();
 // const key = fs.readFileSync('./privatekey.pem', 'utf8');
@@ -63,26 +65,6 @@ app.ws('/api/stream/:cameraIP', (ws, req) => {
     return stream(ws);
 });
 
-// this is an example html page to view the stream
-app.get('/camera/stream/:cameraIP', (req, res) =>
-    res.send(`
-  <canvas id='canvas-camera'></canvas>
-
-  <script src='${scriptUrl}'></script>
-  <script>
-    loadPlayer({
-      url: 'ws://' + location.host + '/api/stream/${req.params.cameraIP}',
-      canvas: document.getElementById('canvas-camera'),
-      wasmMemorySize: 64 * 1024 * 1024, // Increase WebAssembly memory
-        disableGl: true, // Fallback to Canvas rendering (helps with frame errors)
-        chunkSize: 512 * 1024, // Prevents buffering overflow
-        videoBufferSize: 1024*1024*8
-    });
-    console.log('loaded Player ${req.params.cameraIP}', location.host);
-  </script>
-`),
-);
-
 app.use('/', express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
 
@@ -110,34 +92,20 @@ app.engine("hbs", engine({
     }
 }));
 
+// Session Configuration
+app.use(
+    session({
+        secret: process.env.JWT_SECRET,
+        resave: false,
+        saveUninitialized: true,
+    })
+);
+
 app.set('views', './views');
-
-import dashboardRoute from './routes/dashboard/index.route.js'
 app.use('/', dashboardRoute);
-
-import sensorsRoute from './routes/sensors/index.route.js'
 app.use('/sensors', sensorsRoute);
-
-import cameraRoute from './routes/camera/index.route.js'
-import { getConnection } from './db.js';
 app.use('/camera', cameraRoute);
-
-
-app.get('/', (req, res) => {
-    res.status(200);
-    res.send("Welcome to root URL of Server");
-});
-
-app.get('/hello', (req, res) => {
-    res.set('Content-Type', 'text/html');
-    res.status(200).send("<h1>Hello GFG Learner!</h1>");
-});
-
-app.post('/', (req, res) => {
-    const { name } = req.body;
-
-    res.send(`Welcome ${name}`);
-});
+app.use('/account', accountRoute);
 
 async function checkPing(ip) {
     try {

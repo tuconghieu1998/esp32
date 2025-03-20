@@ -3,13 +3,14 @@ var router = express.Router();
 import ExcelJS from 'exceljs';
 import moment from "moment-timezone";
 import { getDataByDate, getLastDataEachFactory } from '../../models/sensor_data.model.js';
+import { authenticate } from '../../middlewares/middleware.js';
 
 const formatTimestamp = (date) => {
     return moment.utc(date).format("HH:mm:ss DD/MM/YYYY");
 };
 
 // trang chu
-router.get('/', async (req, res, next) => {
+router.get('/', authenticate, async (req, res, next) => {
     try {
         var now = new Date();
 
@@ -58,7 +59,7 @@ function convertDateFormat(dateStr) {
     return `${year}-${month}-${day}`;
 }
 
-router.get("/dashboard/filter", async (req, res) => {
+router.get("/dashboard/filter", authenticate, async (req, res) => {
     let { factory, location, time } = req.query;
     console.log('/dashboard/filter', factory, location, time);
 
@@ -97,7 +98,7 @@ router.get("/dashboard/filter", async (req, res) => {
     });
 });
 
-router.get("/dashboard/export-excel", async (req, res) => {
+router.get("/dashboard/export-excel", authenticate, async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Factory Data");
 
@@ -150,13 +151,13 @@ router.get("/dashboard/export-excel", async (req, res) => {
 });
 
 // API to get sensor data
-router.get("/api/sensor-data/:id", (req, res) => {
+router.get("/api/sensor-data/:id", authenticate,(req, res) => {
     const sensorId = req.params.id;
     res.json(sensorData.find(item => item.sensorId == sensorId) || { temperature: "N/A", humidity: "N/A" });
 });
 
 // API to get sensor data
-router.get("/api/sensor-data", (req, res) => {
+router.get("/api/sensor-data", authenticate, (req, res) => {
     let { factory } = req.query;
     res.json({ sensors: sensorData });
 });
