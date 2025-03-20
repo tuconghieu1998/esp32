@@ -1,11 +1,11 @@
 import express from 'express';
 var router = express.Router();
 import ExcelJS from 'exceljs';
-import moment from "moment";
+import moment from "moment-timezone";
 import { getDataByDate, getLastDataEachFactory } from '../../models/sensor_data.model.js';
 
 const formatTimestamp = (date) => {
-    return moment(date).format("HH:mm:ss DD/MM/YYYY");
+    return moment.utc(date).format("HH:mm:ss DD/MM/YYYY");
 };
 
 // trang chu
@@ -25,7 +25,7 @@ router.get('/', async (req, res, next) => {
         });
 
         // get data today
-        const today = '2025-03-14';//new Date().toISOString().split('T')[0];
+        const today = '2025-03-20';//new Date().toISOString().split('T')[0];
         let data = await getDataByDate(today);
 
         let page = parseInt(req.query.page) || 1; // Get the current page
@@ -68,7 +68,7 @@ router.get("/dashboard/filter", async (req, res) => {
     let endIndex = page * limit;
 
     // get data today
-    let date = '2025-03-14';//new Date().toISOString().split('T')[0];
+    let date = '2025-03-20';//new Date().toISOString().split('T')[0];
     if (time && time != '') {
         date = convertDateFormat(time);
     }
@@ -119,7 +119,7 @@ router.get("/dashboard/export-excel", async (req, res) => {
     console.log("dashboard/export-excel", factory, location, time);
 
     // get data today
-    let date = '2025-03-14';//new Date().toISOString().split('T')[0];
+    let date = '2025-03-20';//new Date().toISOString().split('T')[0];
     if (time && time != '') {
         date = convertDateFormat(time);
     }

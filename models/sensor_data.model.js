@@ -1,5 +1,7 @@
 import { getConnection, closeConnection } from "../db.js";
 
+const table_name = "sensor_data_test";
+
 export async function getLastDataEachSensor() {
     let pool;
     try {
@@ -8,7 +10,7 @@ export async function getLastDataEachSensor() {
         WITH LatestData AS (
             SELECT *, 
                 ROW_NUMBER() OVER (PARTITION BY sensor_id ORDER BY timestamp DESC) AS rn
-            FROM sensor_data
+            FROM ${table_name}
         )
         SELECT id, sensor_id, temperature, humidity, sound, light, factory, location, timestamp
         FROM LatestData
@@ -35,19 +37,30 @@ export async function getLastDataEachFactory() {
 WITH LatestData AS (
     SELECT *, 
            ROW_NUMBER() OVER (PARTITION BY sensor_id ORDER BY timestamp DESC) AS rn
-    FROM sensor_data
+    FROM ${table_name}
+),
+FilteredData AS (
+    SELECT *
+    FROM LatestData
+    WHERE rn = 1
+),
+MaxTimestamps AS (
+    SELECT factory, MAX(timestamp) AS max_timestamp
+    FROM FilteredData
+    GROUP BY factory
 )
 SELECT 
-    factory,
-    ROUND(AVG(temperature), 0) AS avg_temperature,
-    ROUND(AVG(humidity), 0) AS avg_humidity,
-    ROUND(AVG(sound), 0) AS avg_sound,
-    ROUND(AVG(light), 0) AS avg_light,
-	MAX(timestamp) AS max_timestamp
-FROM LatestData
-WHERE rn = 1
-GROUP BY factory
-ORDER BY factory;
+    f.factory,
+    ROUND(AVG(f.temperature), 0) AS avg_temperature,
+    ROUND(AVG(f.humidity), 0) AS avg_humidity,
+    ROUND(AVG(f.sound), 0) AS avg_sound,
+    ROUND(AVG(f.light), 0) AS avg_light,
+    m.max_timestamp
+FROM FilteredData f
+JOIN MaxTimestamps m ON f.factory = m.factory
+WHERE f.timestamp >= DATEADD(MINUTE, -30, m.max_timestamp)
+GROUP BY f.factory, m.max_timestamp
+ORDER BY f.factory;
         `);
 
         return result.recordset || [];
@@ -67,7 +80,7 @@ export async function getDataByDate(date) {
         pool = await getConnection();
         const result = await pool.request().query(`
 SELECT * 
-FROM sensor_data 
+FROM ${table_name} 
 WHERE CAST(timestamp AS DATE) = '${date}'
 ORDER BY timestamp DESC;
         `);
