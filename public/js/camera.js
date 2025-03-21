@@ -25,7 +25,7 @@ function loadCameras(cameras) {
 }
 
 function createCamera(camera) {
-    if(camera.key == '14.10' || camera.key == '14.11' || camera.key == '14.12') {
+    if (camera.key == '14.10' || camera.key == '14.11' || camera.key == '14.12') {
         return `<a class="cameraElement" href="javascript:void(0)" onclick="handleCameraClick('${camera.key}')">
                         <div id=${camera.ip} class="camera floor2" style="left: ${camera.position[0]}%; top: ${camera.position[1]}%;" data-id="${camera.key}">
                         <span class="camera-text">${camera.key}</span>
@@ -119,28 +119,37 @@ function clearCanvas() {
 async function openModal(cameraIP) {
     console.log('openModal', cameraIP);
     try {
-        clearCanvas();
+        let token = localStorage.getItem('pnsmrotoken');
+        if (token) {
+            clearCanvas();
 
-        const canvas = document.getElementById('canvas-camera');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const canvas = document.getElementById('canvas-camera');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            let host = window.location.host;
+            let match = host.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)$/); // Match IP:port
 
-        socket = await loadPlayer({
-            url: `ws://${location.host}/api/stream/${cameraIP}`,
-            canvas: canvas,
-            wasmMemorySize: 64 * 1024 * 1024,
-            disableGl: true,
-            chunkSize: 512 * 1024,
-            videoBufferSize: 1024 * 1024 * 8
-        });
+            if (match) {
+                host = `${match[1]}:4344`; // Replace port with 4344
+            }
 
-        console.log('🎥 Player loaded:', cameraIP);
+            socket = await loadPlayer({
+                url: `ws://${host}/api/stream/${cameraIP}?token=${token}`,
+                canvas: canvas,
+                wasmMemorySize: 64 * 1024 * 1024,
+                disableGl: true,
+                chunkSize: 512 * 1024,
+                videoBufferSize: 1024 * 1024 * 8
+            });
 
-        // Show the modal
-        let modal = new bootstrap.Modal(document.getElementById("cameraModal"));
-        modal.show();
+            console.log('🎥 Player loaded:', cameraIP);
 
-        // Close WebSocket when modal is hidden
-        document.getElementById("cameraModal").addEventListener("hidden.bs.modal", closeWebSocket);
+            // Show the modal
+            let modal = new bootstrap.Modal(document.getElementById("cameraModal"));
+            modal.show();
+
+            // Close WebSocket when modal is hidden
+            document.getElementById("cameraModal").addEventListener("hidden.bs.modal", closeWebSocket);
+        }
     } catch (error) {
         console.error('❌ Failed to load player:', error);
     }
@@ -148,7 +157,7 @@ async function openModal(cameraIP) {
 
 $(document).ready(function () {
     const ipAddresses = [];
-    for(let key in cameras) {
+    for (let key in cameras) {
         ipAddresses.push(cameras[key].ip);
     }
 
@@ -161,12 +170,12 @@ $(document).ready(function () {
             for (let ping of response) {
                 let element = document.getElementById(ping.ip);
                 //set status
-                for(let key in cameras) {
-                    if(cameras[key].ip == ping.ip){
+                for (let key in cameras) {
+                    if (cameras[key].ip == ping.ip) {
                         cameras[key].status = ping.status;
                     }
                 }
-    
+
                 if (element) { // Ensure element exists
                     element.classList.remove("ip-online");
                     element.classList.remove("ip-offline");
@@ -184,4 +193,4 @@ $(document).ready(function () {
             console.error("Error fetching ping results:", error);
         }
     });
-  });
+});

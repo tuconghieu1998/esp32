@@ -10,6 +10,7 @@ import sensorsRoute from './routes/sensors/index.route.js';
 import cameraRoute from './routes/camera/index.route.js';
 import accountRoute from './routes/account/index.route.js';
 import session from 'express-session';
+import { authenticateWebSocket } from './middlewares/middleware.js';
 
 dotenv.config();
 // const key = fs.readFileSync('./privatekey.pem', 'utf8');
@@ -41,28 +42,30 @@ const { proxy, scriptUrl } = rtspRelay(app, server);
 const activeStreams = new Map(); // Store active FFmpeg processes
 
 app.ws('/api/stream/:cameraIP', (ws, req) => {
-    const cameraIP = req.params.cameraIP;
-    console.log(`Starting stream for: ${cameraIP}`);
+    console.log("/api/stream/:cameraIP");
+    authenticateWebSocket(ws, req, () => {
+        const cameraIP = req.params.cameraIP;
+        console.log(`Starting stream for: ${cameraIP}`);
 
-    if (activeStreams.has(cameraIP)) {
-        console.log(`Reusing existing stream for: ${cameraIP}`);
-        return activeStreams.get(cameraIP)(ws);
-    }
+        if (activeStreams.has(cameraIP)) {
+            console.log(`Reusing existing stream for: ${cameraIP}`);
+            return activeStreams.get(cameraIP)(ws);
+        }
 
-    const stream = proxy({
-        url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
-        transport: 'tcp',
-        additionalFlags: ['-q', '1']
+        const stream = proxy({
+            url: `rtsp://${RTSP_USER}:${RTSP_PASS}@${req.params.cameraIP}/Streaming/Channels/101`,
+            transport: 'tcp',
+            additionalFlags: ['-q', '1']
+        });
+
+        activeStreams.set(cameraIP, stream);
+
+        ws.on('close', () => {
+            console.log(`Closing stream for: ${cameraIP}`);
+            activeStreams.delete(cameraIP);
+        });
+        return stream(ws);
     });
-
-    activeStreams.set(cameraIP, stream);
-
-    ws.on('close', () => {
-        console.log(`Closing stream for: ${cameraIP}`);
-        activeStreams.delete(cameraIP);
-    });
-
-    return stream(ws);
 });
 
 app.use('/', express.static(path.join(process.cwd(), 'public')));
