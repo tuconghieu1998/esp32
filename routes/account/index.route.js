@@ -9,11 +9,13 @@ router.get('/login', (req, res) => {
     return res.render('account/login.hbs', { layout: false });
 });
 
+router.get('/auto-login', (req, res) => {
+    return res.render('account/auto_login.hbs', { layout: false });
+});
+
 router.post('/auto-login', (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
-        console.log('auto-login', token);
-
         const secretKey = process.env.JWT_SECRET;
 
         if (!token) {
@@ -41,7 +43,6 @@ router.post('/auto-login', (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        console.log('/login', username, password);
 
         if (!username || !password) {
             return res.status(400).json({ message: 'Username and password are required' });
@@ -72,6 +73,21 @@ router.post('/login', async (req, res) => {
         return res.status(400).json({ message: "Bad request" });
     }
 
+});
+
+router.post('/logout', (req, res) => {
+    // Destroy session if using express-session
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err) {
+                return res.status(500).json({ message: "Logout failed" });
+            }
+            res.clearCookie("connect.sid"); // Clear session cookie
+            res.json({ message: "Logout successful" });
+        });
+    } else {
+        res.json({ message: "No active session" });
+    }
 });
 
 export default router;

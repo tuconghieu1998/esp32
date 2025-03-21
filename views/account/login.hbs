@@ -72,26 +72,6 @@
 
     <script>
         window.onload = function () {
-            const token = localStorage.getItem("pnsmrotoken");
-            if (token) {
-                fetch('/account/auto-login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Send token for validation
-                    }
-                })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            window.location.href = "/"; // Redirect if token is valid
-                        } else {
-                            localStorage.removeItem("pnsmrotoken"); // Remove invalid token
-                        }
-                    })
-                    .catch(error => console.error('Auto-login error:', error));
-            }
-
             setTimeout(() => {
                 document.getElementById("username").value = localStorage.getItem("savedUsername") || "";
                 document.getElementById("password").value = localStorage.getItem("savedPassword") || "";
