@@ -126,10 +126,13 @@ async function openModal(cameraIP) {
             const canvas = document.getElementById('canvas-camera');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             let host = window.location.host;
-            let match = host.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)$/); // Match IP:port
+            let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
 
             if (match) {
                 host = `${match[1]}:4344`; // Replace port with 4344
+            }
+            else {
+                host = `${host}:4344`;
             }
 
             socket = await loadPlayer({
