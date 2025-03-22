@@ -115,3 +115,65 @@ ORDER BY timestamp DESC;
         }
     }
 } 
+
+export async function getDataChartByDate(factory, location, sensor_id, date) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+SELECT 
+    CAST(timestamp AS DATE) AS date,
+    DATEPART(HOUR, timestamp) AS hour,
+    ROUND(AVG(temperature), 2) AS avg_temperature,
+    ROUND(AVG(humidity), 2) AS avg_humidity,
+    ROUND(AVG(sound), 2) AS avg_sound,
+    ROUND(AVG(light), 2) AS avg_light
+FROM ${table_name}
+WHERE CAST(timestamp AS DATE) = '${date}'
+    AND ('${factory}' = '' OR LTRIM(RTRIM(factory)) = '${factory}')
+    AND ('${location}' = '' OR LTRIM(RTRIM(location)) = '${location}')
+    AND ('${sensor_id}' = '' OR LTRIM(RTRIM(sensor_id)) = '${sensor_id}')
+GROUP BY CAST(timestamp AS DATE), DATEPART(HOUR, timestamp)
+ORDER BY date DESC, hour ASC;
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+} 
+
+export async function getDataChartForWorkshop(date) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+SELECT 
+    factory,
+    CAST(timestamp AS DATE) AS date,
+    DATEPART(HOUR, timestamp) AS hour,
+    ROUND(AVG(temperature), 2) AS avg_temperature,
+    ROUND(AVG(humidity), 2) AS avg_humidity,
+    ROUND(AVG(sound), 2) AS avg_sound,
+    ROUND(AVG(light), 2) AS avg_light
+FROM ${table_name}
+WHERE CAST(timestamp AS DATE) = '${date}'
+GROUP BY factory, CAST(timestamp AS DATE), DATEPART(HOUR, timestamp)
+ORDER BY date DESC, hour ASC;
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+} 

@@ -10,36 +10,14 @@
                         </div>
                         <div>
                             <form method="GET" id="filterForm" class="row g-3 p-2">
-                                <!-- Factory Filter -->
-                                <div class="col-md-3">
-                                    <label for="factory" class="form-label">Factory</label>
-                                    <select name="factory" id="factory" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="F1" selected>Factory 1</option>
-                                        <option value="F2">Factory 2</option>
-                                        <option value="F3">Factory 3</option>
-                                        <option value="F4">Factory 4</option>
-                                    </select>
-                                </div>
-
-                                <!-- Location Filter -->
-                                <div class="col-md-3">
-                                    <label for="location" class="form-label">Location</label>
-                                    <select name="location" id="location" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="L0">L0</option>
-                                        <option value="L1" selected>L1</option>
-                                        <option value="L2">L2</option>
-                                    </select>
-                                </div>
-
                                 <!-- Sensors Filter -->
                                 <div class="col-md-3">
-                                    <label for="sensors" class="form-label">Sensor</label>
-                                    <select name="sensors" id="sensors" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="ETH01_02" selected>ETH01_02</option>
-                                        <option value="ESP02">ESP02</option>
+                                    <label for="filter-type" class="form-label">Chart type</label>
+                                    <select name="filter-type" id="filter-type" class="form-select">
+                                        <option value="temperatures" selected>Temperature</option>
+                                        <option value="humidities">Humidity</option>
+                                        <option value="sounds">Sound</option>
+                                        <option value="lights">Light</option>
                                     </select>
                                 </div>
 
@@ -179,25 +157,27 @@
 
         $("#filterForm").submit(function (e) {
             e.preventDefault(); // Prevent page reload
-
-            let factory = $("#factory").val();
-            let location = $("#location").val();
-            let sensor_id = $("#sensors").val();
+            let filter_type = $("#filter-type").val();
             let time = $("#time").val();
 
-            getDataSheet(factory, location, sensor_id, time, 1);
-            getDataChart(factory, location, sensor_id, time);
+            //getDataSheet(factory, location, sensor_id, time, 1);
+            getDataChart(filter_type, time);
         });
 
-        function getDataChart(factory, location, sensor_id, time) {
+        function getDataChart(type, time) {
+            console.log("getDataChart", type, time);
             $.ajax({
-                url: `/sensors/chart-data`,
+                url: `/sensors/workshop-chart-data`,
                 method: 'GET',
-                data: { factory, location, sensor_id, time },
+                data: { type, time },
                 dataType: "json",
                 success: function (response) {
-                    const { labels, temperatures, humidities, sounds, lights } = response;
-                    createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);
+                    const { labels, F1, F2, F3, F4 } = response;
+
+                    console.log("Filter type: ", type);
+                    console.log("Data: ", F1[type]);
+
+                    createFactoryLineChart("chartjs-dashboard-line", labels, F1[type], F2[type], F3[type], F4[type]);
                 }
             });
         }
@@ -270,13 +250,11 @@
             }
         });
 
-        let factory = $("#factory").val();
-        let location = $("#location").val();
-        let sensor_id = $("#sensors").val();
+        let filter_type = $("#filter-type").val();
         let time = $("#time").val();
 
-        getDataSheet(factory, location, sensor_id, time, 1);
-        getDataChart(factory, location, sensor_id, time);
+        //getDataSheet(factory, location, sensor_id, time, 1);
+        getDataChart(filter_type, time);
     });
     function exportExcel() {
         let factory = $("#factory").val();

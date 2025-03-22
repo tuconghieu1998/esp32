@@ -1,6 +1,6 @@
 import express from 'express';
 var router = express.Router();
-import { getDataByDate, getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
+import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
 import { convertDateFormat, formatTimestamp } from '../../utils/helpers.js';
 
@@ -92,6 +92,37 @@ router.get('/chart', authenticate, async (req, res, next) => {
     }
 });
 
+router.get("/chart-data", authenticate, async (req, res) => {
+    let { factory, location, sensor_id, time } = req.query;
+
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let filteredData = await getDataChartByDate(factory, location, sensor_id, date);
+
+    const labels = [];
+    const temperatures = [];
+    const humidities = [];
+    const sounds = [];
+    const lights = [];
+
+    filteredData.forEach(item => {
+        labels.push(item.hour);
+        temperatures.push(item.avg_temperature);
+        humidities.push(item.avg_humidity);
+        sounds.push(item.avg_sound);
+        lights.push(item.avg_light);
+    })
+
+    res.json({
+        labels, temperatures, humidities, sounds, lights
+    });
+});
+
 router.get("/filter", authenticate, async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
     console.log('/sensors/filter', factory, sensor_id, location, time);
@@ -161,5 +192,122 @@ router.get("/export-excel", authenticate, async (req, res) => {
 
     await sendResponseExcelDownload(res, createWorkBookSensorData(filteredData), `SensorData_${factory}_${location}_${sensor_id}_${date}.xlsx`);
 });
+
+router.get('/workshop-chart', authenticate, async (req, res, next) => {
+    try {
+        res.locals.pageTitle = 'WorkshopChart';
+        const {time, type} = req.query;
+        // get data today
+        let date;
+        if (time && time != '') {
+            date = convertDateFormat(time);
+        }
+        else {
+            date = new Date().toISOString().split('T')[0]; // get data today
+        }
+        let data = await getDataChartForWorkshop(date);
+
+        let page = parseInt(req.query.page) || 1; // Get the current page
+        let limit = 20; // Number of items per page
+        let startIndex = (page - 1) * limit;
+        let endIndex = page * limit;
+
+        let paginatedData = data.slice(startIndex, endIndex); // Slice the data
+
+        paginatedData.forEach(detail => {
+            detail.timestamp = formatTimestamp(detail.timestamp);
+        });
+
+        res.render('sensors/workshop_avg_chart.hbs', {
+            details: paginatedData,
+            currentPage: page,
+            totalPages: Math.ceil(data.length / limit),
+            limit
+        });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/workshop-chart-data", authenticate, async (req, res) => {
+    let { type, time } = req.query;
+
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let filteredData = await getDataChartForWorkshop(date);
+
+    const labels = [];
+    const F1 = {
+        temperatures: [],
+        humidities: [],
+        sounds: [],
+        lights: []
+    };
+    const F2 = {
+        temperatures: [],
+        humidities: [],
+        sounds: [],
+        lights: []
+    };
+    const F3 = {
+        temperatures: [],
+        humidities: [],
+        sounds: [],
+        lights: []
+    };
+    const F4 = {
+        temperatures: [],
+        humidities: [],
+        sounds: [],
+        lights: []
+    };
+
+    filteredData.forEach(item => {
+        if (labels.findIndex(label => label == item.hour) == -1) {
+            labels.push(item.hour);
+        }
+        const factory = item.factory.trim();
+        
+        switch (factory) {
+            case "F1":
+                F1.temperatures.push(item.avg_temperature);
+                F1.humidities.push(item.avg_humidity);
+                F1.sounds.push(item.avg_sound);
+                F1.lights.push(item.avg_light);
+                break;
+            case "F2":
+                F2.temperatures.push(item.avg_temperature);
+                F2.humidities.push(item.avg_humidity);
+                F2.sounds.push(item.avg_sound);
+                F2.lights.push(item.avg_light);
+                break;
+            case "F3":
+                F3.temperatures.push(item.avg_temperature);
+                F3.humidities.push(item.avg_humidity);
+                F3.sounds.push(item.avg_sound);
+                F3.lights.push(item.avg_light);
+                break;
+            case "F4":
+                F4.temperatures.push(item.avg_temperature);
+                F4.humidities.push(item.avg_humidity);
+                F4.sounds.push(item.avg_sound);
+                F4.lights.push(item.avg_light);
+                break;
+        }
+    });
+
+    res.json({
+        labels, F1, F2, F3, F4
+    });
+});
+
+
 
 export default router;
