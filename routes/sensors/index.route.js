@@ -1,13 +1,8 @@
 import express from 'express';
 var router = express.Router();
-import { getConnection, closeConnection, sql } from "../../db.js";
-import moment from "moment";
-import { getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
+import { getDataByDate, getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
-
-const formatTimestamp = (date) => {
-    return moment(date).format("HH:mm:ss DD/MM/YYYY");
-};
+import { convertDateFormat, formatTimestamp } from '../../utils/helpers.js';
 
 // trang chu
 router.get('/', authenticate, (req, res, next) => {
@@ -65,6 +60,106 @@ router.get("/api/factory-last-data", authenticate, async (req, res) => {
     }
 });
 
+// trang chu
+router.get('/chart', authenticate, async (req, res, next) => {
+    try {
+        res.locals.pageTitle = 'Chart';
+        // get data today
+        const today = new Date().toISOString().split('T')[0];
+        let data = await getDataByDate(today);
 
+        let page = parseInt(req.query.page) || 1; // Get the current page
+        let limit = 20; // Number of items per page
+        let startIndex = (page - 1) * limit;
+        let endIndex = page * limit;
+
+        let paginatedData = data.slice(startIndex, endIndex); // Slice the data
+
+        paginatedData.forEach(detail => {
+            detail.timestamp = formatTimestamp(detail.timestamp);
+        });
+
+        res.render('sensors/sensor_chart.hbs', {
+            details: paginatedData,
+            currentPage: page,
+            totalPages: Math.ceil(data.length / limit),
+            limit
+        });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/filter", authenticate, async (req, res) => {
+    let { factory, location, sensor_id, time } = req.query;
+    console.log('/sensors/filter', factory, sensor_id, location, time);
+
+    let page = parseInt(req.query.page) || 1; // Get the current page
+    let limit = 20; // Number of items per page
+    let startIndex = (page - 1) * limit;
+    let endIndex = page * limit;
+
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let filteredData = await getDataByDate(date);
+
+    // Apply filters if they are selected
+    if (factory && factory !== "") {
+        filteredData = filteredData.filter(item => item.factory.trim() == factory);
+    }
+    if (location && location !== "") {
+        filteredData = filteredData.filter(item => item.location.trim() == location);
+    }
+    if (sensor_id && sensor_id !== "") {
+        filteredData = filteredData.filter(item => item.sensor_id.trim() == sensor_id);
+    }
+
+    let paginatedData = filteredData.slice(startIndex, endIndex); // Slice the data
+
+    paginatedData.forEach(detail => {
+        detail.timestamp = formatTimestamp(detail.timestamp);
+    });
+
+    res.json({
+        details: paginatedData,
+        currentPage: page,
+        limit,
+        totalPages: Math.ceil(filteredData.length / limit)
+    });
+});
+
+router.get("/export-excel", authenticate, async (req, res) => {
+    let { factory, location, sensor, time } = req.query;
+    console.log('/sensors/export-excel', factory, sensor_id, location, time);
+
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let filteredData = await getDataByDate(date);
+
+    // Apply filters if they are selected
+    if (factory && factory !== "") {
+        filteredData = filteredData.filter(item => item.factory.trim() == factory);
+    }
+    if (location && location !== "") {
+        filteredData = filteredData.filter(item => item.location.trim() == location);
+    }
+    if (sensor_id && sensor_id !== "") {
+        filteredData = filteredData.filter(item => item.sensor_id.trim() == sensor_id);
+    }
+
+    await sendResponseExcelDownload(res, createWorkBookSensorData(filteredData), `SensorData_${factory}_${location}_${sensor_id}_${date}.xlsx`);
+});
 
 export default router;

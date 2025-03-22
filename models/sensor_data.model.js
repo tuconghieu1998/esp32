@@ -2,6 +2,26 @@ import { getConnection, closeConnection } from "../db.js";
 
 const table_name = "sensor_data_test";
 
+export async function getListSensors() {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+        SELECT *
+        FROM sensors
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
+
 export async function getLastDataEachSensor() {
     let pool;
     try {

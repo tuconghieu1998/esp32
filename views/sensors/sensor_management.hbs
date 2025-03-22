@@ -1,0 +1,423 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <h2 class="h3 mb-3">Sensor <strong>Management</strong></h2>
+        <div class="row">
+            <div class="row">
+                <div class="col-12 col-lg-8 col-xxl-9 d-flex">
+                    <div class="card flex-fill">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Details Data</h5>
+                        </div>
+                        <div>
+                            <form method="GET" id="filterForm" class="row g-3 p-2">
+                                <!-- Factory Filter -->
+                                <div class="col-md-3">
+                                    <label for="factory" class="form-label">Factory</label>
+                                    <select name="factory" id="factory" class="form-select">
+                                        <option value="">All</option>
+                                        <option value="F1">Factory 1</option>
+                                        <option value="F2">Factory 2</option>
+                                        <option value="F3">Factory 3</option>
+                                        <option value="F4">Factory 4</option>
+                                    </select>
+                                </div>
+
+                                <!-- Location Filter -->
+                                <div class="col-md-3">
+                                    <label for="location" class="form-label">Location</label>
+                                    <select name="location" id="location" class="form-select">
+                                        <option value="">All</option>
+                                        <option value="L0">L0</option>
+                                        <option value="L1">L1</option>
+                                        <option value="L2">L2</option>
+                                    </select>
+                                </div>
+
+                                <!-- Date Filter -->
+                                <div class="col-md-4">
+                                    <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
+                                    <div class="input-group date">
+                                        <input type="text" name="time" id="time" class="form-control"
+                                            placeholder="Date">
+                                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                                            Filter</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="p-2">
+                            <a href="javascript:void(0)" onclick="exportExcel()" class="btn btn-success">
+                                <i class="fas fa-file-excel"></i> Export to Excel
+                            </a>
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="chart chart-sm">
+                                <canvas id="chartjs-dashboard-line"></canvas>
+                            </div>
+                        </div>
+                        <table class="table table-hover my-0">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="d-none d-xl-table-cell">Sensor ID</th>
+                                    <th class="d-none d-xl-table-cell">Factory</th>
+                                    <th class="d-none d-xl-table-cell">Location</th>
+                                    <th class="d-none d-md-table-cell">Temperature(&deg;C)</th>
+                                    <th class="d-none d-md-table-cell">Humidity(%)</th>
+                                    <th class="d-none d-md-table-cell">Sound(dB)</th>
+                                    <th class="d-none d-md-table-cell">Light(Lux)</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                {{#each details}}
+                                <tr>
+                                    <td>{{increment @index}}</td>
+                                    <td class="d-none d-xl-table-cell">{{sensor_id}}</td>
+                                    <td class="d-none d-xl-table-cell">{{factory}}</td>
+                                    <td class="d-none d-xl-table-cell">{{location}}</td>
+                                    <td class="d-none d-md-table-cell">{{temperature}}</td>
+                                    <td class="d-none d-md-table-cell">{{humidity}}</td>
+                                    <td class="d-none d-md-table-cell">{{sound}}</td>
+                                    <td class="d-none d-md-table-cell">{{light}}</td>
+                                    <td class="d-none d-md-table-cell">{{timestamp}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                        <!-- Pagination Buttons -->
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mt-3" id="pagination">
+                                <!-- Previous Button -->
+                                {{#if (gt currentPage 1)}}
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="{{sub currentPage 1}}">&laquo;</a>
+                                </li>
+                                {{/if}}
+
+                                <!-- First Page -->
+                                <li class="page-item {{#if (eq 1 currentPage)}}active{{/if}}">
+                                    <a class="page-link" href="#" data-page="1">1</a>
+                                </li>
+
+                                <!-- Left Ellipsis -->
+                                {{#if (gt currentPage 4)}}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {{/if}}
+
+                                <!-- Page Numbers Around Current -->
+                                {{#each (range (max 2 (sub currentPage 2)) (min totalPages (add currentPage 2)))}}
+                                <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
+                                    <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
+                                </li>
+                                {{/each}}
+
+                                <!-- Right Ellipsis -->
+                                {{#if (lt currentPage (sub totalPages 3))}}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {{/if}}
+
+                                <!-- Last Page -->
+                                {{#if (gt totalPages 1)}}
+                                <li class="page-item {{#if (eq totalPages currentPage)}}active{{/if}}">
+                                    <a class="page-link" href="#" data-page="{{totalPages}}">{{totalPages}}</a>
+                                </li>
+                                {{/if}}
+
+                                <!-- Next Button -->
+                                {{#if (lt currentPage totalPages)}}
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="{{add currentPage 1}}">&raquo;</a>
+                                </li>
+                                {{/if}}
+                                <li class="page-item">
+                                    <input type="number" id="gotoPage" min="1" max="{{totalPages}}" class="form-control"
+                                        placeholder="Page"
+                                        style="width: 80px; margin-left: 20px; display: inline-block; text-align: center;">
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-1">
+                    <div class="card flex-fill" style="height: 500px;">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Calendar</h5>
+                        </div>
+                        <div class="card-body d-flex">
+                            <div class="align-self-center w-100">
+                                <div class="chart">
+                                    <div id="datetimepicker-dashboard"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script>
+    $(document).ready(function () {
+        $('#time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        });
+
+        $("#filterForm").submit(function (e) {
+            e.preventDefault(); // Prevent page reload
+            loadPage(1);
+        });
+
+        function createPageItem(page, currentPage) {
+            return `<li class="page-item ${page === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${page}">${page}</a>
+            </li>`;
+        }
+
+        function createPageNumber(pageId, currentPage, totalPages) {
+            const pagination = $("#" + pageId); // Ensure #pagination exists
+            pagination.empty();
+
+            // Previous Button
+            if (currentPage > 1) {
+                pagination.append(`<li class="page-item">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+                </li>`);
+            }
+
+            // First Page
+            pagination.append(createPageItem(1, currentPage));
+
+            // Left Ellipsis (if needed)
+            if (currentPage > 4) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+
+            // Page Numbers Around Current
+            const startPage = Math.max(2, currentPage - 2);
+            const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                pagination.append(createPageItem(i, currentPage));
+            }
+
+            // Right Ellipsis (if needed)
+            if (currentPage < totalPages - 3) {
+                pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+
+            // Last Page
+            if (totalPages > 1) {
+                pagination.append(createPageItem(totalPages, currentPage));
+            }
+
+            // Next Button
+            if (currentPage < totalPages) {
+                pagination.append(`<li class="page-item">
+               <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+               </li>`);
+            }
+
+            // Add "Go to Page" Input
+            pagination.append(`
+                <li class="page-item">
+                    <input type="number" id="gotoPage" min="1" max="${totalPages}" class="form-control" 
+                           placeholder="Page" style="width: 80px; margin-left: 20px; display: inline-block; text-align: center;">
+                </li>
+            `);
+
+            // Rebind click event after updating pagination
+            $(".page-link").click(function (event) {
+                event.preventDefault();
+                let page = $(this).data("page");
+                loadPage(page);
+            });
+
+            $("#gotoPage").keypress(function (e) {
+                if (e.which === 13) { // Enter key
+                    let page = parseInt($(this).val());
+                    let minPage = parseInt($(this).attr("min"), 10);
+                    let maxPage = parseInt($(this).attr("max"), 10);
+                    if (page >= minPage && page <= maxPage) {
+                        loadPage(page); // Function to load the selected page
+                    } else {
+                        alert("Invalid page number!");
+                    }
+                }
+            });
+        }
+
+        function loadPage(page) {
+            console.log('loadPage', page);
+
+            let factory = $("#factory").val();
+            let location = $("#location").val();
+            let time = $("#time").val();
+
+            $.ajax({
+                url: `/dashboard/filter`,
+                method: "GET",
+                data: { factory, location, time, page },
+                dataType: "json",
+                success: function (response) {
+                    let tableBody = $("#tableBody");
+                    let pagination = $("#pagination");
+
+                    // Clear old data
+                    tableBody.empty();
+                    pagination.empty();
+
+                    // Populate table with new data
+                    response.details.forEach((item, index) => {
+                        tableBody.append(`
+                        <tr>
+                            <td>${(response.currentPage - 1) * response.limit + index + 1}</td>
+                            <td class="d-none d-xl-table-cell">${item.sensor_id}</td>
+                            <td class="d-none d-xl-table-cell">${item.factory}</td>
+                            <td class="d-none d-xl-table-cell">${item.location}</td>
+                            <td class="d-none d-md-table-cell">${item.temperature}</td>
+                            <td class="d-none d-md-table-cell">${item.humidity}</td>
+                            <td class="d-none d-md-table-cell">${item.sound}</td>
+                            <td class="d-none d-md-table-cell">${item.light}</td>
+                            <td class="d-none d-md-table-cell">${item.timestamp}</td>
+                        </tr>
+                    `);
+                    });
+
+                    // Create pagination buttons
+                    createPageNumber('pagination', response.currentPage, response.totalPages);
+                }
+            });
+
+        }
+
+        // Handle Pagination Clicks
+        $(document).on("click", ".page-link", function (event) {
+            event.preventDefault();
+            let page = $(this).data("page");
+            loadPage(page);
+        });
+
+        // Handle "Enter" Key Press
+        $("#gotoPage").on("keypress", function (e) {
+            console.log('keypress', $(this).min, $(this).max, e.which)
+            if (e.which === 13) { // Enter key
+                let page = parseInt($(this).val());
+                let minPage = parseInt($(this).attr("min"), 10);
+                let maxPage = parseInt($(this).attr("max"), 10);
+                if (page >= minPage && page <= maxPage) {
+                    loadPage(page); // Function to load the selected page
+                } else {
+                    alert("Invalid page number!");
+                }
+            }
+
+        });
+    });
+    function exportExcel() {
+        let factory = $("#factory").val();
+        let location = $("#location").val();
+        let time = $("#time").val();
+
+        console.log("Exporting...");
+
+        // Construct query string
+        let queryString = $.param({ factory, location, time });
+
+        // Trigger file download
+        window.location.href = `/dashboard/export-excel?${queryString}`;
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById("chartjs-dashboard-line").getContext("2d");
+        var gradient = ctx.createLinearGradient(0, 0, 0, 225);
+        gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
+        gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
+        var labels = [];
+        var temperatures = [];
+        var humidity = [];
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+        for (var i = 0; i < 24; i++) {
+            labels.push(i + "h");
+            temperatures.push(getRndInteger(20, 35));
+            humidity.push(getRndInteger(70, 85));
+        }
+        // Line chart
+        new Chart(document.getElementById("chartjs-dashboard-line"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Temperature (&deg;C)",
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: 'red',
+                    data: temperatures
+                },
+                {
+                    label: "Humidity (%)",
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: window.theme.primary,
+                    data: humidity
+                },
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    intersect: false
+                },
+                hover: {
+                    intersect: true
+                },
+                plugins: {
+                    filler: {
+                        propagate: false
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        reverse: true,
+                        gridLines: {
+                            color: "rgba(0,0,0,0.0)"
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            stepSize: 1000
+                        },
+                        display: true,
+                        borderDash: [3, 3],
+                        gridLines: {
+                            color: "rgba(0,0,0,0.0)"
+                        }
+                    }]
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var date = new Date(Date.now());
+        var defaultDate = date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
+        document.getElementById("datetimepicker-dashboard").flatpickr({
+            inline: true,
+            prevArrow: "<span title=\"Previous month\">&laquo;</span>",
+            nextArrow: "<span title=\"Next month\">&raquo;</span>",
+            defaultDate: defaultDate
+        });
+    });
+</script>

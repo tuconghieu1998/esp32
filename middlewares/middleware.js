@@ -11,7 +11,6 @@ export const authenticate = (req, res, next) => {
 export const authenticateWebSocket = (ws, req, next) => {
     const params = new URLSearchParams(req.url.split('?')[1]);
     const token = params.get('token'); // Extract token from URL
-    console.log('authenticateWebSocket', token);
 
     if (!token) {
         ws.close(4001, "No token provided"); // Reject if no token
@@ -25,6 +24,11 @@ export const authenticateWebSocket = (ws, req, next) => {
         }
 
         req.user = user; // Attach user data to request
+
+        if(user.role != 'ADMIN' && user.role != 'SECURITY') {
+            ws.close(4003, "No authenticated!");
+            return;
+        }
         next(); // Proceed to WebSocket connection
     });
 };
