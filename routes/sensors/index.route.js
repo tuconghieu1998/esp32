@@ -2,7 +2,7 @@ import express from 'express';
 var router = express.Router();
 import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
-import { convertDateFormat, formatTimestamp } from '../../utils/helpers.js';
+import { convertDateFormat, createWorkBookSensorData, formatTimestamp, sendResponseExcelDownload } from '../../utils/helpers.js';
 
 // trang chu
 router.get('/', authenticate, (req, res, next) => {
@@ -167,7 +167,7 @@ router.get("/filter", authenticate, async (req, res) => {
 });
 
 router.get("/export-excel", authenticate, async (req, res) => {
-    let { factory, location, sensor, time } = req.query;
+    let { factory, location, sensor_id, time } = req.query;
     console.log('/sensors/export-excel', factory, sensor_id, location, time);
 
     let date;
@@ -215,13 +215,13 @@ router.get('/workshop-chart', authenticate, async (req, res, next) => {
         let paginatedData = data.slice(startIndex, endIndex); // Slice the data
 
         paginatedData.forEach(detail => {
-            detail.timestamp = formatTimestamp(detail.timestamp);
+            detail.date = formatTimestamp(detail.date);
         });
 
         res.render('sensors/workshop_avg_chart.hbs', {
-            details: paginatedData,
+            data: paginatedData,
             currentPage: page,
-            totalPages: Math.ceil(data.length / limit),
+            totalPages: Math.ceil(paginatedData.length / limit),
             limit
         });
     }
@@ -229,6 +229,56 @@ router.get('/workshop-chart', authenticate, async (req, res, next) => {
         console.log(e);
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+router.get('/workshop-chart/page', authenticate, async (req, res, next) => {
+    try {
+        const {time} = req.query;
+        // get data today
+        let date;
+        if (time && time != '') {
+            date = convertDateFormat(time);
+        }
+        else {
+            date = new Date().toISOString().split('T')[0]; // get data today
+        }
+        let data = await getDataChartForWorkshop(date);
+
+        page = parseInt(req.query.page) || 1; // Get the current page
+        let limit = 20; // Number of items per page
+        let startIndex = (page - 1) * limit;
+        let endIndex = page * limit;
+
+        let paginatedData = data.slice(startIndex, endIndex); // Slice the data
+
+        paginatedData.forEach(detail => {
+            detail.date = formatTimestamp(detail.date);
+        });
+
+        res.json({data: paginatedData,
+            currentPage: page,
+            totalPages: Math.ceil(paginatedData.length / limit),
+            limit});
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/workshop-chart/export-excel", authenticate, async (req, res) => {
+    const {time} = req.query;
+        // get data today
+        let date;
+        if (time && time != '') {
+            date = convertDateFormat(time);
+        }
+        else {
+            date = new Date().toISOString().split('T')[0]; // get data today
+        }
+        let data = await getDataChartForWorkshop(date);
+
+    await sendResponseExcelDownload(res, createWorkBookSensorData(data), `Factory_${date}.xlsx`);
 });
 
 router.get("/workshop-chart-data", authenticate, async (req, res) => {
@@ -304,10 +354,10 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
     });
 
     res.json({
+        data: filteredData,
         labels, F1, F2, F3, F4
     });
 });
-
 
 
 export default router;

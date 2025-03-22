@@ -47,9 +47,7 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th class="d-none d-xl-table-cell">Sensor ID</th>
                                     <th class="d-none d-xl-table-cell">Factory</th>
-                                    <th class="d-none d-xl-table-cell">Location</th>
                                     <th class="d-none d-md-table-cell">Temperature(&deg;C)</th>
                                     <th class="d-none d-md-table-cell">Humidity(%)</th>
                                     <th class="d-none d-md-table-cell">Sound(dB)</th>
@@ -58,17 +56,15 @@
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
-                                {{#each details}}
+                                {{#each data}}
                                 <tr>
                                     <td>{{increment @index}}</td>
-                                    <td class="d-none d-xl-table-cell">{{sensor_id}}</td>
                                     <td class="d-none d-xl-table-cell">{{factory}}</td>
-                                    <td class="d-none d-xl-table-cell">{{location}}</td>
-                                    <td class="d-none d-md-table-cell">{{temperature}}</td>
-                                    <td class="d-none d-md-table-cell">{{humidity}}</td>
-                                    <td class="d-none d-md-table-cell">{{sound}}</td>
-                                    <td class="d-none d-md-table-cell">{{light}}</td>
-                                    <td class="d-none d-md-table-cell">{{timestamp}}</td>
+                                    <td class="d-none d-xl-table-cell">{{avg_temperature}}</td>
+                                    <td class="d-none d-xl-table-cell">{{avg_humidity}}</td>
+                                    <td class="d-none d-md-table-cell">{{avg_sound}}</td>
+                                    <td class="d-none d-md-table-cell">{{avg_light}}</td>
+                                    <td class="d-none d-md-table-cell">{{date}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
@@ -182,11 +178,11 @@
             });
         }
 
-        function getDataSheet(factory, location, sensor_id, time, page) {
+        function getDataSheet(time, page) {
             $.ajax({
-                url: `/sensors/filter`,
+                url: `/sensors/workshop-chart/page`,
                 method: "GET",
-                data: { factory, location, sensor_id, time, page },
+                data: { time, page },
                 dataType: "json",
                 success: function (response) {
                     let tableBody = $("#tableBody");
@@ -197,18 +193,16 @@
                     pagination.empty();
 
                     // Populate table with new data
-                    response.details.forEach((item, index) => {
+                    response.data.forEach((item, index) => {
                         tableBody.append(`
                         <tr>
                             <td>${(response.currentPage - 1) * response.limit + index + 1}</td>
-                            <td class="d-none d-xl-table-cell">${item.sensor_id}</td>
                             <td class="d-none d-xl-table-cell">${item.factory}</td>
-                            <td class="d-none d-xl-table-cell">${item.location}</td>
-                            <td class="d-none d-md-table-cell">${item.temperature}</td>
-                            <td class="d-none d-md-table-cell">${item.humidity}</td>
-                            <td class="d-none d-md-table-cell">${item.sound}</td>
-                            <td class="d-none d-md-table-cell">${item.light}</td>
-                            <td class="d-none d-md-table-cell">${item.timestamp}</td>
+                            <td class="d-none d-xl-table-cell">${item.avg_temperature}</td>
+                            <td class="d-none d-xl-table-cell">${item.avg_humidity}</td>
+                            <td class="d-none d-md-table-cell">${item.avg_sound}</td>
+                            <td class="d-none d-md-table-cell">${item.avg_light}</td>
+                            <td class="d-none d-md-table-cell">${item.date}</td>
                         </tr>
                     `);
                     });
@@ -257,17 +251,15 @@
         getDataChart(filter_type, time);
     });
     function exportExcel() {
-        let factory = $("#factory").val();
-        let location = $("#location").val();
         let time = $("#time").val();
 
         console.log("Exporting...");
 
         // Construct query string
-        let queryString = $.param({ factory, location, time });
+        let queryString = $.param({ time });
 
         // Trigger file download
-        window.location.href = `/dashboard/export-excel?${queryString}`;
+        window.location.href = `/workshop-chart/export-excel?${queryString}`;
     }
 </script>
 <script>

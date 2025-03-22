@@ -281,15 +281,16 @@
     function exportExcel() {
         let factory = $("#factory").val();
         let location = $("#location").val();
+        let sensor_id = $("#sensors").val();
         let time = $("#time").val();
 
         console.log("Exporting...");
 
         // Construct query string
-        let queryString = $.param({ factory, location, time });
+        let queryString = $.param({ factory, location, sensor_id, time });
 
         // Trigger file download
-        window.location.href = `/dashboard/export-excel?${queryString}`;
+        window.location.href = `/sensors/export-excel?${queryString}`;
     }
 </script>
 <script>
