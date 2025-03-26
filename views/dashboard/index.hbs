@@ -299,14 +299,18 @@
                                 <label for="location" class="form-label">Location</label>
                                 <select name="location" id="location" class="form-select">
                                     <option value="">All</option>
-                                    <option value="L0">L0</option>
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="sensor-select" class="form-label">Sensor</label>
+                                <select name="sensor-select" id="sensor-select" class="form-select">
+                                    <option value="" selected>All</option>
                                 </select>
                             </div>
 
                             <!-- Date Filter -->
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
                                 <div class="input-group date">
                                     <input type="text" name="time" id="time" class="form-control" placeholder="Date">
@@ -488,6 +492,31 @@
 <script src="/js/sensor_chart.js"></script>
 <script>
     $(document).ready(function () {
+        $("#factory").change(function () {
+            let factory = $(this).val();
+            $("#location").html('<option value="">All</option>'); // Reset locations
+            $("#sensor-select").html('<option value="">All</option>'); // Reset sensors
+
+            if (factory) {
+                $.ajax({
+                    url: "/sensors/search",
+                    type: "GET",
+                    data: { factory: factory },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.sensors) {
+                            $.each(response.sensors, function (index, sensor) {
+                                $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
+                            });
+                        }
+                    },
+                    error: function () {
+                        console.error("Error fetching locations.");
+                    }
+                });
+            }
+        });
+
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
@@ -583,12 +612,13 @@
 
             let factory = $("#factory").val();
             let location = $("#location").val();
+            let sensor_id = $("#sensor-select").val();
             let time = $("#time").val();
 
             $.ajax({
                 url: `/dashboard/filter`,
                 method: "GET",
-                data: { factory, location, time, page },
+                data: { factory, location, sensor_id, time, page },
                 dataType: "json",
                 success: function (response) {
                     let tableBody = $("#tableBody");
@@ -648,12 +678,13 @@
     function exportExcel() {
         let factory = $("#factory").val();
         let location = $("#location").val();
+        let sensor_id = $("#sensor-select").val();
         let time = $("#time").val();
 
         console.log("Exporting...");
 
         // Construct query string
-        let queryString = $.param({ factory, location, time });
+        let queryString = $.param({ factory, location, sensor_id, time });
 
         // Trigger file download
         window.location.href = `/dashboard/export-excel?${queryString}`;
@@ -684,7 +715,7 @@
             dataType: "json",
             success: function (response) {
                 const { labels, temperatures, humidities, sounds, lights } = response;
-                if(sensorChart) {
+                if (sensorChart) {
                     sensorChart.destroy();
                 }
                 sensorChart = createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);

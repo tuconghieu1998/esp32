@@ -1,8 +1,8 @@
 import express from 'express';
 var router = express.Router();
-import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataEachSensor } from '../../models/sensor_data.model.js';
+import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataEachSensor, getSensorsByFactory } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
-import { convertDateFormat, createWorkBookSensorData, formatTimestamp, sendResponseExcelDownload } from '../../utils/helpers.js';
+import { convertDateFormat, createWorkBookSensorData, createWorkBookWorkshopData, formatTimestamp, formatTimeToDate, sendResponseExcelDownload } from '../../utils/helpers.js';
 
 // trang chu
 router.get('/', authenticate, (req, res, next) => {
@@ -196,7 +196,17 @@ router.get("/export-excel", authenticate, async (req, res) => {
 router.get('/workshop-chart', authenticate, async (req, res, next) => {
     try {
         res.locals.pageTitle = 'WorkshopChart';
-        const {time, type} = req.query;
+        res.render('sensors/workshop_avg_chart.hbs');
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/workshop-chart/page', authenticate, async (req, res, next) => {
+    try {
+        const { time } = req.query;
         // get data today
         let date;
         if (time && time != '') {
@@ -215,10 +225,10 @@ router.get('/workshop-chart', authenticate, async (req, res, next) => {
         let paginatedData = data.slice(startIndex, endIndex); // Slice the data
 
         paginatedData.forEach(detail => {
-            detail.date = formatTimestamp(detail.date);
+            detail.date = formatTimeToDate(detail.date);
         });
 
-        res.render('sensors/workshop_avg_chart.hbs', {
+        res.json({
             data: paginatedData,
             currentPage: page,
             totalPages: Math.ceil(paginatedData.length / limit),
@@ -231,55 +241,22 @@ router.get('/workshop-chart', authenticate, async (req, res, next) => {
     }
 });
 
-router.get('/workshop-chart/page', authenticate, async (req, res, next) => {
-    try {
-        const {time} = req.query;
-        // get data today
-        let date;
-        if (time && time != '') {
-            date = convertDateFormat(time);
-        }
-        else {
-            date = new Date().toISOString().split('T')[0]; // get data today
-        }
-        let data = await getDataChartForWorkshop(date);
-
-        page = parseInt(req.query.page) || 1; // Get the current page
-        let limit = 20; // Number of items per page
-        let startIndex = (page - 1) * limit;
-        let endIndex = page * limit;
-
-        let paginatedData = data.slice(startIndex, endIndex); // Slice the data
-
-        paginatedData.forEach(detail => {
-            detail.date = formatTimestamp(detail.date);
-        });
-
-        res.json({data: paginatedData,
-            currentPage: page,
-            totalPages: Math.ceil(paginatedData.length / limit),
-            limit});
-    }
-    catch (e) {
-        console.log(e);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
 router.get("/workshop-chart/export-excel", authenticate, async (req, res) => {
-    const {time} = req.query;
-        // get data today
-        let date;
-        if (time && time != '') {
-            date = convertDateFormat(time);
-        }
-        else {
-            date = new Date().toISOString().split('T')[0]; // get data today
-        }
-        let data = await getDataChartForWorkshop(date);
+    const { time } = req.query;
+    // get data today
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let data = await getDataChartForWorkshop(date);
 
-    await sendResponseExcelDownload(res, createWorkBookSensorData(data), `Factory_${date}.xlsx`);
+    await sendResponseExcelDownload(res, createWorkBookWorkshopData(data), `Factory_${date}.xlsx`);
 });
+
+
 
 router.get("/workshop-chart-data", authenticate, async (req, res) => {
     let { type, time } = req.query;
@@ -294,63 +271,47 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
     let filteredData = await getDataChartForWorkshop(date);
 
     const labels = [];
-    const F1 = {
-        temperatures: [],
-        humidities: [],
-        sounds: [],
-        lights: []
-    };
-    const F2 = {
-        temperatures: [],
-        humidities: [],
-        sounds: [],
-        lights: []
-    };
-    const F3 = {
-        temperatures: [],
-        humidities: [],
-        sounds: [],
-        lights: []
-    };
-    const F4 = {
-        temperatures: [],
-        humidities: [],
-        sounds: [],
-        lights: []
-    };
+
+    function initValues() {
+        return {
+            temperatures: Array(24).fill(0),
+            humidities: Array(24).fill(0),
+            sounds: Array(24).fill(0),
+            lights: Array(24).fill(0)
+        };
+    }
+    const F1 = initValues();
+    const F2 = initValues();
+    const F3 = initValues();
+    const F4 = initValues();
 
     filteredData.forEach(item => {
         if (labels.findIndex(label => label == item.hour) == -1) {
             labels.push(item.hour);
         }
+        item.date = formatTimeToDate(item.date);
         const factory = item.factory.trim();
-        
+        if(item.hour < 1 || item.hour > 24) return;
+        let factoryData;
+
         switch (factory) {
             case "F1":
-                F1.temperatures.push(item.avg_temperature);
-                F1.humidities.push(item.avg_humidity);
-                F1.sounds.push(item.avg_sound);
-                F1.lights.push(item.avg_light);
+                factoryData = F1;
                 break;
             case "F2":
-                F2.temperatures.push(item.avg_temperature);
-                F2.humidities.push(item.avg_humidity);
-                F2.sounds.push(item.avg_sound);
-                F2.lights.push(item.avg_light);
+                factoryData = F2;
                 break;
             case "F3":
-                F3.temperatures.push(item.avg_temperature);
-                F3.humidities.push(item.avg_humidity);
-                F3.sounds.push(item.avg_sound);
-                F3.lights.push(item.avg_light);
+                factoryData = F3;
                 break;
             case "F4":
-                F4.temperatures.push(item.avg_temperature);
-                F4.humidities.push(item.avg_humidity);
-                F4.sounds.push(item.avg_sound);
-                F4.lights.push(item.avg_light);
+                factoryData = F4;
                 break;
         }
+        factoryData.temperatures[item.hour - 1] = item.avg_temperature;
+        factoryData.humidities[item.hour - 1] = item.avg_humidity;
+        factoryData.sounds[item.hour - 1] = item.avg_sound;
+        factoryData.lights[item.hour - 1] = item.avg_light;
     });
 
     res.json({
@@ -359,5 +320,14 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
     });
 });
 
+
+router.get("/search", authenticate, async (req, res) => {
+    let { factory } = req.query;
+    let data = await getSensorsByFactory(factory);
+
+    res.json({
+        sensors: data,
+    });
+});
 
 export default router;

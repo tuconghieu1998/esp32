@@ -14,8 +14,8 @@
                                 <div class="col-md-3">
                                     <label for="factory" class="form-label">Factory</label>
                                     <select name="factory" id="factory" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="F1" selected>Factory 1</option>
+                                        <option value="" selected>All</option>
+                                        <option value="F1">Factory 1</option>
                                         <option value="F2">Factory 2</option>
                                         <option value="F3">Factory 3</option>
                                         <option value="F4">Factory 4</option>
@@ -26,20 +26,15 @@
                                 <div class="col-md-3">
                                     <label for="location" class="form-label">Location</label>
                                     <select name="location" id="location" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="L0">L0</option>
-                                        <option value="L1" selected>L1</option>
-                                        <option value="L2">L2</option>
+                                        <option value="" selected>All</option>
                                     </select>
                                 </div>
 
                                 <!-- Sensors Filter -->
                                 <div class="col-md-3">
-                                    <label for="sensors" class="form-label">Sensor</label>
-                                    <select name="sensors" id="sensors" class="form-select">
-                                        <option value="">All</option>
-                                        <option value="ETH01_02" selected>ETH01_02</option>
-                                        <option value="ESP02">ESP02</option>
+                                    <label for="sensor-select" class="form-label">Sensor</label>
+                                    <select name="sensor-select" id="sensor-select" class="form-select">
+                                        <option value="" selected>All</option>
                                     </select>
                                 </div>
 
@@ -172,6 +167,32 @@
 <script>
     let sensorChart;
     $(document).ready(function () {
+
+        $("#factory").change(function () {
+            let factory = $(this).val();
+            $("#location").html('<option value="">All</option>'); // Reset locations
+            $("#sensor-select").html('<option value="">All</option>'); // Reset sensors
+
+            if (factory) {
+                $.ajax({
+                    url: "/sensors/search",
+                    type: "GET",
+                    data: { factory: factory },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.sensors) {
+                            $.each(response.sensors, function (index, sensor) {
+                                $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
+                            });
+                        }
+                    },
+                    error: function () {
+                        console.error("Error fetching locations.");
+                    }
+                });
+            }
+        });
+
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
@@ -183,7 +204,7 @@
 
             let factory = $("#factory").val();
             let location = $("#location").val();
-            let sensor_id = $("#sensors").val();
+            let sensor_id = $("#sensor-select").val();
             let time = $("#time").val();
 
             getDataSheet(factory, location, sensor_id, time, 1);
@@ -198,7 +219,7 @@
                 dataType: "json",
                 success: function (response) {
                     const { labels, temperatures, humidities, sounds, lights } = response;
-                    if(sensorChart) {
+                    if (sensorChart) {
                         sensorChart.destroy();
                     }
                     sensorChart = createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);
@@ -246,7 +267,7 @@
         function loadPage(page) {
             let factory = $("#factory").val();
             let location = $("#location").val();
-            let sensor_id = $("#sensors").val();
+            let sensor_id = $("#sensor-select").val();
             let time = $("#time").val();
 
             getDataSheet(factory, location, sensor_id, time, page);
@@ -276,7 +297,7 @@
 
         let factory = $("#factory").val();
         let location = $("#location").val();
-        let sensor_id = $("#sensors").val();
+        let sensor_id = $("#sensor-select").val();
         let time = $("#time").val();
 
         getDataSheet(factory, location, sensor_id, time, 1);
@@ -285,7 +306,7 @@
     function exportExcel() {
         let factory = $("#factory").val();
         let location = $("#location").val();
-        let sensor_id = $("#sensors").val();
+        let sensor_id = $("#sensor-select").val();
         let time = $("#time").val();
 
         console.log("Exporting...");

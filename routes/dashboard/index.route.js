@@ -27,7 +27,7 @@ router.get('/', authenticate, async (req, res, next) => {
         });
 
         // get data today
-        const today = '2025-03-20';//new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split('T')[0];
         let data = await getDataByDate(today);
 
         let page = parseInt(req.query.page) || 1; // Get the current page
@@ -56,8 +56,8 @@ router.get('/', authenticate, async (req, res, next) => {
 });
 
 router.get("/dashboard/filter", authenticate, async (req, res) => {
-    let { factory, location, time } = req.query;
-    console.log('/dashboard/filter', factory, location, time);
+    let { factory, location, sensor_id, time } = req.query;
+    console.log('/dashboard/filter', factory, location, sensor_id, time);
 
     let page = parseInt(req.query.page) || 1; // Get the current page
     let limit = 10; // Number of items per page
@@ -65,20 +65,11 @@ router.get("/dashboard/filter", authenticate, async (req, res) => {
     let endIndex = page * limit;
 
     // get data today
-    let date = '2025-03-20';//new Date().toISOString().split('T')[0];
+    let date = new Date().toISOString().split('T')[0];
     if (time && time != '') {
         date = convertDateFormat(time);
     }
-    let filteredData = await getDataByDate(date);
-
-    // Apply filters if they are selected
-    if (factory && factory !== "") {
-        filteredData = filteredData.filter(item => item.factory.trim() == factory);
-    }
-
-    if (location && location !== "") {
-        filteredData = filteredData.filter(item => item.location.trim() == location);
-    }
+    let filteredData = await getDataByDate(date, factory, location, sensor_id);
 
     let paginatedData = filteredData.slice(startIndex, endIndex); // Slice the data
 
@@ -95,25 +86,16 @@ router.get("/dashboard/filter", authenticate, async (req, res) => {
 });
 
 router.get("/dashboard/export-excel", authenticate, async (req, res) => {
-    let { factory, location, time } = req.query;
+    let { factory, location, sensor_id, time } = req.query;
 
     console.log("dashboard/export-excel", factory, location, time);
 
     // get data today
-    let date = '2025-03-20';//new Date().toISOString().split('T')[0];
+    let date = new Date().toISOString().split('T')[0];
     if (time && time != '') {
         date = convertDateFormat(time);
     }
-    let sampleData = await getDataByDate(date);
-
-    // Apply filters if they are selected
-    if (factory && factory !== "") {
-        sampleData = sampleData.filter(item => item.factory.trim() == factory);
-    }
-
-    if (location && location !== "") {
-        sampleData = sampleData.filter(item => item.location.trim() == location);
-    }
+    let sampleData = await getDataByDate(date, factory, location, sensor_id);
 
     await sendResponseExcelDownload(res, createWorkBookSensorData(sampleData), `SensorData_${factory}_${location}_${date}.xlsx`);
 });

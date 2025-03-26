@@ -5,6 +5,10 @@ export const formatTimestamp = (date) => {
     return moment.utc(date).format("HH:mm:ss DD/MM/YYYY");
 };
 
+export const formatTimeToDate = (time) => {
+    return moment.utc(time).format("DD/MM/YYYY");
+};
+
 export const convertDateFormat = (dateStr) => {
     const [day, month, year] = dateStr.split('/');
     return `${year}-${month}-${day}`;
@@ -25,6 +29,28 @@ export const createWorkBookSensorData = (data) => {
         { header: "Sound (dB)", key: "sound", width: 10 },
         { header: "Light (Lux)", key: "light", width: 10 },
         { header: "Timestamp", key: "timestamp", width: 20 },
+    ];
+
+    // Add rows
+    data.forEach((row) => worksheet.addRow(row));
+
+    return workbook;
+};
+
+export const createWorkBookWorkshopData = (data) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data");
+
+    // Define columns
+    worksheet.columns = [
+        { header: "", key: "id", width: 10 },
+        { header: "Factory", key: "factory", width: 15 },
+        { header: "Temperature (°C)", key: "avg_temperature", width: 15 },
+        { header: "Humidity (%)", key: "avg_humidity", width: 15 },
+        { header: "Sound (dB)", key: "avg_sound", width: 10 },
+        { header: "Light (Lux)", key: "avg_light", width: 10 },
+        { header: "Time", key: "hour", width: 20 },
+        { header: "Date", key: "date", width: 20 },
     ];
 
     // Add rows

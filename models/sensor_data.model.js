@@ -22,6 +22,27 @@ export async function getListSensors() {
     }
 }
 
+export async function getSensorsByFactory(factory) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+        SELECT *
+        FROM sensors
+        WHERE '${factory}' = '' OR LTRIM(RTRIM(factory)) = '${factory}'
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
+
 export async function getLastDataEachSensor() {
     let pool;
     try {
@@ -94,7 +115,7 @@ ORDER BY f.factory;
     }
 } 
 
-export async function getDataByDate(date) {
+export async function getDataByDate(date, factory = '', location = '', sensor_id = '') {
     let pool;
     try {
         pool = await getConnection();
@@ -102,6 +123,9 @@ export async function getDataByDate(date) {
 SELECT * 
 FROM ${table_name} 
 WHERE CAST(timestamp AS DATE) = '${date}'
+    AND ('${factory}' = '' OR LTRIM(RTRIM(factory)) = '${factory}')
+    AND ('${location}' = '' OR LTRIM(RTRIM(location)) = '${location}')
+    AND ('${sensor_id}' = '' OR LTRIM(RTRIM(sensor_id)) = '${sensor_id}')
 ORDER BY timestamp DESC;
         `);
 
@@ -194,7 +218,7 @@ SELECT
 FROM ${table_name}
 WHERE CAST(timestamp AS DATE) = '${date}'
 GROUP BY factory, CAST(timestamp AS DATE), DATEPART(HOUR, timestamp)
-ORDER BY date DESC, hour ASC;
+ORDER BY factory ASC, date DESC, hour ASC;
         `);
 
         return result.recordset || [];

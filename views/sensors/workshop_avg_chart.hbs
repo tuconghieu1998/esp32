@@ -52,68 +52,16 @@
                                     <th class="d-none d-md-table-cell">Humidity(%)</th>
                                     <th class="d-none d-md-table-cell">Sound(dB)</th>
                                     <th class="d-none d-md-table-cell">Light(Lux)</th>
-                                    <th>Time</th>
+                                    <th class="d-none d-md-table-cell">Time</th>
+                                    <th>Date</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
-                                {{#each data}}
-                                <tr>
-                                    <td>{{increment @index}}</td>
-                                    <td class="d-none d-xl-table-cell">{{factory}}</td>
-                                    <td class="d-none d-xl-table-cell">{{avg_temperature}}</td>
-                                    <td class="d-none d-xl-table-cell">{{avg_humidity}}</td>
-                                    <td class="d-none d-md-table-cell">{{avg_sound}}</td>
-                                    <td class="d-none d-md-table-cell">{{avg_light}}</td>
-                                    <td class="d-none d-md-table-cell">{{date}}</td>
-                                </tr>
-                                {{/each}}
                             </tbody>
                         </table>
                         <!-- Pagination Buttons -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center mt-3" id="pagination">
-                                <!-- Previous Button -->
-                                {{#if (gt currentPage 1)}}
-                                <li class="page-item">
-                                    <a class="page-link" href="#" data-page="{{sub currentPage 1}}">&laquo;</a>
-                                </li>
-                                {{/if}}
-
-                                <!-- First Page -->
-                                <li class="page-item {{#if (eq 1 currentPage)}}active{{/if}}">
-                                    <a class="page-link" href="#" data-page="1">1</a>
-                                </li>
-
-                                <!-- Left Ellipsis -->
-                                {{#if (gt currentPage 4)}}
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                                {{/if}}
-
-                                <!-- Page Numbers Around Current -->
-                                {{#each (range (max 2 (sub currentPage 2)) (min totalPages (add currentPage 2)))}}
-                                <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
-                                    <a class="page-link" href="#" data-page="{{this}}">{{this}}</a>
-                                </li>
-                                {{/each}}
-
-                                <!-- Right Ellipsis -->
-                                {{#if (lt currentPage (sub totalPages 3))}}
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                                {{/if}}
-
-                                <!-- Last Page -->
-                                {{#if (gt totalPages 1)}}
-                                <li class="page-item {{#if (eq totalPages currentPage)}}active{{/if}}">
-                                    <a class="page-link" href="#" data-page="{{totalPages}}">{{totalPages}}</a>
-                                </li>
-                                {{/if}}
-
-                                <!-- Next Button -->
-                                {{#if (lt currentPage totalPages)}}
-                                <li class="page-item">
-                                    <a class="page-link" href="#" data-page="{{add currentPage 1}}">&raquo;</a>
-                                </li>
-                                {{/if}}
                                 <li class="page-item">
                                     <input type="number" id="gotoPage" min="1" max="{{totalPages}}" class="form-control"
                                         placeholder="Page"
@@ -205,6 +153,7 @@
                             <td class="d-none d-xl-table-cell">${item.avg_humidity}</td>
                             <td class="d-none d-md-table-cell">${item.avg_sound}</td>
                             <td class="d-none d-md-table-cell">${item.avg_light}</td>
+                            <td class="d-none d-md-table-cell">${item.hour}h</td>
                             <td class="d-none d-md-table-cell">${item.date}</td>
                         </tr>
                     `);
@@ -217,12 +166,8 @@
         }
 
         function loadPage(page) {
-            let factory = $("#factory").val();
-            let location = $("#location").val();
-            let sensor_id = $("#sensors").val();
             let time = $("#time").val();
-
-            getDataSheet(factory, location, sensor_id, time, page);
+            getDataSheet(time, page);
         }
 
         // Handle Pagination Clicks
@@ -250,7 +195,7 @@
         let filter_type = $("#filter-type").val();
         let time = $("#time").val();
 
-        //getDataSheet(factory, location, sensor_id, time, 1);
+        loadPage(1);
         getDataChart(filter_type, time);
     });
     function exportExcel() {
@@ -262,7 +207,7 @@
         let queryString = $.param({ time });
 
         // Trigger file download
-        window.location.href = `/workshop-chart/export-excel?${queryString}`;
+        window.location.href = `/sensors/workshop-chart/export-excel?${queryString}`;
     }
 </script>
 <script>
