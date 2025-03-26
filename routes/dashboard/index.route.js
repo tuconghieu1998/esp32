@@ -2,7 +2,7 @@ import express from 'express';
 var router = express.Router();
 import ExcelJS from 'exceljs';
 import moment from "moment-timezone";
-import { getDataByDate, getLastDataEachFactory } from '../../models/sensor_data.model.js';
+import { getDataByDate, getDataChartByFactoryAndDate, getLastDataEachFactory } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
 import { convertDateFormat, createWorkBookSensorData, sendResponseExcelDownload } from '../../utils/helpers.js';
 
@@ -128,6 +128,37 @@ router.get("/api/sensor-data/:id", authenticate,(req, res) => {
 router.get("/api/sensor-data", authenticate, (req, res) => {
     let { factory } = req.query;
     res.json({ sensors: sensorData });
+});
+
+router.get("/api/chart-data", authenticate, async (req, res) => {
+    let { factory, time } = req.query;
+
+    let date;
+    if (time && time != '') {
+        date = convertDateFormat(time);
+    }
+    else {
+        date = new Date().toISOString().split('T')[0]; // get data today
+    }
+    let filteredData = await getDataChartByFactoryAndDate(factory, date);
+
+    const labels = [];
+    const temperatures = [];
+    const humidities = [];
+    const sounds = [];
+    const lights = [];
+
+    filteredData.forEach(item => {
+        labels.push(item.hour);
+        temperatures.push(item.avg_temperature);
+        humidities.push(item.avg_humidity);
+        sounds.push(item.avg_sound);
+        lights.push(item.avg_light);
+    })
+
+    res.json({
+        labels, temperatures, humidities, sounds, lights
+    });
 });
 
 export default router;

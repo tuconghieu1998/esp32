@@ -144,6 +144,7 @@
 <script src="/js/sensor_chart.js"></script>
 <script src="/js/pagination.js"></script>
 <script>
+    let sensorChart;
     $(document).ready(function () {
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
@@ -172,8 +173,10 @@
 
                     console.log("Filter type: ", type);
                     console.log("Data: ", F1[type]);
-
-                    createFactoryLineChart("chartjs-dashboard-line", labels, F1[type], F2[type], F3[type], F4[type]);
+                    if(sensorChart) {
+                        sensorChart.destroy();
+                    }
+                    sensorChart = createFactoryLineChart("chartjs-dashboard-line", labels, F1[type], F2[type], F3[type], F4[type]);
                 }
             });
         }

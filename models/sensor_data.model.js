@@ -146,7 +146,37 @@ ORDER BY date DESC, hour ASC;
             await closeConnection(); // Close connection after request
         }
     }
-} 
+}
+
+export async function getDataChartByFactoryAndDate(factory, date) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+SELECT 
+    factory,
+    CAST(timestamp AS DATE) AS date,
+    DATEPART(HOUR, timestamp) AS hour,
+    ROUND(AVG(temperature), 2) AS avg_temperature,
+    ROUND(AVG(humidity), 2) AS avg_humidity,
+    ROUND(AVG(sound), 2) AS avg_sound,
+    ROUND(AVG(light), 2) AS avg_light
+FROM ${table_name}
+WHERE CAST(timestamp AS DATE) = '${date}' and factory = '${factory}'
+GROUP BY factory, CAST(timestamp AS DATE), DATEPART(HOUR, timestamp)
+ORDER BY date DESC, hour ASC;
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
 
 export async function getDataChartForWorkshop(date) {
     let pool;

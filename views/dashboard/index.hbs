@@ -239,15 +239,41 @@
                         <h5 class="card-title mb-0">Measure Today</h5>
                     </div>
                     <div class="card-body py-3">
+                        <div class="row align-items-center justify-content-between pb-3">
+                            <div class="col-auto">
+                                <input type="radio" class="btn-check" name="options-outlined" id="factory1-chart"
+                                    autocomplete="off" checked>
+                                <label class="btn btn-outline-primary" for="factory1-chart">Factory 1</label>
+
+                                <input type="radio" class="btn-check" name="options-outlined" id="factory2-chart"
+                                    autocomplete="off">
+                                <label class="btn btn-outline-primary" for="factory2-chart">Factory 2</label>
+
+                                <input type="radio" class="btn-check" name="options-outlined" id="factory3-chart"
+                                    autocomplete="off">
+                                <label class="btn btn-outline-primary" for="factory3-chart">Factory 3</label>
+
+                                <input type="radio" class="btn-check" name="options-outlined" id="factory4-chart"
+                                    autocomplete="off">
+                                <label class="btn btn-outline-primary" for="factory4-chart">Factory 4</label>
+                            </div>
+                            <div class="col-auto ms-auto">
+                                <div class="input-group date">
+                                    <input type="text" name="time" id="chart-time" class="form-control"
+                                        placeholder="Date">
+                                    <button type="submit" class="btn btn-primary" id="btnViewChart"><i
+                                            class="bi bi-funnel"></i>
+                                        View</button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="chart chart-sm">
                             <canvas id="chartjs-dashboard-line"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
-
         <div class="row">
             <div class="col-12 col-lg-8 col-xxl-9 d-flex">
                 <div class="card flex-fill">
@@ -459,14 +485,14 @@
 
     </div>
 </main>
-
+<script src="/js/sensor_chart.js"></script>
 <script>
     $(document).ready(function () {
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
             todayHighlight: true
-        });
+        }).datepicker('setDate', new Date());
 
         $("#filterForm").submit(function (e) {
             e.preventDefault(); // Prevent page reload
@@ -634,80 +660,48 @@
     }
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var ctx = document.getElementById("chartjs-dashboard-line").getContext("2d");
-        var gradient = ctx.createLinearGradient(0, 0, 0, 225);
-        gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
-        gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
-        var labels = [];
-        var temperatures = [];
-        var humidity = [];
-        function getRndInteger(min, max) {
-            return Math.floor(Math.random() * (max - min)) + min;
-        }
-        for (var i = 0; i < 24; i++) {
-            labels.push(i + "h");
-            temperatures.push(getRndInteger(20, 35));
-            humidity.push(getRndInteger(70, 85));
-        }
-        // Line chart
-        new Chart(document.getElementById("chartjs-dashboard-line"), {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Temperature (&deg;C)",
-                    fill: true,
-                    backgroundColor: gradient,
-                    borderColor: 'red',
-                    data: temperatures
-                },
-                {
-                    label: "Humidity (%)",
-                    fill: true,
-                    backgroundColor: gradient,
-                    borderColor: window.theme.primary,
-                    data: humidity
-                },
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                legend: {
-                    display: false
-                },
-                tooltips: {
-                    intersect: false
-                },
-                hover: {
-                    intersect: true
-                },
-                plugins: {
-                    filler: {
-                        propagate: false
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        reverse: true,
-                        gridLines: {
-                            color: "rgba(0,0,0,0.0)"
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            stepSize: 1000
-                        },
-                        display: true,
-                        borderDash: [3, 3],
-                        gridLines: {
-                            color: "rgba(0,0,0,0.0)"
-                        }
-                    }]
-                }
-            }
+    $(document).ready(function () {
+        $('#chart-time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+
+        $("#btnViewChart").click(function (e) {
+            e.preventDefault(); // Prevent page reload
+            let selectedFactory = document.querySelector('input[name="options-outlined"]:checked').id;
+            let factory = selectedFactory.replace('factory', 'F').replace('-chart', '');
+            let time = $("#chart-time").val() || new Date().toLocaleDateString("en-GB");
+            getDataChart(factory, time);
         });
     });
+    let sensorChart;
+    function getDataChart(factory, time) {
+        $.ajax({
+            url: `/api/chart-data`,
+            method: 'GET',
+            data: { factory, time },
+            dataType: "json",
+            success: function (response) {
+                const { labels, temperatures, humidities, sounds, lights } = response;
+                if(sensorChart) {
+                    sensorChart.destroy();
+                }
+                sensorChart = createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);
+            }
+        });
+    }
+
+    document.querySelectorAll('input[name="options-outlined"]').forEach((radio) => {
+        radio.addEventListener('change', function () {
+            let factory = this.id.replace('factory', 'F').replace('-chart', '');
+            let time = $("#chart-time").val();  // You can dynamically set this
+            getDataChart(factory, time);
+        });
+    });
+
+    // Initial call for the checked radio button
+    document.querySelector('input[name="options-outlined"]:checked').dispatchEvent(new Event('change'));
 </script>
 
 <script>

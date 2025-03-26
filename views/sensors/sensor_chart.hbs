@@ -170,6 +170,7 @@
 <script src="/js/sensor_chart.js"></script>
 <script src="/js/pagination.js"></script>
 <script>
+    let sensorChart;
     $(document).ready(function () {
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
@@ -197,7 +198,10 @@
                 dataType: "json",
                 success: function (response) {
                     const { labels, temperatures, humidities, sounds, lights } = response;
-                    createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);
+                    if(sensorChart) {
+                        sensorChart.destroy();
+                    }
+                    sensorChart = createSensorDataLineChart("chartjs-dashboard-line", labels, temperatures, humidities, sounds, lights);
                 }
             });
         }
