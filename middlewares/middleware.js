@@ -3,7 +3,7 @@ const secretKey = process.env.JWT_SECRET;
 
 export const authenticate = (req, res, next) => {
     if (!req.session.user) {
-        return res.redirect('/account/auto-login');
+        return res.redirect(`/account/auto-login?next=${encodeURIComponent(req.originalUrl)}`);
     }
     next();
 };

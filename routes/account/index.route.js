@@ -10,7 +10,8 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/auto-login', (req, res) => {
-    return res.render('account/auto_login.hbs', { layout: false });
+    let url = req.query.next || '/'; // Default to home if no URL is provided
+    return res.render('account/auto_login.hbs', { layout: false, url });
 });
 
 router.post('/auto-login', (req, res) => {
