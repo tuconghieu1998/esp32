@@ -1,8 +1,8 @@
 import express from 'express';
 var router = express.Router();
-import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataEachSensor, getSensorsByFactory } from '../../models/sensor_data.model.js';
+import { getDataByDate, getDataChartByDate, getDataChartForWorkshop, getLastDataEachFactory, getLastDataSensorsInDate, getSensorsByFactory } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
-import { convertDateFormat, createWorkBookSensorData, createWorkBookWorkshopData, formatTimestamp, formatTimeToDate, sendResponseExcelDownload } from '../../utils/helpers.js';
+import { convertDateFormat, createWorkBookSensorData, createWorkBookWorkshopData, formatTimestamp, formatTimeToDate, formatToTime, sendResponseExcelDownload } from '../../utils/helpers.js';
 
 // trang chu
 router.get('/', authenticate, (req, res, next) => {
@@ -44,8 +44,16 @@ router.get("/sensor-data", authenticate, (req, res) => {
 
 router.get("/api/sensor-last-data", authenticate, async (req, res) => {
     try {
-        const data = await getLastDataEachSensor();
-        res.json(data);
+        let { time } = req.query;
+        if (!time || time == '') {
+            time = new Date().toISOString().split('T')[0]; // get data today
+        }
+        let data = await getLastDataSensorsInDate(time);
+        data.forEach(detail => {
+            detail.time = formatToTime(detail.timestamp); 
+        });
+        console.log(data);
+        res.json({sensors: data});
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
@@ -291,7 +299,7 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
         }
         item.date = formatTimeToDate(item.date);
         const factory = item.factory.trim();
-        if(item.hour < 1 || item.hour > 24) return;
+        if (item.hour < 1 || item.hour > 24) return;
         let factoryData;
 
         switch (factory) {

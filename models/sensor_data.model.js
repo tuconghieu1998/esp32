@@ -231,3 +231,31 @@ ORDER BY factory ASC, date DESC, hour ASC;
         }
     }
 } 
+
+export async function getLastDataSensorsInDate(date) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+WITH LatestData AS (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY sensor_id ORDER BY timestamp DESC) AS rn
+    FROM ${table_name}
+    WHERE CAST(timestamp AS DATE) = '${date}'
+)
+SELECT *
+FROM LatestData
+WHERE rn = 1
+ORDER BY sensor_id;
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+} 

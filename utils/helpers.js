@@ -5,6 +5,10 @@ export const formatTimestamp = (date) => {
     return moment.utc(date).format("HH:mm:ss DD/MM/YYYY");
 };
 
+export const formatToTime = (date) => {
+    return moment.utc(date).format("HH:mm:ss");
+};
+
 export const formatTimeToDate = (time) => {
     return moment.utc(time).format("DD/MM/YYYY");
 };
