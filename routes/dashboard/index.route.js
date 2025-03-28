@@ -57,7 +57,7 @@ router.get('/', authenticate, async (req, res, next) => {
 
 router.get("/dashboard/filter", authenticate, async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
-    console.log('/dashboard/filter', factory, location, sensor_id, time);
+    // console.log('/dashboard/filter', factory, location, sensor_id, time);
 
     let page = parseInt(req.query.page) || 1; // Get the current page
     let limit = 10; // Number of items per page

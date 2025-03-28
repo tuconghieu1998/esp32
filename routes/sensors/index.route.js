@@ -52,7 +52,6 @@ router.get("/api/sensor-last-data", authenticate, async (req, res) => {
         data.forEach(detail => {
             detail.time = formatToTime(detail.timestamp); 
         });
-        console.log(data);
         res.json({sensors: data});
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
@@ -133,7 +132,7 @@ router.get("/chart-data", authenticate, async (req, res) => {
 
 router.get("/filter", authenticate, async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
-    console.log('/sensors/filter', factory, sensor_id, location, time);
+    // console.log('/sensors/filter', factory, sensor_id, location, time);
 
     let page = parseInt(req.query.page) || 1; // Get the current page
     let limit = 20; // Number of items per page
@@ -176,7 +175,7 @@ router.get("/filter", authenticate, async (req, res) => {
 
 router.get("/export-excel", authenticate, async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
-    console.log('/sensors/export-excel', factory, sensor_id, location, time);
+    // console.log('/sensors/export-excel', factory, sensor_id, location, time);
 
     let date;
     if (time && time != '') {
