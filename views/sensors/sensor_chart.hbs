@@ -170,28 +170,32 @@
 
         $("#factory").change(function () {
             let factory = $(this).val();
+            loadSensorSelection(factory);
+        });
+
+        loadSensorSelection("");// load first
+
+        function loadSensorSelection(factory) {
             $("#location").html('<option value="">All</option>'); // Reset locations
             $("#sensor-select").html('<option value="">All</option>'); // Reset sensors
 
-            if (factory) {
-                $.ajax({
-                    url: "/sensors/search",
-                    type: "GET",
-                    data: { factory: factory },
-                    dataType: "json",
-                    success: function (response) {
-                        if (response.sensors) {
-                            $.each(response.sensors, function (index, sensor) {
-                                $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
-                            });
-                        }
-                    },
-                    error: function () {
-                        console.error("Error fetching locations.");
+            $.ajax({
+                url: "/sensors/search",
+                type: "GET",
+                data: { factory: factory },
+                dataType: "json",
+                success: function (response) {
+                    if (response.sensors) {
+                        $.each(response.sensors, function (index, sensor) {
+                            $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
+                        });
                     }
-                });
-            }
-        });
+                },
+                error: function () {
+                    console.error("Error fetching locations.");
+                }
+            });
+        }
 
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter

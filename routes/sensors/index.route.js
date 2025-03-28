@@ -332,7 +332,6 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
 router.get("/search", authenticate, async (req, res) => {
     let { factory } = req.query;
     let data = await getSensorsByFactory(factory);
-
     res.json({
         sensors: data,
     });

@@ -286,7 +286,7 @@
                             <div class="col-md-3">
                                 <label for="factory" class="form-label">Factory</label>
                                 <select name="factory" id="factory" class="form-select">
-                                    <option value="">All</option>
+                                    <option value="" selected>All</option>
                                     <option value="F1">Factory 1</option>
                                     <option value="F2">Factory 2</option>
                                     <option value="F3">Factory 3</option>
@@ -494,28 +494,32 @@
     $(document).ready(function () {
         $("#factory").change(function () {
             let factory = $(this).val();
+            loadSensorSelection(factory);
+        });
+
+        loadSensorSelection("");// load first
+
+        function loadSensorSelection(factory) {
             $("#location").html('<option value="">All</option>'); // Reset locations
             $("#sensor-select").html('<option value="">All</option>'); // Reset sensors
 
-            if (factory) {
-                $.ajax({
-                    url: "/sensors/search",
-                    type: "GET",
-                    data: { factory: factory },
-                    dataType: "json",
-                    success: function (response) {
-                        if (response.sensors) {
-                            $.each(response.sensors, function (index, sensor) {
-                                $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
-                            });
-                        }
-                    },
-                    error: function () {
-                        console.error("Error fetching locations.");
+            $.ajax({
+                url: "/sensors/search",
+                type: "GET",
+                data: { factory: factory },
+                dataType: "json",
+                success: function (response) {
+                    if (response.sensors) {
+                        $.each(response.sensors, function (index, sensor) {
+                            $("#sensor-select").append(`<option value="${sensor.sensor_id}">${sensor.sensor_id}</option>`);
+                        });
                     }
-                });
-            }
-        });
+                },
+                error: function () {
+                    console.error("Error fetching locations.");
+                }
+            });
+        }
 
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter

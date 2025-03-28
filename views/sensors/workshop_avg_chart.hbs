@@ -10,20 +10,26 @@
                         </div>
                         <div>
                             <form method="GET" id="filterForm" class="row g-3 p-2">
-                                <!-- Sensors Filter -->
-                                <div class="col-md-3">
-                                    <label for="filter-type" class="form-label">Chart type</label>
-                                    <select name="filter-type" id="filter-type" class="form-select">
-                                        <option value="temperatures" selected>Temperature</option>
-                                        <option value="humidities">Humidity</option>
-                                        <option value="sounds">Sound</option>
-                                        <option value="lights">Light</option>
-                                    </select>
+                                <div class="col-auto">
+                                    <input type="radio" class="btn-check" name="options-outlined" id="temperature-radio"
+                                        autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary" for="temperature-radio">Temperature</label>
+
+                                    <input type="radio" class="btn-check" name="options-outlined" id="humidity-radio"
+                                        autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="humidity-radio">Humidity</label>
+
+                                    <input type="radio" class="btn-check" name="options-outlined" id="sound-radio"
+                                        autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="sound-radio">Sound</label>
+
+                                    <input type="radio" class="btn-check" name="options-outlined" id="light-radio"
+                                        autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="light-radio">Light</label>
                                 </div>
 
                                 <!-- Date Filter -->
                                 <div class="col-md-3">
-                                    <label for="time" class="form-label">Date (dd/mm/yyyy)</label>
                                     <div class="input-group date">
                                         <input type="text" name="time" id="time" class="form-control"
                                             placeholder="Date">
@@ -102,12 +108,39 @@
 
         $("#filterForm").submit(function (e) {
             e.preventDefault(); // Prevent page reload
-            let filter_type = $("#filter-type").val();
+            let id = document.querySelector('input[name="options-outlined"]:checked').id;
             let time = $("#time").val();
-
-            //getDataSheet(factory, location, sensor_id, time, 1);
+            let filter_type = getTypeChart(id);
             getDataChart(filter_type, time);
         });
+
+        function getTypeChart(id) {
+            let type = '';
+            switch (id) {
+                case "temperature-radio":
+                    type = "temperatures"; break;
+                case "humidity-radio":
+                    type = "humidities"; break;
+                case "sound-radio":
+                    type = "sounds"; break;
+                case "light-radio":
+                    type = "lights"; break;
+            }
+            return type;
+        }
+
+        document.querySelectorAll('input[name="options-outlined"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                let type = getTypeChart(this.id);
+                if (type != '') {
+                    let time = $("#time").val();  // You can dynamically set this
+                    getDataChart(type, time);
+                }
+            });
+        });
+
+        // Initial call for the checked radio button
+        document.querySelector('input[name="options-outlined"]:checked').dispatchEvent(new Event('change'));
 
         function getDataChart(type, time) {
             console.log("getDataChart", type, time);
@@ -121,7 +154,7 @@
 
                     console.log("Filter type: ", type);
                     console.log("Data: ", F1[type]);
-                    if(sensorChart) {
+                    if (sensorChart) {
                         sensorChart.destroy();
                     }
                     sensorChart = createFactoryLineChart("chartjs-dashboard-line", labels, F1[type], F2[type], F3[type], F4[type]);
@@ -191,12 +224,7 @@
                 }
             }
         });
-
-        let filter_type = $("#filter-type").val();
-        let time = $("#time").val();
-
         loadPage(1);
-        getDataChart(filter_type, time);
     });
     function exportExcel() {
         let time = $("#time").val();
