@@ -298,7 +298,7 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
         }
         item.date = formatTimeToDate(item.date);
         const factory = item.factory.trim();
-        if (item.hour < 1 || item.hour > 24) return;
+        if (item.hour < 0 || item.hour >= 24) return;
         let factoryData;
 
         switch (factory) {
@@ -315,10 +315,10 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
                 factoryData = F4;
                 break;
         }
-        factoryData.temperatures[item.hour - 1] = item.avg_temperature;
-        factoryData.humidities[item.hour - 1] = item.avg_humidity;
-        factoryData.sounds[item.hour - 1] = item.avg_sound;
-        factoryData.lights[item.hour - 1] = item.avg_light;
+        factoryData.temperatures[item.hour] = item.avg_temperature;
+        factoryData.humidities[item.hour] = item.avg_humidity;
+        factoryData.sounds[item.hour] = item.avg_sound;
+        factoryData.lights[item.hour] = item.avg_light;
     });
 
     res.json({
