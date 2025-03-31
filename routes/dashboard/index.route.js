@@ -1,6 +1,6 @@
 import express from 'express';
 var router = express.Router();
-import ExcelJS from 'exceljs';
+import axios from 'axios';
 import moment from "moment-timezone";
 import { getDataByDate, getDataChartByFactoryAndDate, getLastDataEachFactory } from '../../models/sensor_data.model.js';
 import { authenticate } from '../../middlewares/middleware.js';
@@ -9,6 +9,8 @@ import { convertDateFormat, createWorkBookSensorData, sendResponseExcelDownload 
 const formatTimestamp = (date) => {
     return moment.utc(date).format("HH:mm:ss DD/MM/YYYY");
 };
+
+const WEATHER_KEY = process.env.WEATHER_KEY;
 
 // trang chu
 router.get('/', authenticate, async (req, res, next) => {
@@ -52,6 +54,19 @@ router.get('/', authenticate, async (req, res, next) => {
     catch (e) {
         console.log(e);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/weather', async (req, res) => {
+    try {
+        const lat = 15.1272;
+        const lon = 108.7256;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}&units=metric&lang=en`;
+
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch weather data' });
     }
 });
 
@@ -101,7 +116,7 @@ router.get("/dashboard/export-excel", authenticate, async (req, res) => {
 });
 
 // API to get sensor data
-router.get("/api/sensor-data/:id", authenticate,(req, res) => {
+router.get("/api/sensor-data/:id", authenticate, (req, res) => {
     const sensorId = req.params.id;
     res.json(sensorData.find(item => item.sensorId == sensorId) || { temperature: "N/A", humidity: "N/A" });
 });
