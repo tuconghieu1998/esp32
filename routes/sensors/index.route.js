@@ -277,8 +277,6 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
     }
     let filteredData = await getDataChartForWorkshop(date);
 
-    const labels = [];
-
     function initValues() {
         return {
             temperatures: Array(24).fill(0),
@@ -291,11 +289,9 @@ router.get("/workshop-chart-data", authenticate, async (req, res) => {
     const F2 = initValues();
     const F3 = initValues();
     const F4 = initValues();
+    const labels = Array.from({ length: 24 }, (_, i) => i);
 
     filteredData.forEach(item => {
-        if (labels.findIndex(label => label == item.hour) == -1) {
-            labels.push(item.hour);
-        }
         item.date = formatTimeToDate(item.date);
         const factory = item.factory.trim();
         if (item.hour < 0 || item.hour >= 24) return;
