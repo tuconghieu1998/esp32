@@ -22,12 +22,32 @@ router.get('/', authenticate, async (req, res, next) => {
         res.locals.pageTitle = 'Trang chủ';
 
         // get data for 4 factory
-        const factoryLastData = await getLastDataEachFactory();
+        const results = await getLastDataEachFactory();
 
-        factoryLastData.forEach(data => {
-            data.max_timestamp = formatTimestamp(data.max_timestamp);
+        let factoryLastData = [null, null, null, null];
+        results.forEach(result=>{
+            switch(result.factory.trim()) {
+                case "F1":
+                    factoryLastData[0] = result;
+                    break;
+                case "F2":
+                    factoryLastData[1] = result;
+                    break;
+                case "F3":
+                    factoryLastData[2] = result;
+                    break;
+                case "F4":
+                    factoryLastData[3] = result;
+                    break;
+            }
         });
 
+        factoryLastData.forEach(data => {
+            if(data && data.max_timestamp) {
+                data.max_timestamp = formatTimestamp(data.max_timestamp);
+            }
+        });
+        
         // get data today
         const today = new Date().toISOString().split('T')[0];
         let data = await getDataByDate(today);

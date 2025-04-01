@@ -1,6 +1,6 @@
 import { getConnection, closeConnection } from "../db.js";
 
-const table_name = "sensor_data_test";
+const table_name = "sensor_data";
 
 export async function getListSensors() {
     let pool;

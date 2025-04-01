@@ -23,42 +23,53 @@
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
-                                            {{#if factoryLastData.length}}
-                                            {{factoryLastData.0.avg_temperature}}&deg;C
+                                            {{#if (gt factoryLastData.length 0)}}
+                                            {{#with (lookup factoryLastData 0)}}
+                                            {{avg_temperature}}&deg;C
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
-                                            {{#if factoryLastData.length}}
-                                            {{factoryLastData.0.avg_humidity}}%
+                                            {{#if (gt factoryLastData.length 0)}}
+                                            {{#with (lookup factoryLastData 0)}}
+                                            {{avg_humidity}}%
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
-                                            {{#if factoryLastData.length}}
-                                            {{factoryLastData.0.avg_sound}}DB
+                                            {{#if (gt factoryLastData.length 0)}}
+                                            {{#with (lookup factoryLastData 0)}}
+                                            {{avg_sound}}dB
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
-                                            {{#if factoryLastData.length}}
-                                            {{factoryLastData.0.avg_light}}Lux
+                                            {{#if (gt factoryLastData.length 0)}}
+                                            {{#with (lookup factoryLastData 0)}}
+                                            {{avg_light}}Lux
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: {{#if factoryLastData.length}}
-                                            {{factoryLastData.0.max_timestamp}}
+                                        <span class="text-muted">Last:
+                                            {{#if (gt factoryLastData.length 0)}}
+                                            {{#with (lookup factoryLastData 0)}}
+                                            {{max_timestamp}}
                                             {{else}}
                                             No Data
-                                            {{/if}}</span>
+                                            {{/with}}</span>
+                                        {{/if}}
                                     </div>
                                 </div>
                             </div>
@@ -78,48 +89,57 @@
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
-                                            {{#if (gt factoryLastData.length 1) }}
-                                            {{factoryLastData.1.avg_temperature}}&deg;C
+                                            {{#if (gt factoryLastData.length 1)}}
+                                            {{#with (lookup factoryLastData 1)}}
+                                            {{avg_temperature}}&deg;C
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 1)}}
-                                            {{factoryLastData.1.avg_humidity}}%
+                                            {{#with (lookup factoryLastData 1)}}
+                                            {{avg_humidity}}%
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 1)}}
-                                            {{factoryLastData.1.avg_sound}}DB
+                                            {{#with (lookup factoryLastData 1)}}
+                                            {{avg_sound}}dB
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 1)}}
-                                            {{factoryLastData.1.avg_light}}Lux
+                                            {{#with (lookup factoryLastData 1)}}
+                                            {{avg_light}}Lux
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 1)}}
-                                            {{factoryLastData.1.max_timestamp}}
+                                        <span class="text-muted">Last:
+                                            {{#if (gt factoryLastData.length 1)}}
+                                            {{#with (lookup factoryLastData 1)}}
+                                            {{max_timestamp}}
                                             {{else}}
                                             No Data
-                                            {{/if}}</span>
+                                            {{/with}}</span>
+                                        {{/if}}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-sm-6">
                             <div class="card">
                                 <div class="card-body">
@@ -127,7 +147,6 @@
                                         <div class="col mt-0">
                                             <h5 class="card-title">Factory 3</h5>
                                         </div>
-
                                         <div class="col-auto">
                                             <div class="stat text-primary">
                                                 <i class="align-middle" data-feather="home"></i>
@@ -137,41 +156,52 @@
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 2)}}
-                                            {{factoryLastData.2.avg_temperature}}&deg;C
+                                            {{#with (lookup factoryLastData 2)}}
+                                            {{avg_temperature}}&deg;C
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 2)}}
-                                            {{factoryLastData.2.avg_humidity}}%
+                                            {{#with (lookup factoryLastData 2)}}
+                                            {{avg_humidity}}%
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 2)}}
-                                            {{factoryLastData.2.avg_sound}}DB
+                                            {{#with (lookup factoryLastData 2)}}
+                                            {{avg_sound}}dB
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 2)}}
-                                            {{factoryLastData.2.avg_light}}Lux
+                                            {{#with (lookup factoryLastData 2)}}
+                                            {{avg_light}}Lux
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 2)}}
-                                            {{factoryLastData.2.max_timestamp}}
+                                        <span class="text-muted">Last:
+                                            {{#if (gt factoryLastData.length 2)}}
+                                            {{#with (lookup factoryLastData 2)}}
+                                            {{max_timestamp}}
                                             {{else}}
                                             No Data
-                                            {{/if}}</span>
+                                            {{/with}}</span>
+                                        {{/if}}
                                     </div>
                                 </div>
                             </div>
@@ -183,7 +213,6 @@
                                         <div class="col mt-0">
                                             <h5 class="card-title">Factory 4</h5>
                                         </div>
-
                                         <div class="col-auto">
                                             <div class="stat text-primary">
                                                 <i class="align-middle" data-feather="home"></i>
@@ -193,41 +222,52 @@
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 3)}}
-                                            {{factoryLastData.3.avg_temperature}}&deg;C
+                                            {{#with (lookup factoryLastData 3)}}
+                                            {{avg_temperature}}&deg;C
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 3)}}
-                                            {{factoryLastData.3.avg_humidity}}%
+                                            {{#with (lookup factoryLastData 3)}}
+                                            {{avg_humidity}}%
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="row">
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 3)}}
-                                            {{factoryLastData.3.avg_sound}}DB
+                                            {{#with (lookup factoryLastData 3)}}
+                                            {{avg_sound}}dB
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                         <h3 class="col mt-1 mb-3">
                                             {{#if (gt factoryLastData.length 3)}}
-                                            {{factoryLastData.3.avg_light}}Lux
+                                            {{#with (lookup factoryLastData 3)}}
+                                            {{avg_light}}Lux
                                             {{else}}
                                             No Data
+                                            {{/with}}
                                             {{/if}}
                                         </h3>
                                     </div>
                                     <div class="mb-0">
-                                        <span class="text-muted">Last: {{#if (gt factoryLastData.length 3)}}
-                                            {{factoryLastData.3.max_timestamp}}
+                                        <span class="text-muted">Last:
+                                            {{#if (gt factoryLastData.length 3)}}
+                                            {{#with (lookup factoryLastData 3)}}
+                                            {{max_timestamp}}
                                             {{else}}
                                             No Data
-                                            {{/if}}</span>
+                                            {{/with}}</span>
+                                        {{/if}}
                                     </div>
                                 </div>
                             </div>
