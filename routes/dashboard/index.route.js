@@ -11,6 +11,8 @@ const formatTimestamp = (date) => {
 };
 
 const WEATHER_KEY = process.env.WEATHER_KEY;
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const ACCUWEATHER_KEY = process.env.ACCUWEATHER_KEY;
 
 // trang chu
 router.get('/', authenticate, async (req, res, next) => {
@@ -79,11 +81,16 @@ router.get('/', authenticate, async (req, res, next) => {
 
 router.get('/weather', async (req, res) => {
     try {
-        const lat = 15.1272;
-        const lon = 108.7256;
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}&units=metric&lang=en`;
-
+        
+        // const lat = 15.211005;
+        // const lon = 108.782677;
+        // http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${ACCUWEATHER_KEY}&q=15.211005,108.782677
+        const url = `http://dataservice.accuweather.com/currentconditions/v1/416393?apikey=${ACCUWEATHER_KEY}&details=true`;
+        //const url = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_API_KEY}&location.latitude=${lat}&location.longitude=${lon}`;
+        // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}&units=metric&lang=en`;
+        // console.log('/weather', url);
         const response = await axios.get(url);
+        // console.log(response.data);
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch weather data' });
