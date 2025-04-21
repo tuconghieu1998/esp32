@@ -50,6 +50,8 @@
 /* Tooltip for temperature and humidity */
 .sensor-tooltip {
     position: absolute;
+    width: 220px;
+    height: auto;
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
     padding: 5px 10px;
