@@ -1,7 +1,12 @@
 import express from 'express';
 var router = express.Router();
+import expressWs from 'express-ws';
 import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
+expressWs(router); // Enable WebSocket support on this router
+
+const DELAY_SEND_WS = 5000; 
+const clients = new Set();
 
 router.get('/', authenticate, (req, res, next) => {
     res.render('machine');
@@ -12,11 +17,37 @@ router.get('/ws2', authenticate, (req, res, next) => {
 });
 
 
-const wss = new WebSocketServer({ port: 8080 });
+
+// WebSocket route for machine data
+router.ws('/socket/ws2', (ws, req) => {
+    console.log('WebSocket client connected');
+    clients.add(ws);
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        clients.delete(ws);
+    });
+});
+
+// Function to simulate and broadcast machine data
+function broadcastMachineData() {
+    const machines = generateMachines(200);
+
+    const data = JSON.stringify(machines);
+
+    for (const client of clients) {
+        if (client.readyState === 1) {
+            client.send(data);
+        }
+    }
+}
+
+// Periodically broadcast data
+setInterval(broadcastMachineData, DELAY_SEND_WS);
 
 // Generate 200 machine objects for simulation
 function generateMachines(num) {
-    const numberOfMachines = 200;
+    const numberOfMachines = num;
     const lines = 5; // e.g. 5 lines
     const statuses = ['running', 'stopped', 'maintenance'];
 
@@ -39,17 +70,5 @@ function generateMachines(num) {
 
     return machines;
 }
-
-const DELAY_SEND_WS = 5000; 
-
-wss.on('connection', ws => {
-    console.log('Client connected');
-
-    // Send data every 5 seconds to simulate real-time updates
-    setInterval(() => {
-        const machines = generateMachines(200); // Generate 200 machines
-        ws.send(JSON.stringify(machines)); // Send machine data as JSON
-    }, DELAY_SEND_WS); // Update interval (every 5 seconds)
-});
 
 export default router;

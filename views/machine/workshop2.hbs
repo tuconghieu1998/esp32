@@ -139,7 +139,18 @@
         });
     }
 
-    const socket = new WebSocket('ws://localhost:8080');
+    let host = window.location.host;
+    let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
+
+    if (match) {
+        host = `${match[1]}:3000`; // Replace port with 4344
+    }
+    else {
+        host = `${host}:4344`;
+    }
+    const url = `ws://${host}/machine/socket/ws2`;
+    console.log(url);
+    const socket = new WebSocket(url);
 
     // Listen for incoming data from WebSocket server
     socket.addEventListener('message', function (event) {
