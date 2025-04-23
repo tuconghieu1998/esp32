@@ -1,0 +1,145 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <h2 class="h3 mb-3">Machine for Workshop 2</h2>
+        <div class="mb-3" id="statusFilterGroup">
+            <label class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="statusFilter" value="all" checked>
+                <span class="form-check-label">All</span>
+            </label>
+            <label class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="statusFilter" value="running">
+                <span class="form-check-label d-flex align-items-center gap-1">
+                    Running
+                </span>
+            </label>
+            <label class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="statusFilter" value="stopped">
+                <span class="form-check-label d-flex align-items-center gap-1">
+                    Stopped
+                </span>
+            </label>
+            <label class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="statusFilter" value="maintenance">
+                <span class="form-check-label d-flex align-items-center gap-1">
+                    Maintenance
+                </span>
+            </label>
+        </div>
+        <div class="row g-2" id="machineGrid"></div>
+    </div>
+    <!-- Machine Detail Modal -->
+    <div class="modal fade" id="machineModal" tabindex="-1" aria-labelledby="machineModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="machineModalLabel">Machine Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="p-3" id="modalMachineContent">
+                    <!-- Details will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    const numberOfMachines = 200;
+    const lines = 5; // e.g. 5 lines
+    const statuses = ['running', 'stopped', 'maintenance'];
+
+    function getRandomStatus() {
+        return statuses[Math.floor(Math.random() * statuses.length)];
+    }
+
+    const machines = Array.from({ length: numberOfMachines }, (_, i) => ({
+        id: i + 1,
+        status: getRandomStatus(),
+        line: Math.floor(i / (numberOfMachines / lines)) + 1,
+        temperature: (Math.random() * 40 + 20).toFixed(1) + '°C',
+        vibration: (Math.random() * 3).toFixed(2) + ' mm/s',
+        uptime: Math.floor(Math.random() * 1000) + ' hrs'
+    }));
+
+    function getStatusDisplay(status) {
+        return `status-${status}`;
+    }
+
+    const grid = document.getElementById('machineGrid');
+
+    function renderMachines(filter = 'all') {
+        grid.innerHTML = '';
+
+        const filtered = machines.filter(machine => filter === 'all' || machine.status === filter);
+
+        // Group by line
+        const linesMap = new Map();
+        filtered.forEach(machine => {
+            if (!linesMap.has(machine.line)) {
+                linesMap.set(machine.line, []);
+            }
+            linesMap.get(machine.line).push(machine);
+        });
+
+        // Render each line
+        linesMap.forEach((lineMachines, lineNumber) => {
+            // Add line header
+            const lineHeader = document.createElement('div');
+            lineHeader.className = 'fw-bold mt-3 mb-2';
+            lineHeader.textContent = `Line ${lineNumber}`;
+            grid.appendChild(lineHeader);
+
+            // Container for machines in this line
+            const lineRow = document.createElement('div');
+            lineRow.className = 'd-flex flex-wrap gap-2 mb-3';
+
+            lineMachines.forEach(machine => {
+                const statusClass = `status-${machine.status}`;
+
+                const col = document.createElement('div');
+                col.style.width = '64px';
+
+                col.innerHTML = `
+                    <div class="machine-card d-flex flex-column align-items-center justify-content-center border rounded"
+                         style="width: 64px; height: 64px; background-color: #f8f9fa; cursor: pointer;"
+                         title="Machine #${machine.id} - ${machine.status}"
+                         data-id="${machine.id}">
+                        <div class="fw-bold small">#${machine.id}</div>
+                        <div class="status-indicator ${statusClass}"></div>
+                    </div>
+                `;
+
+                col.querySelector('.machine-card').addEventListener('click', () => {
+                    const modalBody = document.getElementById('modalMachineContent');
+                    const modalTitle = document.getElementById('machineModalLabel');
+
+                    modalTitle.textContent = `Machine #${machine.id} Detail`;
+
+                    modalBody.innerHTML = ` <div>
+        <p><strong>Status:</strong> ${machine.status}</p>
+        <p><strong>Temperature:</strong> ${machine.temperature}</p>
+        <p><strong>Vibration:</strong> ${machine.vibration}</p>
+        <p><strong>Uptime:</strong> ${machine.uptime}</p>
+        <p><strong>Line:</strong> ${machine.line}</p>
+        </div>`;
+
+                    const modal = new bootstrap.Modal(document.getElementById('machineModal'));
+                    modal.show();
+                });
+
+                lineRow.appendChild(col);
+            });
+
+            grid.appendChild(lineRow);
+        });
+    }
+
+    // Initial render
+    renderMachines();
+
+    // Add event listener to filter
+    document.querySelectorAll('input[name="statusFilter"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            renderMachines(e.target.value);
+        });
+    });
+</script>

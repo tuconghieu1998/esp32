@@ -9,6 +9,7 @@ import dashboardRoute from './routes/dashboard/index.route.js';
 import sensorsRoute from './routes/sensors/index.route.js';
 import cameraRoute from './routes/camera/index.route.js';
 import accountRoute from './routes/account/index.route.js';
+import machineRoute from './routes/machine/index.route.js';
 import session from 'express-session';
 import { authenticateWebSocket } from './middlewares/middleware.js';
 
@@ -109,6 +110,7 @@ app.use('/', dashboardRoute);
 app.use('/sensors', sensorsRoute);
 app.use('/camera', cameraRoute);
 app.use('/account', accountRoute);
+app.use('/machine', machineRoute);
 
 async function checkPing(ip) {
     try {
