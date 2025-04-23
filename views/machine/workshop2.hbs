@@ -43,22 +43,28 @@
     </div>
 </main>
 <script>
-    const numberOfMachines = 200;
-    const lines = 5; // e.g. 5 lines
-    const statuses = ['running', 'stopped', 'maintenance'];
+    function generateMachines(num) {
+        const numberOfMachines = num;
+        const lines = 5; // e.g. 5 lines
+        const statuses = ['running', 'stopped', 'maintenance'];
 
-    function getRandomStatus() {
-        return statuses[Math.floor(Math.random() * statuses.length)];
+        function getRandomStatus() {
+            return statuses[Math.floor(Math.random() * statuses.length)];
+        }
+
+        let machines = Array.from({ length: numberOfMachines }, (_, i) => ({
+            id: i + 1,
+            status: "waiting",
+            line: Math.floor(i / (numberOfMachines / lines)) + 1,
+            temperature: (Math.random() * 40 + 20).toFixed(1) + '°C',
+            vibration: (Math.random() * 3).toFixed(2) + ' mm/s',
+            uptime: Math.floor(Math.random() * 1000) + ' hrs'
+        }));
+
+        return machines;
     }
 
-    const machines = Array.from({ length: numberOfMachines }, (_, i) => ({
-        id: i + 1,
-        status: getRandomStatus(),
-        line: Math.floor(i / (numberOfMachines / lines)) + 1,
-        temperature: (Math.random() * 40 + 20).toFixed(1) + '°C',
-        vibration: (Math.random() * 3).toFixed(2) + ' mm/s',
-        uptime: Math.floor(Math.random() * 1000) + ' hrs'
-    }));
+    let machines = generateMachines(200);
 
     function getStatusDisplay(status) {
         return `status-${status}`;
@@ -132,6 +138,14 @@
             grid.appendChild(lineRow);
         });
     }
+
+    const socket = new WebSocket('ws://localhost:8080');
+
+    // Listen for incoming data from WebSocket server
+    socket.addEventListener('message', function (event) {
+        machines = JSON.parse(event.data); // The array of 200 machines
+        renderMachines();
+    });
 
     // Initial render
     renderMachines();
