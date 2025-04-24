@@ -125,15 +125,20 @@ async function openModal(cameraIP) {
 
             const canvas = document.getElementById('canvas-camera');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            let host = window.location.host;
-            let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
-
-            if (match) {
-                host = `${match[1]}:4344`; // Replace port with 4344
+            function getHost() {
+                let host = window.location.host;
+                let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
+        
+                if (!match) {
+                    host = `${host}:4344`;
+                }
+                else if (match[2] == '80') {
+                    host = `${match[1]}:4344`;
+                }
+                return host;
             }
-            else {
-                host = `${host}:4344`;
-            }
+        
+            const host = getHost();
 
             socket = await loadPlayer({
                 url: `ws://${host}/api/stream/${cameraIP}?token=${token}`,

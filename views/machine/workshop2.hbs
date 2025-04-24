@@ -139,15 +139,20 @@
         });
     }
 
-    let host = window.location.host;
-    let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
+    function getHost() {
+        let host = window.location.host;
+        let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
 
-    if (match) {
-        host = `${match[1]}:3000`; // Replace port with 4344
+        if (!match) {
+            host = `${host}:4344`;
+        }
+        else if (match[2] == '80') {
+            host = `${match[1]}:4344`;
+        }
+        return host;
     }
-    else {
-        host = `${host}:4344`;
-    }
+
+    const host = getHost();
     const url = `ws://${host}/machine/socket/ws2`;
     console.log(url);
     const socket = new WebSocket(url);
