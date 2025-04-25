@@ -71,6 +71,7 @@
     }
 
     const grid = document.getElementById('machineGrid');
+    let current_filter = 'all';
 
     function renderMachines(filter = 'all') {
         grid.innerHTML = '';
@@ -160,7 +161,7 @@
     // Listen for incoming data from WebSocket server
     socket.addEventListener('message', function (event) {
         machines = JSON.parse(event.data); // The array of 200 machines
-        renderMachines();
+        renderMachines(current_filter);
     });
 
     // Initial render
@@ -169,7 +170,8 @@
     // Add event listener to filter
     document.querySelectorAll('input[name="statusFilter"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            renderMachines(e.target.value);
+            current_filter = e.target.value;
+            renderMachines(current_filter);
         });
     });
 </script>
