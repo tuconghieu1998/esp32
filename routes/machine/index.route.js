@@ -59,9 +59,12 @@ function hasClientReady() {
 // Function to simulate and broadcast machine data
 async function broadcastMachineData() {
     if (hasClientReady()) {
-        const machines = await getMachineData();
-        if(!machines || machines.length == 0) return;
-        const data = JSON.stringify(Object.values(machines));
+        // const machines = await getMachineData();
+        // if(!machines || machines.length == 0) return;
+        // const data = JSON.stringify(Object.values(machines));
+
+        const machines = generateMachines(200);
+        const data = JSON.stringify(machines);
 
         for (const client of clients) {
             if (client.readyState === 1) {
