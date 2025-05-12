@@ -160,9 +160,12 @@
     socket.addEventListener('message', function (event) {
         let data = JSON.parse(event.data); // The array of 200 machines
         for(let i = 0;i<data.length;i++) {
-            machines[i].sensor_id = data[i].sensor_id;
-            machines[i].machine_id = data[i].machine_id;
-            machines[i].status = data[i].status;
+            let machine_id = data[i].machine_id;
+            if(machines[machine_id - 1]) {
+                machines[machine_id - 1].sensor_id = data[i].sensor_id;
+                machines[machine_id - 1].machine_id = data[i].machine_id;
+                machines[machine_id - 1].status = data[i].status;
+            }
         }
         renderMachines(current_filter);
     });
