@@ -8,7 +8,7 @@ import axios from 'axios';
 import { getListMachines } from '../../models/machine.model.js';
 import moment from 'moment';
 
-const DELAY_SEND_WS = 5000;
+const DELAY_SEND_WS = 1000;
 const clients = new Set();
 const MACHINE_200_SERVER_URL = process.env.MACHINE_200_SERVER_URL;
 
