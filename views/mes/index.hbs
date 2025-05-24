@@ -60,6 +60,7 @@
             text-align: center;
             margin-top: 100px;
         }
+
         .slide-group p {
             text-align: center;
         }
@@ -150,6 +151,13 @@
             display: none;
             /* Chrome, Safari, Opera */
         }
+
+        /* Hide thumbnails on small screens */
+        @media (max-width: 1900px) {
+            #right-thumbnails {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -217,11 +225,21 @@
             <img src="MES PNS/Slide22.PNG" alt="Slide 2">
             <h3>8044 - Sizing Work Sheet Management</h3>
             <p>Hoạt động sản xuất xưởng 1</p>
-            <a href="MES PNS/PNSCHUN_MES(1).pdf" target="_blank"><p>Bắt đầu BEAM mới</p></a>
-            <a href="MES PNS/PNSCHUN_MES(2).pdf" target="_blank"><p>Tiếp tục BEAM từ ca trước</p></a>
-            <a href="MES PNS/PNSCHUN_MES(3).pdf" target="_blank"><p>Kết thúc BEAM</p></a>
-            <a href="MES PNS/PNSCHUN_MES(4).pdf" target="_blank"><p>Kết thúc BEAM từ ca trước</p></a>
-            <a href="MES PNS/PNSCHUN_MES(5).pdf" target="_blank"><p>Kết thúc ca nhưng BEAM đang chạy</p></a>
+            <a href="MES PNS/PNSCHUN_MES(1).pdf" target="_blank">
+                <p>Bắt đầu BEAM mới</p>
+            </a>
+            <a href="MES PNS/PNSCHUN_MES(2).pdf" target="_blank">
+                <p>Tiếp tục BEAM từ ca trước</p>
+            </a>
+            <a href="MES PNS/PNSCHUN_MES(3).pdf" target="_blank">
+                <p>Kết thúc BEAM</p>
+            </a>
+            <a href="MES PNS/PNSCHUN_MES(4).pdf" target="_blank">
+                <p>Kết thúc BEAM từ ca trước</p>
+            </a>
+            <a href="MES PNS/PNSCHUN_MES(5).pdf" target="_blank">
+                <p>Kết thúc ca nhưng BEAM đang chạy</p>
+            </a>
             <img src="MES PNS/Slide23.PNG" alt="Slide 2">
         </div>
 
