@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Slide Groups</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .sidebar button:hover {
+            background-color: #3d566e;
+        }
+
+        /* Main content */
+        .main {
+            margin-left: 240px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .slide-group {
+            display: none;
+        }
+
+        .slide-group.active {
+            display: block;
+        }
+
+        .slide-group h3 {
+            text-align: center;
+            margin-top: 100px;
+        }
+        .slide-group p {
+            text-align: center;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 1300px;
+            margin: 20px auto;
+        }
+
+        .image-container img {
+            width: 100%;
+            border: 4px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: block;
+        }
+
+        .caption {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .thumbnail-panel {
+            position: fixed;
+            top: 0px;
+            right: 10px;
+            width: 120px;
+            max-height: 100vh;
+            overflow-y: auto;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .thumbnail-panel img {
+            width: 95%;
+            margin-bottom: 5px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border 0.3s;
+        }
+
+        .thumbnail-panel img:hover {
+            border: 2px solid #3498db;
+        }
+
+        .right-thumb.active-thumb {
+            border: 3px solid #3498db;
+        }
+
+        .thumbnail-label {
+            font-size: 12px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+
+        #right-thumbnails {
+            cursor: pointer;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* Internet Explorer 10+ */
+        }
+
+        #right-thumbnails.hidden {
+            max-width: 0;
+            pointer-events: none;
+            transition: max-width 0.3s ease;
+        }
+
+        #right-thumbnails::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>Slide Groups</h2>
+        <button onclick="showGroup('group1', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
+            1</button>
+        <button onclick="showGroup('group2', 'QUY TRÌNH NHẬP LIỆU MUA HÀNG SỢI')">QUY TRÌNH NHẬP LIỆU MUA HÀNG
+            SỢI</button>
+        <button onclick="showGroup('group3', 'QUY TRÌNH DYEING - TẠO THẺ TIẾN HÀNH CÔNG ĐOẠN')">QUY TRÌNH DYEING - TẠO
+            THẺ TIẾN HÀNH CÔNG ĐOẠN</button>
+        <button onclick="showGroup('group4', 'QUY TRÌNH DYEING - XƯỞNG 2')">QUY TRÌNH DYEING - XƯỞNG 2</button>
+        <button onclick="showGroup('group5', 'QUY TRÌNH DYEING - XƯỞNG 3')">QUY TRÌNH DYEING - XƯỞNG 3</button>
+        <button onclick="showGroup('group6', 'QUY TRÌNH DYEING - XƯỞNG 4')">QUY TRÌNH DYEING - XƯỞNG 4</button>
+        <button onclick="showGroup('group7', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 2')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
+            2</button>
+        <button onclick="showGroup('group8', 'QUY TRÌNH SALES XUẤT HÀNG')">QUY TRÌNH SALES XUẤT HÀNG</button>
+    </div>
+
+    <div class="main" id="main-content">
+        <h1 id="title">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1</h1>
+        <div id="group1" class="slide-group active">
+            <img src="MES PNS/Slide1.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide2.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide3.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide4.PNG" alt="Slide 2">
+            <h3>8040 - Sizing Order Status</h3>
+            <p>Nhận đơn</p>
+            <img src="MES PNS/Slide5.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide6.PNG" alt="Slide 2">
+            <h3>8044 - Sizing Work Sheet Management</h3>
+            <p>Tạo lệnh chạy</p>
+            <img src="MES PNS/Slide7.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide8.PNG" alt="Slide 2">
+            <h3>8044 - Sizing Work Sheet Management</h3>
+            <p>Đưa lệnh chạy vào máy</p>
+            <img src="MES PNS/Slide9.PNG" alt="Slide 1">
+            <h3>Yêu cầu sợi</h3>
+            <img src="MES PNS/Slide10.PNG" alt="Slide 2">
+            <h3>3113 - Yarn Out Plan Management</h3>
+            <p>Tạo kế hoạch lấy sợi</p>
+            <img src="MES PNS/Slide11.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide12.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide13.PNG" alt="Slide 1">
+            <h3>3112 - Yarn Warehouse Management</h3>
+            <p>Quét mã lấy sợi</p>
+            <img src="MES PNS/Slide14.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide15.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide16.PNG" alt="Slide 2">
+            <h3>3115 - Yarn Out List</h3>
+            <p>In phiếu xuất kho</p>
+            <img src="MES PNS/Slide17.PNG" alt="Slide 1">
+            <h3>7699 - Thread Processing Yarn In Management</h3>
+            <p>Nhận sợi</p>
+            <img src="MES PNS/Slide18.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide19.PNG" alt="Slide 1">
+            <h3>7706 - Thread Processing Yarn Stock List</h3>
+            <p>Xem số lượng sợi hiện có trong xưởng</p>
+            <img src="MES PNS/Slide20.PNG" alt="Slide 2">
+            <h3>7701 - Thread Processing Yarn Out Management</h3>
+            <p>Đưa sợi vào sản xuất</p>
+            <img src="MES PNS/Slide21.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide22.PNG" alt="Slide 2">
+            <h3>8044 - Sizing Work Sheet Management</h3>
+            <p>Hoạt động sản xuất xưởng 1</p>
+            <a href="MES PNS/PNSCHUN_MES(1).pdf" target="_blank"><p>Bắt đầu BEAM mới</p></a>
+            <a href="MES PNS/PNSCHUN_MES(2).pdf" target="_blank"><p>Tiếp tục BEAM từ ca trước</p></a>
+            <a href="MES PNS/PNSCHUN_MES(3).pdf" target="_blank"><p>Kết thúc BEAM</p></a>
+            <a href="MES PNS/PNSCHUN_MES(4).pdf" target="_blank"><p>Kết thúc BEAM từ ca trước</p></a>
+            <a href="MES PNS/PNSCHUN_MES(5).pdf" target="_blank"><p>Kết thúc ca nhưng BEAM đang chạy</p></a>
+            <img src="MES PNS/Slide23.PNG" alt="Slide 2">
+        </div>
+
+        <div id="group2" class="slide-group">
+            <img src="MES PNS/Slide24.PNG" alt="Slide 1">
+            <h3>3108 - Purchase Management</h3>
+            <p>Tạo hóa đơn mua sợi</p>
+            <img src="MES PNS/Slide25.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide26.PNG" alt="Slide 1">
+            <h3>3097 - Yarn In Plan</h3>
+            <p>Điền thông tin pallet sợi</p>
+            <img src="MES PNS/Slide27.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide28.PNG" alt="Slide 1">
+            <h3>3111 - Yarn Label Management</h3>
+            <p>Tạo nhãn dán</p>
+            <img src="MES PNS/Slide29.PNG" alt="Slide 2">
+            <h3>3112 - Yarn Warehouse Management</h3>
+            <p>Quét nhãn</p>
+            <img src="MES PNS/Slide30.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide31.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide32.PNG" alt="Slide 1">
+            <h3>7570 - Yarn Stock By Supplier</h3>
+            <p>Xem thông tin lô sợi vừa nhập</p>
+            <img src="MES PNS/Slide33.PNG" alt="Slide 2">
+        </div>
+
+        <div id="group3" class="slide-group">
+            <img src="MES PNS/Slide34.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide35.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide36.PNG" alt="Slide 1">
+            <h3>7268 - Prod Process Wait List</h3>
+            <p>Xem thông tin các công đoạn đang chạy</p>
+            <img src="MES PNS/Slide37.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide38.PNG" alt="Slide 1">
+            <h3></h3>
+            <img src="MES PNS/Slide39.PNG" alt="Slide 2">
+            <h3>7206 - Work Sheet Management</h3>
+            <p>Tạo thẻ tiến hành công đoạn</p>
+            <img src="MES PNS/Slide40.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide41.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide42.PNG" alt="Slide 1">
+        </div>
+
+        <div id="group4" class="slide-group">
+            <img src="MES PNS/Slide43.PNG" alt="Slide 1">
+            <h3>7476 - Greige Goods Out Plan Management</h3>
+            <p>Tạo kế hoạch xuất vải</p>
+            <img src="MES PNS/Slide44.PNG" alt="Slide 2">
+            <h3>7477 - Greige Goods Packing Scan Management</h3>
+            <p>Quét mã cuộn vải</p>
+            <img src="MES PNS/Slide45.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide46.PNG" alt="Slide 2">
+            <h3>7218 - Prod Management</h3>
+            <p>Unrolling - Xả cuộn</p>
+            <img src="MES PNS/Slide47.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide48.PNG" alt="Slide 2">
+            <p>Unrolling - Bắt đầu làm việc</p>
+            <img src="MES PNS/Slide49.PNG" alt="Slide 1">
+            <p>Unrolling - Hoàn thành công đoạn</p>
+            <img src="MES PNS/Slide50.PNG" alt="Slide 2">
+            <h3>7451 - Greige Fabric Stock Management</h3>
+            <p>Thống kê cuộn vải hiện tại trong kho</p>
+            <img src="MES PNS/Slide51.PNG" alt="Slide 1">
+            <h3>7463 - Weaving Ship List</h3>
+            <p>Thống kê cuộn vải được chuyển đi</p>
+            <img src="MES PNS/Slide52.PNG" alt="Slide 1">
+            <h3>7440 - Dyeing Precleaning Production List</h3>
+            <p>Thống kê cuộn vải được xả cuộn</p>
+            <img src="MES PNS/Slide53.PNG" alt="Slide 1">
+        </div>
+        <div id="group5" class="slide-group">
+            <img src="MES PNS/Slide54.PNG" alt="Slide 1">
+            <h3>7638 - Input Output Management</h3>
+            <p>Nhập vải xưởng 3</p>
+            <img src="MES PNS/Slide55.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide56.PNG" alt="Slide 1">
+            <h3>7218 - Prod Management</h3>
+            <p>Thực hiện giặt vải - Scouring</p>
+            <img src="MES PNS/Slide57.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide58.PNG" alt="Slide 1">
+            <p>Scouring - Bắt đầu làm việc</p>
+            <img src="MES PNS/Slide59.PNG" alt="Slide 2">
+            <p>Scouring - Hoàn thành công đoạn</p>
+            <img src="MES PNS/Slide60.PNG" alt="Slide 1">
+            <h3>7218 - Prod Management</h3>
+            <p>Thực hiện kéo căng vải - Tenter</p>
+            <img src="MES PNS/Slide61.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide62.PNG" alt="Slide 1">
+            <p>Tenter - Bắt đầu làm việc</p>
+            <img src="MES PNS/Slide63.PNG" alt="Slide 1">
+            <p>Tenter - Hoàn thành công đoạn</p>
+            <img src="MES PNS/Slide64.PNG" alt="Slide 1">
+            <h3>7375 - Finishing Production List</h3>
+            <p>Thống kê giặt vải (Scouring) và kéo căng (Tenter) trong ngày</p>
+            <img src="MES PNS/Slide65.PNG" alt="Slide 1">
+        </div>
+        <div id="group6" class="slide-group">
+            <img src="MES PNS/Slide66.PNG" alt="Slide 1">
+            <h3>7638 - Input Output Management</h3>
+            <p>Nhập vải xưởng 4</p>
+            <img src="MES PNS/Slide67.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide68.PNG" alt="Slide 1">
+            <h3>7218 - Prod Management</h3>
+            <p>Thực hiện phủ hóa chất - Coating</p>
+            <img src="MES PNS/Slide69.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide70.PNG" alt="Slide 1">
+            <p>Coating - Bắt đầu công việc</p>
+            <img src="MES PNS/Slide71.PNG" alt="Slide 2">
+            <p>Coating - Hoàn thành công đoạn</p>
+            <img src="MES PNS/Slide72.PNG" alt="Slide 1">
+            <h3>8068 - Coating Production List</h3>
+            <p>Thống kê Coating trong ngày</p>
+            <img src="MES PNS/Slide73.PNG" alt="Slide 2">
+            <h3>7221 - Inspection Register</h3>
+            <p>Thực hiện kiểm tra vải</p>
+            <img src="MES PNS/Slide74.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide75.PNG" alt="Slide 1">
+            <h3>7376 - Inspection List</h3>
+            <p>Thống kê kiểm tra trong ngày</p>
+            <img src="MES PNS/Slide76.PNG" alt="Slide 1">
+            <h3>7800 - Inspection Defect Rolls List</h3>
+            <p>Danh sách cuộn được kiểm tra trong ngày</p>
+            <img src="MES PNS/Slide77.PNG" alt="Slide 1">
+            <h3>7801 - Inspection Result Report</h3>
+            <p>Thống kê kiểm tra vải trong tháng</p>
+            <img src="MES PNS/Slide78.PNG" alt="Slide 2">
+            <h3>7227 - Q.C Roll Judge Management</h3>
+            <p>Đánh giá chất lượng vải</p>
+            <img src="MES PNS/Slide79.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide80.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide81.PNG" alt="Slide 1">
+            <h3>7982 - Q.C Output Management</h3>
+            <p>Kiểm tra chất lượng vải đầu ra</p>
+            <img src="MES PNS/Slide82.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide83.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide84.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide85.PNG" alt="Slide 1">
+        </div>
+
+        <div id="group7" class="slide-group">
+            <img src="MES PNS/Slide86.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide87.PNG" alt="Slide 2">
+            <h3>7432 - Weaving Order Status</h3>
+            <p>Nhận đơn</p>
+            <img src="MES PNS/Slide88.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide89.PNG" alt="Slide 2">
+            <h3>7437 - Weaving Work Sheet Management</h3>
+            <p>Tạo kế hoạch chạy </p>
+            <img src="MES PNS/Slide90.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide91.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide92.PNG" alt="Slide 1">
+            <h3>7437 - Weaving Work Sheet Management</h3>
+            <p>Gán kế hoạch chạy vào máy</p>
+            <img src="MES PNS/Slide93.PNG" alt="Slide 2">
+            <h3>7437 - Weaving Work Sheet Management</h3>
+            <p>Theo dõi tình hình sản xuất</p>
+            <img src="MES PNS/Slide94.PNG" alt="Slide 1">
+            <h3>8051 - Sizing Goods Out Plan Management</h3>
+            <p>Tạo kế hoạch lấy cuộn sợi xưởng 1</p>
+            <img src="MES PNS/Slide99.PNG" alt="Slide 1">
+            <h3>8052 - Sizing Packing Scan Management</h3>
+            <p>Quét mã xuất cuộn sợi</p>
+            <img src="MES PNS/Slide100.PNG" alt="Slide 2">
+            <h3>7672 - Weaving Yarn In Management</h3>
+            <p>Nhập sợi nguyên liệu</p>
+            <img src="MES PNS/Slide101.PNG" alt="Slide 1">
+            <h3>7674 - Weaving Yarn Out Management</h3>
+            <p>Đưa sợi vào sản xuất</p>
+            <img src="MES PNS/Slide102.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide103.PNG" alt="Slide 1">
+            <h3>7478 - Weaving Prod Touch Management</h3>
+            <p>Nhập dữ liệu cuộn vải đã chạy xong</p>
+            <img src="MES PNS/Slide95.PNG" alt="Slide 1">
+            <h3>7480 - Weaving Inspection Touch Management</h3>
+            <p>Kiểm tra cuộn</p>
+            <img src="MES PNS/Slide96.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide97.PNG" alt="Slide 1">
+            <h3>7451 - Greige Fabric Stock Management</h3>
+            <p>Xem thông tin cuộn vải trong kho</p>
+            <img src="MES PNS/Slide98.PNG" alt="Slide 2">
+        </div>
+
+        <div id="group8" class="slide-group">
+            <img src="MES PNS/Slide104.PNG" alt="Slide 1">
+            <h3>5 - Sales Order Status</h3>
+            <p>Xem đơn hàng</p>
+            <img src="MES PNS/Slide105.PNG" alt="Slide 2">
+            <h3>7194 - Order Status</h3>
+            <p>Nhận đơn</p>
+            <img src="MES PNS/Slide106.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide107.PNG" alt="Slide 2">
+            <h3>7206 - Work Sheet Management</h3>
+            <p>Lấy vải</p>
+            <img src="MES PNS/Slide108.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide109.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide110.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide111.PNG" alt="Slide 2">
+            <h3>7235 - Goods In List</h3>
+            <p>Tạo nhãn</p>
+            <img src="MES PNS/Slide112.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide113.PNG" alt="Slide 1">
+            <h3>8062 - Shipping Receive Management</h3>
+            <p>Mapping barcode PNS với barcode mpm.sedo</p>
+            <img src="MES PNS/Slide114.PNG" alt="Slide 1">
+            <h3>7649 - Shipment Booking Management</h3>
+            <p>Tạo booking</p>
+            <img src="MES PNS/Slide115.PNG" alt="Slide 1">
+            <h3>7890 - Goods Shipment Request Work Flow Management - Section 1</h3>
+            <p>Đưa hàng đã chuẩn bị vào booking</p>
+            <img src="MES PNS/Slide116.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide117.PNG" alt="Slide 1">
+            <h3>7890 - Goods Shipment Request Work Flow Management - Section 2</h3>
+            <p>In shipping mark giống MPM</p>
+            <img src="MES PNS/Slide118.PNG" alt="Slide 2">
+            <h3>7890 - Goods Shipment Request Work Flow Management - Section 2</h3>
+            <p>Chỉ định cuộn vải vào thùng</p>
+            <img src="MES PNS/Slide119.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide120.PNG" alt="Slide 2">
+            <img src="MES PNS/Slide121.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide122.PNG" alt="Slide 2">
+            <h3>7890 - Goods Shipment Request Work Flow Management - Section 2</h3>
+            <p>Xác nhận hoàn thành công đoạn chuẩn bị</p>
+            <img src="MES PNS/Slide123.PNG" alt="Slide 1">
+            <h3>7653 - Goods Packing Scan Register</h3>
+            <p>Scan xuất hàng</p>
+            <img src="MES PNS/Slide124.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide125.PNG" alt="Slide 1">
+            <h3>7890 - Goods Shipment Request Work Flow Management - Section 4</h3>
+            <p>In phiếu xuất kho</p>
+            <img src="MES PNS/Slide126.PNG" alt="Slide 1">
+            <img src="MES PNS/Slide127.PNG" alt="Slide 1">
+        </div>
+    </div>
+    <div id="right-thumbnails" class="thumbnail-panel">
+    </div>
+
+    <script>
+        let observer = null; // global so we can disconnect before reuse
+
+        function showGroup(groupId, title) {
+            document.getElementById("title").innerText = title;
+            // Hide all groups
+            const groups = document.querySelectorAll('.slide-group');
+            groups.forEach(group => group.classList.remove('active'));
+
+            // Show selected group
+            let activeGroup = document.getElementById(groupId);
+            activeGroup.classList.add('active');
+
+            // Scroll to top of the main content smoothly
+            document.getElementById("main-content").scrollIntoView();
+
+            // Build right thumbnails
+            const thumbnailPanel = document.getElementById("right-thumbnails");
+            thumbnailPanel.innerHTML = ``;
+            let isThumbnailClick = false;
+
+            const images = activeGroup.querySelectorAll("img");
+            images.forEach((img) => {
+                // Create container
+                const container = document.createElement("div");
+                container.classList.add("thumbnail-container");
+
+                let index = img.getAttribute('data-index');
+
+                const thumb = document.createElement("img");
+                thumb.src = img.src;
+                thumb.alt = "Thumbnail " + (index + 1);
+                thumb.classList.add("right-thumb");
+                thumb.setAttribute('data-index', index);
+                thumb.onclick = () => {
+                    isThumbnailClick = true;
+                    img.scrollIntoView({ behavior: "smooth", block: "center" });
+                    setTimeout(() => { isThumbnailClick = false; }, 2000); // Reset after scroll
+                }
+
+                // Create label for image name
+                const label = document.createElement("div");
+                label.classList.add("thumbnail-label");
+                label.textContent = img.src.split("/").pop().replace(/\.[^/.]+$/, "");
+
+                // Append thumbnail and label to container
+                container.appendChild(thumb);
+                container.appendChild(label);
+
+                // Append container to panel
+                thumbnailPanel.appendChild(container);
+            });
+
+            // Clear old observer
+            if (observer) observer.disconnect();
+
+            // Create new observer to track which slide is in view
+            observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = entry.target.getAttribute('data-index');
+                        document.querySelectorAll(".right-thumb").forEach(thumb => {
+                            thumb.classList.remove("active-thumb");
+                        });
+                        const activeThumb = document.querySelector(`.right-thumb[data-index="${index}"]`);
+                        if (activeThumb) {
+                            activeThumb.classList.add("active-thumb");
+                            if (isThumbnailClick) return; // Prevent auto-scroll on user click
+                            activeThumb.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+                        }
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            });
+
+            images.forEach(img => observer.observe(img));
+        }
+
+        // Wrap all images in .image-container and add filename caption
+        document.querySelectorAll('.slide-group img').forEach((img, index) => {
+            // Create wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.className = 'image-container';
+
+            const imgId = `slide-${index}`;
+            img.setAttribute('id', imgId);
+            img.setAttribute('data-index', index);
+
+            // Insert wrapper before the image
+            img.parentNode.insertBefore(wrapper, img);
+            // Move image inside wrapper
+            wrapper.appendChild(img);
+
+            // Create caption from filename
+            const filename = img.src.split("/").pop().replace(/\.[^/.]+$/, "");
+            const caption = document.createElement('div');
+            caption.className = 'caption';
+            caption.innerText = filename;
+
+            // Add caption to wrapper
+            wrapper.appendChild(caption);
+        });
+
+        showGroup('group1', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1');
+
+    </script>
+
+</body>
+
+</html>

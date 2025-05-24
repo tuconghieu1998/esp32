@@ -11,7 +11,7 @@ import cameraRoute from './routes/camera/index.route.js';
 import accountRoute from './routes/account/index.route.js';
 import machineRoute from './routes/machine/index.route.js';
 import session from 'express-session';
-import { authenticateWebSocket } from './middlewares/middleware.js';
+import { authenticate, authenticateWebSocket } from './middlewares/middleware.js';
 
 dotenv.config();
 // const key = fs.readFileSync('./privatekey.pem', 'utf8');
@@ -111,6 +111,9 @@ app.use('/sensors', sensorsRoute);
 app.use('/camera', cameraRoute);
 app.use('/account', accountRoute);
 app.use('/machine', machineRoute);
+app.get('/mes', authenticate, (req, res) => {
+    res.render('mes', { layout: false });
+});
 
 async function checkPing(ip) {
     try {

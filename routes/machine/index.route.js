@@ -50,7 +50,7 @@ async function getMachineData() {
         }
         return [];
     } catch (error) {
-        console.error('Error fetching machine data:', error);
+        //console.error('Error fetching machine data:', error);
         return [];
     }
 }
@@ -80,7 +80,7 @@ async function broadcastMachineData() {
 }
 
 // Periodically broadcast data
-setInterval(broadcastMachineData, DELAY_SEND_WS);
+//setInterval(broadcastMachineData, DELAY_SEND_WS);
 
 let MACHINES_DATA = await initMachines();
 
