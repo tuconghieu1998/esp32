@@ -37,6 +37,18 @@
             cursor: pointer;
         }
 
+        .sidebar select {
+            width: 60%;
+            padding: 10px;
+            margin: 5px 0;
+            margin-top: 50px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         .sidebar button:hover {
             background-color: #3d566e;
         }
@@ -169,81 +181,93 @@
 <body>
 
     <div class="sidebar">
-        <h2>Slide Groups</h2>
-        <button class="sidebar-button active" onclick="showGroup('group1', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
+        <h2>MES PNS</h2>
+        <button class="sidebar-button active" data-i18n="group1"
+            onclick="showGroup('group1', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
             1</button>
-        <button class="sidebar-button" onclick="showGroup('group2', 'QUY TRÌNH NHẬP LIỆU MUA HÀNG SỢI')">QUY TRÌNH NHẬP LIỆU MUA HÀNG
+        <button class="sidebar-button" data-i18n="group2"
+            onclick="showGroup('group2', 'QUY TRÌNH NHẬP LIỆU MUA HÀNG SỢI')">QUY TRÌNH NHẬP LIỆU MUA HÀNG
             SỢI</button>
-        <button class="sidebar-button" onclick="showGroup('group3', 'QUY TRÌNH DYEING - TẠO THẺ TIẾN HÀNH CÔNG ĐOẠN')">QUY TRÌNH DYEING - TẠO
+        <button class="sidebar-button" data-i18n="group3"
+            onclick="showGroup('group3', 'QUY TRÌNH DYEING - TẠO THẺ TIẾN HÀNH CÔNG ĐOẠN')">QUY TRÌNH DYEING - TẠO
             THẺ TIẾN HÀNH CÔNG ĐOẠN</button>
-        <button class="sidebar-button" onclick="showGroup('group4', 'QUY TRÌNH DYEING - XƯỞNG 2')">QUY TRÌNH DYEING - XƯỞNG 2</button>
-        <button class="sidebar-button" onclick="showGroup('group5', 'QUY TRÌNH DYEING - XƯỞNG 3')">QUY TRÌNH DYEING - XƯỞNG 3</button>
-        <button class="sidebar-button" onclick="showGroup('group6', 'QUY TRÌNH DYEING - XƯỞNG 4')">QUY TRÌNH DYEING - XƯỞNG 4</button>
-        <button class="sidebar-button" onclick="showGroup('group7', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 2')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
+        <button class="sidebar-button" data-i18n="group4"
+            onclick="showGroup('group4', 'QUY TRÌNH DYEING - XƯỞNG 2')">QUY TRÌNH DYEING - XƯỞNG 2</button>
+        <button class="sidebar-button" data-i18n="group5"
+            onclick="showGroup('group5', 'QUY TRÌNH DYEING - XƯỞNG 3')">QUY TRÌNH DYEING - XƯỞNG 3</button>
+        <button class="sidebar-button" data-i18n="group6"
+            onclick="showGroup('group6', 'QUY TRÌNH DYEING - XƯỞNG 4')">QUY TRÌNH DYEING - XƯỞNG 4</button>
+        <button class="sidebar-button" data-i18n="group7"
+            onclick="showGroup('group7', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 2')">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG
             2</button>
-        <button class="sidebar-button" onclick="showGroup('group8', 'QUY TRÌNH SALES XUẤT HÀNG')">QUY TRÌNH SALES XUẤT HÀNG</button>
+        <button class="sidebar-button" data-i18n="group8" onclick="showGroup('group8', 'QUY TRÌNH SALES XUẤT HÀNG')">QUY
+            TRÌNH SALES XUẤT HÀNG</button>
+        <select id="language-select">
+            <option value="en">English</option>
+            <option value="vi">Tiếng Việt</option>
+        </select>
     </div>
 
     <div class="main" id="main-content">
-        <h1 id="title">QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1</h1>
+        <h1 id="title"></h1>
         <div id="group1" class="slide-group active">
             <img src="MES PNS/Slide1.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide2.PNG" alt="Slide 2" loading="lazy">
             <img src="MES PNS/Slide3.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide4.PNG" alt="Slide 2" loading="lazy">
             <h3>8040 - Sizing Order Status</h3>
-            <p>Nhận đơn</p>
+            <p data-i18n="group1-text1" >Nhận đơn</p>
             <img src="MES PNS/Slide5.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide6.PNG" alt="Slide 2" loading="lazy">
             <h3>8044 - Sizing Work Sheet Management</h3>
-            <p>Tạo lệnh chạy</p>
+            <p data-i18n="group1-text2">Tạo lệnh chạy</p>
             <img src="MES PNS/Slide7.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide8.PNG" alt="Slide 2" loading="lazy">
             <h3>8044 - Sizing Work Sheet Management</h3>
-            <p>Đưa lệnh chạy vào máy</p>
+            <p data-i18n="group1-text3">Đưa lệnh chạy vào máy</p>
             <img src="MES PNS/Slide9.PNG" alt="Slide 1" loading="lazy">
-            <h3>Yêu cầu sợi</h3>
+            <h3 data-i18n="group1-text4">Yêu cầu sợi</h3>
             <img src="MES PNS/Slide10.PNG" alt="Slide 2" loading="lazy">
             <h3>3113 - Yarn Out Plan Management</h3>
-            <p>Tạo kế hoạch lấy sợi</p>
+            <p data-i18n="group1-text5">Tạo kế hoạch lấy sợi</p>
             <img src="MES PNS/Slide11.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide12.PNG" alt="Slide 2" loading="lazy">
             <img src="MES PNS/Slide13.PNG" alt="Slide 1" loading="lazy">
             <h3>3112 - Yarn Warehouse Management</h3>
-            <p>Quét mã lấy sợi</p>
+            <p data-i18n="group1-text6">Quét mã lấy sợi</p>
             <img src="MES PNS/Slide14.PNG" alt="Slide 2" loading="lazy">
             <img src="MES PNS/Slide15.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide16.PNG" alt="Slide 2" loading="lazy">
             <h3>3115 - Yarn Out List</h3>
-            <p>In phiếu xuất kho</p>
+            <p data-i18n="group1-text7">In phiếu xuất kho</p>
             <img src="MES PNS/Slide17.PNG" alt="Slide 1" loading="lazy">
             <h3>7699 - Thread Processing Yarn In Management</h3>
-            <p>Nhận sợi</p>
+            <p data-i18n="group1-text8">Nhận sợi</p>
             <img src="MES PNS/Slide18.PNG" alt="Slide 2" loading="lazy">
             <img src="MES PNS/Slide19.PNG" alt="Slide 1" loading="lazy">
             <h3>7706 - Thread Processing Yarn Stock List</h3>
-            <p>Xem số lượng sợi hiện có trong xưởng</p>
+            <p data-i18n="group1-text9">Xem số lượng sợi hiện có trong xưởng</p>
             <img src="MES PNS/Slide20.PNG" alt="Slide 2" loading="lazy">
             <h3>7701 - Thread Processing Yarn Out Management</h3>
-            <p>Đưa sợi vào sản xuất</p>
+            <p data-i18n="group1-text10">Đưa sợi vào sản xuất</p>
             <img src="MES PNS/Slide21.PNG" alt="Slide 1" loading="lazy">
             <img src="MES PNS/Slide22.PNG" alt="Slide 2" loading="lazy">
             <h3>8044 - Sizing Work Sheet Management</h3>
-            <p>Hoạt động sản xuất xưởng 1</p>
+            <p data-i18n="group1-text11">Hoạt động sản xuất xưởng 1</p>
             <a href="MES PNS/PNSCHUN_MES(1).pdf" target="_blank">
-                <p>Bắt đầu BEAM mới</p>
+                <p data-i18n="group1-text12">Bắt đầu BEAM mới</p>
             </a>
             <a href="MES PNS/PNSCHUN_MES(2).pdf" target="_blank">
-                <p>Tiếp tục BEAM từ ca trước</p>
+                <p data-i18n="group1-text13">Tiếp tục BEAM từ ca trước</p>
             </a>
             <a href="MES PNS/PNSCHUN_MES(3).pdf" target="_blank">
-                <p>Kết thúc BEAM</p>
+                <p data-i18n="group1-text14">Kết thúc BEAM</p>
             </a>
             <a href="MES PNS/PNSCHUN_MES(4).pdf" target="_blank">
-                <p>Kết thúc BEAM từ ca trước</p>
+                <p data-i18n="group1-text15">Kết thúc BEAM từ ca trước</p>
             </a>
             <a href="MES PNS/PNSCHUN_MES(5).pdf" target="_blank">
-                <p>Kết thúc ca nhưng BEAM đang chạy</p>
+                <p data-i18n="group1-text16">Kết thúc ca nhưng BEAM đang chạy</p>
             </a>
             <img src="MES PNS/Slide23.PNG" alt="Slide 2" loading="lazy">
         </div>
@@ -480,21 +504,24 @@
     </div>
     <div id="right-thumbnails" class="thumbnail-panel">
     </div>
-
+    <script src="js/localize.js"></script>
     <script>
         let observer = null; // global so we can disconnect before reuse
+        let currentGroup = "group1";
 
         const sidebarButtons = document.querySelectorAll('.sidebar-button');
 
-sidebarButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    sidebarButtons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-  });
-});
+        sidebarButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                sidebarButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
 
         function showGroup(groupId, title) {
-            document.getElementById("title").innerText = title;
+            currentGroup = groupId;
+            const savedLang = localStorage.getItem('lang') || 'en';
+            document.getElementById("title").innerText = translations[savedLang][groupId];
             // Hide all groups
             const groups = document.querySelectorAll('.slide-group');
             groups.forEach(group => group.classList.remove('active'));
@@ -599,7 +626,25 @@ sidebarButtons.forEach(button => {
         showGroup('group1', 'QUY TRÌNH SẢN XUẤT HÀNG XƯỞNG 1');
 
     </script>
+    <script>
+        function localize(lang = 'en') {
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                elem.textContent = translations[lang][key] || key;
+            });
+        }
+        document.getElementById('language-select').addEventListener('change', e => {
+            const lang = e.target.value;
+            localStorage.setItem('lang', lang);
+            localize(lang);
+            document.getElementById("title").innerText = translations[lang][currentGroup];
+        });
 
+        // Load saved language on page load
+        const savedLang = localStorage.getItem('lang') || 'en';
+        document.getElementById('language-select').value = savedLang;
+        localize(savedLang);
+    </script>
 </body>
 
 </html>
