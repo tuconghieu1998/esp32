@@ -47,19 +47,27 @@
 					<li class="sidebar-header">
 						ESP32
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item active">
 						<a class="sidebar-link" href="/">
 							<i class="align-middle" data-feather="sliders"></i> <span
 								class="align-middle">Dashboard</span>
 						</a>
+					</li>
+					<li class="sidebar-item">
 						<a class="sidebar-link" href="/sensors">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Diagrams</span>
 						</a>
+					</li>
+					<li class="sidebar-item">
 						<a class="sidebar-link" href="/sensors/chart">
-							<i class="align-middle" data-feather="activity"></i> <span class="align-middle">Charts</span>
+							<i class="align-middle" data-feather="activity"></i> <span
+								class="align-middle">Charts</span>
 						</a>
+					</li>
+					<li class="sidebar-item">
 						<a class="sidebar-link" href="/sensors/workshop-chart">
-							<i class="align-middle" data-feather="activity"></i> <span class="align-middle">Workshop Chart</span>
+							<i class="align-middle" data-feather="activity"></i> <span class="align-middle">Workshop
+								Chart</span>
 						</a>
 					</li>
 					<li class="sidebar-header">
@@ -67,8 +75,8 @@
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/machine/ws2">
-							<i class="align-middle" data-feather="server"></i> <span
-								class="align-middle">Workshop 2</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Workshop
+								2</span>
 						</a>
 					</li>
 					<li class="sidebar-header">
@@ -76,8 +84,7 @@
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/mes">
-							<i class="align-middle" data-feather="grid"></i> <span
-								class="align-middle">MES PNS</span>
+							<i class="align-middle" data-feather="grid"></i> <span class="align-middle">MES PNS</span>
 						</a>
 					</li>
 					<li class="sidebar-header">
@@ -333,6 +340,21 @@
 
 	<script src="/js/app.js"></script>
 	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const sidebarItems = document.querySelectorAll(".sidebar-item");
+
+			sidebarItems.forEach(item => {
+				const link = item.querySelector("a.sidebar-link");
+				if (link && link.getAttribute("href") === window.location.pathname) {
+					// Loại bỏ "active" khỏi tất cả các item
+					sidebarItems.forEach(i => i.classList.remove("active"));
+					// Gán "active" cho item trùng href với location.pathname
+					item.classList.add("active");
+				}
+			});
+		});
+	</script>
+	<script>
 		document.getElementById("logout").addEventListener("click", () => {
 			fetch('/account/logout', { method: 'POST', credentials: 'include' }) // Notify server to destroy session
 				.then(() => {
@@ -340,10 +362,10 @@
 					window.location.href = "/account/login"; // Redirect to login page
 				})
 				.catch(error => {
-					console.error("Logout failed:", error); 
+					console.error("Logout failed:", error);
 					localStorage.removeItem("pnsmrotoken"); // Remove JWT token
 					window.location.href = "/account/login"; // Redirect to login page
-					}
+				}
 				);
 		});
 	</script>
