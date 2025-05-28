@@ -10,6 +10,7 @@ import sensorsRoute from './routes/sensors/index.route.js';
 import cameraRoute from './routes/camera/index.route.js';
 import accountRoute from './routes/account/index.route.js';
 import machineRoute from './routes/machine/index.route.js';
+import stockRoute from './routes/stock/index.route.js';
 import session from 'express-session';
 import { authenticate, authenticateWebSocket } from './middlewares/middleware.js';
 
@@ -111,6 +112,7 @@ app.use('/sensors', sensorsRoute);
 app.use('/camera', cameraRoute);
 app.use('/account', accountRoute);
 app.use('/machine', machineRoute);
+app.use('/stock', stockRoute);
 app.get('/mes', authenticate, (req, res) => {
     res.render('mes', { layout: false });
 });
