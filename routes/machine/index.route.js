@@ -23,6 +23,14 @@ router.get('/ws2', authenticate, async (req, res, next) => {
     });
 });
 
+router.get('/machine-dashboard', authenticate, async (req, res, next) => {
+    res.render('machine/machine_dashboard.hbs');
+});
+
+router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
+    res.render('machine/workshop_dashboard.hbs');
+});
+
 function getCurrentTime() {
     return moment().format('YYYY-MM-DD HH:mm:ss');
 }

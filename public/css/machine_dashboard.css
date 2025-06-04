@@ -1,0 +1,140 @@
+.timeline-container {
+    position: relative;
+    height: 60px;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+}
+
+.timeline-block {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    border-right: 1px solid #fff;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.running {
+    background-color: #28a745;
+}
+
+.stopped {
+    background-color: #dc3545;
+}
+
+.changeover {
+    background-color: #ffc107;
+}
+
+.timeline-block:hover {
+    transform: scaleY(1.1);
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+
+.timeline-block:hover::after {
+    opacity: 1;
+    transform: translateY(-10px);
+}
+
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.timeline-date {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+/* Custom Tooltip */
+#custom-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.day-cell {
+    border: 1px solid #ddd;
+    padding: 10px;
+    min-height: 80px;
+    position: relative;
+    cursor: default;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.percent-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 0.85rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    color: white;
+}
+
+/* Color scale for percent running */
+.percent-high {
+    background-color: #28a745;
+}
+
+/* green */
+.percent-medium {
+    background-color: #FB9E3A;
+}
+
+/* yellow */
+.percent-low {
+    background-color: #dc3545;
+}
+
+/* red */
+
+.machine-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+    text-align: center;
+    font-size: 14px;
+    background-color: #f8f9fa;
+  }
+
+  .machine-card .percent {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .high { color: green; }
+  .medium { color: orange; }
+  .low { color: red; }
