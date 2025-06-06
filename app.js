@@ -114,7 +114,7 @@ app.use('/sensors', sensorsRoute);
 app.use('/camera', cameraRoute);
 app.use('/account', accountRoute);
 app.use('/machine', machineRoute);
-app.get('/mes', authenticate, (req, res) => {
+app.get('/mes', (req, res) => {
     res.render('mes', { layout: false });
 });
 
