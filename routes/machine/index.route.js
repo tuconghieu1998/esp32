@@ -89,7 +89,7 @@ async function broadcastMachineData() {
 }
 
 // Periodically broadcast data
-//setInterval(broadcastMachineData, DELAY_SEND_WS);
+setInterval(broadcastMachineData, DELAY_SEND_WS);
 
 let MACHINES_DATA = await initMachines();
 
@@ -101,6 +101,7 @@ async function updateMachinesData() {
         if(machines[sensor_id]) {
             MACHINES_DATA[i].status = machines[sensor_id].status;
             MACHINES_DATA[i].update_time = machines[sensor_id].update_time;
+            MACHINES_DATA[i].connect = machines[sensor_id].connect;
         }
     }
     return true;
@@ -120,7 +121,8 @@ async function initMachines() {
             machine_id: machinesConfig[i].machine_id,
             line: machinesConfig[i].line,
             status: 'stopped',
-            update_time: currentTime
+            update_time: currentTime,
+            connect: false
         });
     }
     return machines;

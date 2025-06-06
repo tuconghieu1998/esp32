@@ -14,8 +14,8 @@
     background-color: red;
 }
 
-.status-waiting {
-    background-color: green;
+.status-disconnected {
+    background-color: grey;
     opacity: 0.3;
 }
 

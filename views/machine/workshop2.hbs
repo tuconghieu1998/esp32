@@ -57,14 +57,16 @@
             sensor_id: "####",
             machine_id: "####",
             line: Math.floor(i / (numberOfMachines / lines)) + 1,
-            status: "waiting",
+            status: "stopped",
+            connect: false
         }));
         return machines;
     }
 
     let machines = generateMachines(200);
 
-    function getStatusDisplay(status) {
+    function getStatusDisplay(status, connect) {
+        if(!connect) return `status-disconnected`; 
         return `status-${status}`;
     }
 
@@ -98,7 +100,7 @@
             lineRow.className = 'd-flex flex-wrap gap-2 mb-3';
 
             lineMachines.forEach(machine => {
-                const statusClass = `status-${machine.status}`;
+                const statusClass = getStatusDisplay(machine.status, machine.connect);
 
                 const col = document.createElement('div');
                 col.style.width = '64px';
@@ -165,6 +167,7 @@
                 machines[machine_id - 1].sensor_id = data[i].sensor_id;
                 machines[machine_id - 1].machine_id = data[i].machine_id;
                 machines[machine_id - 1].status = data[i].status;
+                machines[machine_id - 1].connect = data[i].connect;
             }
         }
         renderMachines(current_filter);
