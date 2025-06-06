@@ -93,6 +93,9 @@ app.engine("hbs", engine({
         },
         increment: (value) => value + 1, // Increments value by 1
         decrement: (value) => value - 1, // Optional: Decrement helper
+        formatMachineId: function (id) {
+            return '#' + String(id).padStart(3, '0');
+        }
     }
 }));
 

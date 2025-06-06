@@ -1,8 +1,13 @@
 <div class="container mt-5">
-    <h2>Machine #001</h2>
+    <h2>Weaving Machine Dashboard</h2>
     <!-- Date Filter -->
-    <div class="row mb-4">
+    <div class="row mb-4 mt-4">
         <div class="col-md-3">
+            <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
+            <input type="text" name="machine-id" id="machine-id" class="form-control" value="{{formatMachineId machine_id}}" placeholder="Machine No">
+        </div>
+        <div class="col-md-3">
+            <label for="time" class="form-label"><strong>Date</strong></label>
             <div class="input-group date">
                 <input type="text" name="time" id="time" class="form-control" placeholder="Date">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>

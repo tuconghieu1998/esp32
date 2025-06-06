@@ -128,13 +128,21 @@
     text-align: center;
     font-size: 14px;
     background-color: #f8f9fa;
-  }
+    cursor: pointer;
+}
 
-  .machine-card .percent {
+.machine-card .percent {
     font-weight: bold;
     font-size: 18px;
-  }
+}
 
-  .high { color: green; }
-  .medium { color: orange; }
-  .low { color: red; }
+.percent.high { color: green; }
+.percent.medium { color: orange; }
+.percent.low { color: red; }
+
+.details {
+  font-size: 14px;
+  margin-top: 6px;
+  text-align: center;
+  color: grey;
+}

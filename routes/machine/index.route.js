@@ -23,8 +23,9 @@ router.get('/ws2', authenticate, async (req, res, next) => {
     });
 });
 
-router.get('/machine-dashboard', authenticate, async (req, res, next) => {
-    res.render('machine/machine_dashboard.hbs');
+router.get('/machine-dashboard/:machine_id', authenticate, async (req, res, next) => {
+    const machine_id = req.params.machine_id;
+    res.render('machine/machine_dashboard.hbs', {machine_id});
 });
 
 router.get('/workshop-dashboard', authenticate, async (req, res, next) => {

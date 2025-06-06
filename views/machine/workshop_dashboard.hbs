@@ -1,7 +1,7 @@
 <div class="container mt-5">
     <h2>Workshop 2 Dashboard</h2>
     <!-- Date Filter -->
-    <div class="row mb-4">
+    <div class="row mb-4 mt-4">
         <div class="col-md-3">
             <div class="input-group date">
                 <input type="text" name="time" id="time" class="form-control" placeholder="Date">
@@ -53,28 +53,53 @@
     </div>
 
     <h4 class="mb-3">Machine Performance Overview</h4>
-  <div class="row" id="machine-grid"></div>
+    <div class="row" id="machine-grid"></div>
 
-    
+
 </div>
+<script>
+    $(document).ready(function () {
+        $('#time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+    });
+</script>
 
 <script>
-  const grid = document.getElementById("machine-grid");
+    const grid = document.getElementById("machine-grid");
 
-  for (let i = 1; i <= 200; i++) {
-    const percent = Math.floor(Math.random() * 70) + 30; // Random 30%–100%
-    const card = document.createElement("div");
-    card.className = "col-6 col-sm-4 col-md-3 col-lg-2";
+    for (let i = 1; i <= 200; i++) {
+        const percent = Math.floor(Math.random() * 70) + 30; // Random 30%–100%
+        const card = document.createElement("div");
+        card.className = "col-6 col-sm-4 col-md-3 col-lg-2";
 
-    const levelClass = percent >= 75 ? 'high' : (percent >= 50 ? 'medium' : 'low');
+        const levelClass = percent >= 75 ? 'high' : (percent >= 50 ? 'medium' : 'low');
 
-    card.innerHTML = `
-      <div class="machine-card">
+        card.innerHTML = `
+      <div class="machine-card" data-machine-id="${i}">
         <div><strong>Machine #${String(i).padStart(3, '0')}</strong></div>
         <div class="percent ${levelClass}">${percent}%</div>
       </div>
     `;
 
-    grid.appendChild(card);
-  }
+        grid.appendChild(card);
+    }
+
+    document.querySelectorAll('.machine-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const machineId = card.dataset.machineId;
+            showDashboard(machineId);
+        });
+    });
+
+    function showDashboard(machineId) {
+        // Load or render the dashboard (use modal or page section)
+        const url = `/machine/machine-dashboard/${machineId}`;
+        window.open(url, '_blank');
+
+        // Example: you could fetch data via AJAX or display a hidden section
+        // $('#dashboard-section').html(renderMachineDashboard(machineId));
+    }
 </script>
