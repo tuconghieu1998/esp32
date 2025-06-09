@@ -173,7 +173,7 @@
     // Listen for incoming data from WebSocket server
     socket.addEventListener('message', function (event) {
         let data = JSON.parse(event.data);
-        console.log("DATA: ", data);
+        //console.log("DATA: ", data);
         let machine_states = data.machine_states;
         time_server = data.time_server;
         for (let i = 0; i < machine_states.length; i++) {
