@@ -78,7 +78,7 @@ async function broadcastMachineData() {
     if (hasClientReady()) {
         const updated = await updateMachinesData();
         if(!updated) return;
-        const data = JSON.stringify(MACHINES_DATA);
+        const data = JSON.stringify({machine_states: MACHINES_DATA, time_server: MACHINE_TIME_SERVER});
 
         for (const client of clients) {
             if (client.readyState === 1) {
@@ -92,16 +92,18 @@ async function broadcastMachineData() {
 setInterval(broadcastMachineData, DELAY_SEND_WS);
 
 let MACHINES_DATA = await initMachines();
+let MACHINE_TIME_SERVER;
 
 async function updateMachinesData() {
-    let machines = await getMachineData();
+    let data = await getMachineData();
+    let machines = data.machine_states;
+    MACHINE_TIME_SERVER = data.current_time;
     if(machines.length == 0) return false;
     for(let i = 0 ;i<MACHINES_DATA.length;i++) {
         let sensor_id = MACHINES_DATA[i].sensor_id; 
         if(machines[sensor_id]) {
             MACHINES_DATA[i].status = machines[sensor_id].status;
             MACHINES_DATA[i].update_time = machines[sensor_id].update_time;
-            MACHINES_DATA[i].connect = machines[sensor_id].connect;
         }
     }
     return true;
@@ -120,9 +122,8 @@ async function initMachines() {
             sensor_id: machinesConfig[i].sensor_id,
             machine_id: machinesConfig[i].machine_id,
             line: machinesConfig[i].line,
-            status: 'stopped',
+            status: 'disconnected',
             update_time: currentTime,
-            connect: false
         });
     }
     return machines;
