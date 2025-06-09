@@ -32,6 +32,10 @@ router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
     res.render('machine/workshop_dashboard.hbs');
 });
 
+router.get('/machine-config', authenticate, async (req, res, next) => {
+    res.render('machine/machine_config.hbs');
+});
+
 function getCurrentTime() {
     return moment().format('YYYY-MM-DD HH:mm:ss');
 }
