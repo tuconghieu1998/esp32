@@ -60,7 +60,21 @@
 
     <div class="card flex-fill p-4">
         <h5>Working Timeline</h5>
-
+        <div class="mb-2 d-flex gap-1 align-items-center">
+            <div><strong>Status Legend:</strong></div>
+            <div class="legend-box running"></div><span>Running</span>
+            <div class="legend-box stopped"></div><span>Stopped</span>
+            <div class="legend-box changeover"></div><span>Changeover</span>
+            <div class="legend-box disconnected"></div><span>Disconnected</span>
+        </div>
+        <div class="timeline-container" id="timeline-container"></div>
+        <div class="timeline-hours d-flex justify-content-between mt-1">
+            <span>0h</span>
+            <span>6h</span>
+            <span>12h</span>
+            <span>18h</span>
+            <span>24h</span>
+        </div>
         <!-- Timeline rows -->
         <div class="mb-3">
             <div class="timeline-date">28/05</div>
@@ -245,6 +259,67 @@
                 }
             });
         });
+
+        function loadTimeline() {
+            let machine_id = '1';
+            let date = '10/06/2025';
+            console.log('loadTimeline', machine_id, date);
+            $.ajax({
+                url: `/machine/api/machine-timeline`,
+                method: "GET",
+                data: { machine_id, date },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response.data);
+                    renderTimeline(response.data); // gọi hàm render với dữ liệu
+                },
+                error: function () {
+                    alert("Failed to load timeline data.");
+                }
+            });
+        }
+
+        function renderTimeline(data) {
+            const container = document.getElementById("timeline-container");
+            container.innerHTML = "";
+
+            const totalMinutes = 1440; // 24 * 60
+
+            data.forEach(block => {
+                const start = new Date(block.start_time.replace('Z', ''));
+                const end = new Date(block.end_time.replace('Z', ''));
+
+                const startMinutes = start.getHours() * 60 + start.getMinutes();
+                const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+                const leftPercent = (startMinutes / totalMinutes) * 100;
+                const widthPercent = ((endMinutes - startMinutes) / totalMinutes) * 100;
+
+                const div = document.createElement("div");
+                div.className = `timeline-block ${block.status}`;
+                div.style.left = `${leftPercent}%`;
+                div.style.width = `${widthPercent}%`;
+                div.dataset.start = block.data_start;
+                div.dataset.end = block.data_end;
+                div.dataset.duration = block.data_duration;
+
+                container.appendChild(div);
+            });
+        }
+
+        // Helper: tính thời gian phút giữa 2 timestamp
+        function getDurationInMinutes(start, end) {
+            const startTime = new Date(start);
+            const endTime = new Date(end);
+            return Math.floor((endTime - startTime) / 60000); // milliseconds to minutes
+        }
+
+        // Helper: viết hoa chữ cái đầu
+        function capitalizeFirstLetter(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        loadTimeline();
     });
 </script>
 
