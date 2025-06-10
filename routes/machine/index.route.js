@@ -16,7 +16,7 @@ router.get('/', authenticate, (req, res, next) => {
     res.render('machine');
 });
 
-router.get('/ws2', authenticate, async (req, res, next) => {
+router.get('/ws2', async (req, res, next) => {
     let machines = MACHINES_DATA;
     res.render('machine/workshop2.hbs', {
         machines
