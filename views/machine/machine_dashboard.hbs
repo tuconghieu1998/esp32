@@ -67,73 +67,7 @@
             <div class="legend-box changeover"></div><span>Changeover</span>
             <div class="legend-box disconnected"></div><span>Disconnected</span>
         </div>
-        <div class="timeline-container" id="timeline-container"></div>
-        <div class="timeline-hours d-flex justify-content-between mt-1">
-            <span>0h</span>
-            <span>6h</span>
-            <span>12h</span>
-            <span>18h</span>
-            <span>24h</span>
-        </div>
-        <!-- Timeline rows -->
-        <div class="mb-3">
-            <div class="timeline-date">28/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <div class="timeline-date">29/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <div class="timeline-date">30/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
-        </div>
-
-        <!-- Time labels below last timeline only -->
-        <div class="time-labels mb-5">
-            <span>08:50</span>
-            <span>10:00</span>
-            <span>12:00</span>
-            <span>14:00</span>
-            <span>16:00</span>
-            <span>17:00</span>
-        </div>
-
+        <div id="multi-day-timelines"></div>
     </div>
 
     <div class="card flex-fill p-4">
@@ -258,29 +192,23 @@
                     }
                 }
             });
+
+            loadLast5Timelines(machine_id, date);
         });
 
-        function loadTimeline() {
-            let machine_id = '1';
-            let date = '10/06/2025';
-            console.log('loadTimeline', machine_id, date);
-            $.ajax({
-                url: `/machine/api/machine-timeline`,
-                method: "GET",
-                data: { machine_id, date },
-                dataType: "json",
-                success: function (response) {
-                    console.log(response.data);
-                    renderTimeline(response.data); // gọi hàm render với dữ liệu
-                },
-                error: function () {
-                    alert("Failed to load timeline data.");
-                }
-            });
-        }
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1; // Months start at 0!
+        let dd = today.getDate();
 
-        function renderTimeline(data) {
-            const container = document.getElementById("timeline-container");
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        const formattedToday = dd + '/' + mm + '/' + yyyy;
+        loadLast5Timelines('1', formattedToday);
+
+        function renderTimeline(containerSelector, data) {
+            const container = document.querySelector(containerSelector);
             container.innerHTML = "";
 
             const totalMinutes = 1440; // 24 * 60
@@ -307,19 +235,58 @@
             });
         }
 
-        // Helper: tính thời gian phút giữa 2 timestamp
-        function getDurationInMinutes(start, end) {
-            const startTime = new Date(start);
-            const endTime = new Date(end);
-            return Math.floor((endTime - startTime) / 60000); // milliseconds to minutes
+        function createTimelineHTML(dateStr) {
+            return `
+                <div class="mb-3">
+                    <div class="timeline-date">${dateStr}</div>
+                    <div class="timeline-container" id="timeline-${dateStr.replaceAll('/', '')}"></div>
+                    <div class="timeline-hours d-flex justify-content-between mt-1">
+                        <span>0h</span><span>3h</span><span>6h</span><span>9h</span><span>12h</span>
+                        <span>15h</span><span>18h</span><span>21h</span><span>24h</span>
+                    </div>
+                </div>
+            `;
         }
 
-        // Helper: viết hoa chữ cái đầu
-        function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
+        function createDateObject(dateStr) {
+            let dateParts = dateStr.split("/");
+            return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
         }
 
-        loadTimeline();
+        function getLast5Dates(date = new Date()) {
+            const dates = [];
+            for (let i = 0; i < 5; i++) {
+                const d = new Date(date);
+                d.setDate(date.getDate() - i);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const dateStr = `${day}/${month}`;
+                const dateParam = d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+                dates.push({ display: dateStr, param: dateParam });
+            }
+            return dates;
+        }
+
+        function loadLast5Timelines(machine_id, date) {
+            const container = document.getElementById("multi-day-timelines");
+            container.innerHTML = '';
+            const dates = getLast5Dates(createDateObject(date));
+            dates.forEach(({ display, param }) => {
+                // 1. Tạo HTML dòng timeline
+                container.innerHTML += createTimelineHTML(display);
+
+                // 2. Gọi API và render timeline
+                $.ajax({
+                    url: `/machine/api/machine-timeline`,
+                    method: "GET",
+                    data: { machine_id, date: param },
+                    dataType: "json",
+                    success: function (response) {
+                        renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                    }
+                });
+            });
+        }
     });
 </script>
 

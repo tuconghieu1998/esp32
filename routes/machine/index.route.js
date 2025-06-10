@@ -90,7 +90,6 @@ router.get("/api/machine-timeline", async (req, res) => {
         dateFormat = convertDateFormat(date);
     }
     const data = await getTimeLineMachineWorking(machine_id, dateFormat);
-    console.log(data);
     res.json({
         data
     });
