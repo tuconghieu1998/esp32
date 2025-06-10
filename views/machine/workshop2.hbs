@@ -71,9 +71,6 @@
         const now = new Date(time_server.replace(" ", "T"));
         const updated = new Date(update_time.replace(" ", "T"));
         const diffSeconds = (now - updated) / 1000;
-
-        console.log("getStatusDisplay: ", now, updated, diffSeconds);
-
         const disconnectedThreshold = 60;
 
         if (diffSeconds > disconnectedThreshold) {
