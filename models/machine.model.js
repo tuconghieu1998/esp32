@@ -186,6 +186,7 @@ ORDER BY start_time;
 
 
 export async function getTimeMachineRunningInMonth(machineId, date) {
+    console.log("getTimeMachineRunningInMonth", machineId, date);
     let pool;
     try {
         pool = await getConnection();
