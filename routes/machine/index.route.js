@@ -5,7 +5,7 @@ import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
 expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
-import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking } from '../../models/machine.model.js';
+import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth } from '../../models/machine.model.js';
 import moment from 'moment';
 import { convertDateFormat } from '../../utils/helpers.js';
 
@@ -90,6 +90,18 @@ router.get("/api/machine-timeline", async (req, res) => {
         dateFormat = convertDateFormat(date);
     }
     const data = await getTimeLineMachineWorking(machine_id, dateFormat);
+    res.json({
+        data
+    });
+});
+
+router.get("/api/machine-month", async (req, res) => {
+    let { machine_id, date } = req.query;
+    let dateFormat = new Date().toISOString().split('T')[0];
+    if (date && date != '') {
+        dateFormat = convertDateFormat(date);
+    }
+    const data = await getTimeMachineRunningInMonth(machine_id, dateFormat);
     res.json({
         data
     });

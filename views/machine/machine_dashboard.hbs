@@ -211,7 +211,9 @@
         if (mm < 10) mm = '0' + mm;
 
         const formattedToday = dd + '/' + mm + '/' + yyyy;
+        const currentMonth = '01/' + mm + '/' + yyyy;
         loadLast5Timelines('1', formattedToday);
+        loadPercentRunningMonth('1', mm, yyyy);
 
         function renderTimeline(containerSelector, data) {
             const container = document.querySelector(containerSelector);
@@ -220,8 +222,8 @@
             const totalMinutes = 1440; // 24 * 60
 
             data.forEach(block => {
-                const start = new Date(block.start_time.replace('Z', ''));
-                const end = new Date(block.end_time.replace('Z', ''));
+                const start = new Date(block.start_time && block.start_time.replace('Z', ''));
+                const end = new Date(block.end_time && block.end_time.replace('Z', ''));
 
                 const startMinutes = start.getHours() * 60 + start.getMinutes();
                 const endMinutes = end.getHours() * 60 + end.getMinutes();
@@ -293,13 +295,32 @@
                 });
             });
         }
-    });
-</script>
 
-<script>
+        function loadLast5Timelines(machine_id, date) {
+            const container = document.getElementById("multi-day-timelines");
+            container.innerHTML = '';
+            const dates = getLast5Dates(createDateObject(date));
+            dates.forEach(({ display, param }) => {
+                // 1. Tạo HTML dòng timeline
+                container.innerHTML += createTimelineHTML(display);
+
+                // 2. Gọi API và render timeline
+                $.ajax({
+                    url: `/machine/api/machine-timeline`,
+                    method: "GET",
+                    data: { machine_id, date: param },
+                    dataType: "json",
+                    success: function (response) {
+                        renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                    }
+                });
+            });
+        }
+    });
+
     function getBadgeClass(percent) {
-        if (percent >= 75) return 'percent-high';
-        if (percent >= 50) return 'percent-medium';
+        if (percent >= 50) return 'percent-high';
+        if (percent > 0) return 'percent-medium';
         return 'percent-low';
     }
 
@@ -329,16 +350,14 @@
         return data;
     }
 
-    function generateCalendar(month, year) {
+    function generateCalendar(month, year, percentData) {
         const calendar = document.getElementById('calendar');
         calendar.innerHTML = ''; // Clear existing content
 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
 
-        const percentData = generatePercentData(daysInMonth);
-
-        // Add blank cells
+        // Add blank cells before the 1st day
         for (let i = 0; i < firstDay; i++) {
             const emptyCell = document.createElement('div');
             calendar.appendChild(emptyCell);
@@ -346,13 +365,14 @@
 
         // Add days
         for (let day = 1; day <= daysInMonth; day++) {
-            calendar.appendChild(createDayCell(day, month, year, percentData[day]));
+            const percent = percentData[day] || 0; // default to 0 if no data
+            calendar.appendChild(createDayCell(day, month, year, percent));
         }
     }
 
     // Initial calendar for current month
-    const now = new Date();
-    generateCalendar(now.getMonth(), now.getFullYear());
+    //const now = new Date();
+    //generateCalendar(now.getMonth(), now.getFullYear());
 
     // When month is selected
     $('#btn-select-month').on('click', function () {
@@ -363,6 +383,31 @@
         const month = parseInt(parts[0], 10) - 1;
         const year = parseInt(parts[1], 10);
 
-        generateCalendar(month, year);
+        // generateCalendar(month, year);
+        loadPercentRunningMonth('1', month, year);
     });
+
+    function loadPercentRunningMonth(machine_id, month, year) {
+        const date = '01/' + month + '/' + year;
+        $.ajax({
+            url: `/machine/api/machine-month`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+
+                // Convert to { 1: 83, 2: 45, ... }
+                const percentData = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                }
+                generateCalendar(month - 1, year, percentData);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
 </script>
