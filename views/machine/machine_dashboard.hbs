@@ -32,7 +32,7 @@
             <div class="card border-success">
                 <div class="card-body">
                     <h5 class="card-title text-success">Hours Running</h5>
-                    <p id="time-running" class="card-text display-4">{{timeRunning}}</p>
+                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime timeRunning}}</p>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="card border-danger">
                 <div class="card-body">
                     <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p id="time-stopped" class="card-text display-4">{{timeStopped}}</p>
+                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime timeStopped}}</p>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-warning">Change Over</h5>
-                    <p id="time-changeover" class="card-text display-4">{{timeChangeOver}}</p>
+                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime timeChangeOver}}</p>
                 </div>
             </div>
         </div>
@@ -177,17 +177,17 @@
 
                         const e2 = $('#time-running');
                         e2.fadeOut(200, function () {
-                            $(this).text(timeRunning).fadeIn(200);
+                            $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
                         });
 
                         const e3 = $('#time-stopped');
                         e3.fadeOut(200, function () {
-                            $(this).text(timeStopped).fadeIn(200);
+                            $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
                         });
 
                         const e4 = $('#time-changeover');
                         e4.fadeOut(200, function () {
-                            $(this).text(timeChangeOver).fadeIn(200);
+                            $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
                         });
                     }
                 }
@@ -195,6 +195,12 @@
 
             loadLast5Timelines(machine_id, date);
         });
+
+        function convertDecimalHoursToTime(decimalHours) {
+            const hours = Math.floor(decimalHours);
+            const minutes = Math.round((decimalHours - hours) * 60);
+            return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        }
 
         const today = new Date();
         const yyyy = today.getFullYear();

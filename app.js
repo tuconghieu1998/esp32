@@ -95,6 +95,11 @@ app.engine("hbs", engine({
         decrement: (value) => value - 1, // Optional: Decrement helper
         formatMachineId: function (id) {
             return '#' + String(id).padStart(3, '0');
+        },
+        convertDecimalHoursToTime: function(decimalHours) {
+            const hours = Math.floor(decimalHours);
+            const minutes = Math.round((decimalHours - hours) * 60);
+            return `${hours}:${minutes.toString().padStart(2, '0')}`;
         }
     }
 }));
