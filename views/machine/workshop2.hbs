@@ -2,27 +2,21 @@
     <div class="container-fluid p-0">
         <h2 class="h3 mb-3">Machine for Workshop 2</h2>
         <div class="mb-3" id="statusFilterGroup">
-            <label class="form-check form-check-inline">
+            <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="all" checked>
                 <span class="form-check-label">All</span>
             </label>
-            <label class="form-check form-check-inline">
+            <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="running">
-                <span class="form-check-label d-flex align-items-center gap-1">
-                    Running
-                </span>
+                <span>Running</span><div class="legend-box-filter running"></div>
             </label>
-            <label class="form-check form-check-inline">
+            <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="stopped">
-                <span class="form-check-label d-flex align-items-center gap-1">
-                    Stopped
-                </span>
+                <span>Stopped</span><div class="legend-box-filter stopped"></div>
             </label>
-            <label class="form-check form-check-inline">
+            <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="changeover">
-                <span class="form-check-label d-flex align-items-center gap-1">
-                    Change Over
-                </span>
+                <span>Changeover</span><div class="legend-box-filter changeover"></div>
             </label>
         </div>
         <div class="row g-2" id="machineGrid"></div>

@@ -158,6 +158,15 @@
     vertical-align: middle;
 }
 
+.legend-box-filter {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
 /* Dùng lại class màu từ timeline-block */
 .legend-box.running { background-color: #28a745; }
 .legend-box.stopped { background-color: #dc3545; }
