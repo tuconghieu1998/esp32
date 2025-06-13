@@ -76,7 +76,7 @@
             <div class="col-md-3">
                 <div class="input-group date">
                     <input type="text" id="monthpicker" class="form-control w-25" placeholder="Select Month" />
-                    <button id="btn-select-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
                         Search</button>
                 </div>
             </div>
@@ -127,6 +127,16 @@
         return '#' + String(id).padStart(3, '0');
     }
 
+    function getMachineId() {
+        let machineIdStr = $("#machine-id").val();
+        machineIdStr = machineIdStr.replace('#', '');
+        if (isNaN(Number(machineIdStr))) {
+            alert("Machine ID invalid!");
+            return '';
+        }
+        return Number(machineIdStr);
+    }
+
     $(document).ready(function () {
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
@@ -143,14 +153,9 @@
 
         $('#search-btn').click(function (e) {
             e.preventDefault();
-            let machineIdStr = $("#machine-id").val();
             let date = $("#time").val();
-            machineIdStr = machineIdStr.replace('#', '');
-            if (isNaN(Number(machineIdStr))) {
-                alert("Machine ID invalid!");
-                return;
-            }
-            let machine_id = Number(machineIdStr);
+            let machine_id = getMachineId();
+            if (machine_id == '') return;
 
             $.ajax({
                 url: `/machine/api/machine-dashboard`,
@@ -194,6 +199,7 @@
             });
 
             loadLast5Timelines(machine_id, date);
+            handleLoadRunningPercentInMonth();
         });
 
         function convertDecimalHoursToTime(decimalHours) {
@@ -375,7 +381,9 @@
     //generateCalendar(now.getMonth(), now.getFullYear());
 
     // When month is selected
-    $('#btn-select-month').on('click', function () {
+    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+
+    function handleLoadRunningPercentInMonth() {
         const val = $('#monthpicker').val(); // Format: mm/yyyy
         if (!val) return;
 
@@ -384,12 +392,11 @@
         const year = parseInt(parts[1], 10);
 
         // generateCalendar(month, year);
-        loadPercentRunningMonth('1', month, year);
-    });
+        loadPercentRunningMonth(getMachineId(), month, year);
+    }
 
     function loadPercentRunningMonth(machine_id, month, year) {
         const date = '01/' + (month + 1) + '/' + year;
-        console.log("loadPercentRunningMonth: ", date);
         $.ajax({
             url: `/machine/api/machine-month`,
             method: "GET",
