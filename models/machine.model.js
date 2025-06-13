@@ -1,5 +1,4 @@
 import { getConnection, closeConnection } from "../db.js";
-import sql from 'mssql';
 
 const table_config = "ws2_machine_config";
 const table_data = "ws2_working_status";

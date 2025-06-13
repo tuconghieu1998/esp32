@@ -41,6 +41,118 @@
             </div>
         </div>
     </div>
+
+    <!-- Machine Detail Modal -->
+    <div class="modal fade" id="machineDashboardModal" tabindex="-1" aria-labelledby="machineDashboardModalLabel"
+        aria-hidden="true" data-id="">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="machineDashboardModalLabel">Weaving Machine Dashboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="p-3" id="modalMachineDashoardContent">
+                    <div class="row mb-4 mt-4">
+                        <div class="col-md-3">
+                            <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
+                            <input type="text" name="machine-id" id="machine-id" class="form-control"
+                                value="" placeholder="Machine No">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="time" class="form-label"><strong>Date</strong></label>
+                            <div class="input-group date">
+                                <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                                <button type="submit" class="btn btn-primary" id="search-btn"><i
+                                        class="bi bi-funnel"></i>
+                                    Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center mb-4">
+                        <!-- Percent Running -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Percent Running</h5>
+                                    <p id="percent-running" class="card-text display-4">0.00%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Running -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Hours Running</h5>
+                                    <p id="time-running" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Stopped -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-danger">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger">Hours Stopped</h5>
+                                    <p id="time-stopped" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Change Over -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning">Change Over</h5>
+                                    <p id="time-changeover" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card flex-fill p-4">
+                        <h5>Working Timeline</h5>
+                        <div class="mb-2 d-flex gap-1 align-items-center">
+                            <div><strong>Status Legend:</strong></div>
+                            <div class="legend-box running"></div><span>Running</span>
+                            <div class="legend-box stopped"></div><span>Stopped</span>
+                            <div class="legend-box changeover"></div><span>Changeover</span>
+                            <div class="legend-box disconnected"></div><span>Disconnected</span>
+                        </div>
+                        <div id="multi-day-timelines"></div>
+                    </div>
+
+                    <div class="card flex-fill p-4">
+                        <h3>Working in month</h3>
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="input-group date">
+                                    <input type="text" id="monthpicker" class="form-control w-25"
+                                        placeholder="Select Month" />
+                                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i
+                                            class="bi bi-funnel"></i>
+                                        Search</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="calendar" id="calendar-header">
+                            <!-- Weekday headers -->
+                            <div><strong>Sun</strong></div>
+                            <div><strong>Mon</strong></div>
+                            <div><strong>Tue</strong></div>
+                            <div><strong>Wed</strong></div>
+                            <div><strong>Thu</strong></div>
+                            <div><strong>Fri</strong></div>
+                            <div><strong>Sat</strong></div>
+                        </div>
+                        <div class="calendar" id="calendar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 <script>
     function generateMachines(num) {
@@ -66,7 +178,7 @@
     let time_server = null;
 
     function getStatusDisplay(status, update_time) {
-        if(!time_server || !update_time) return 'status-disconnected';
+        if (!time_server || !update_time) return 'status-disconnected';
 
         const now = new Date(time_server.replace(" ", "T"));
         const updated = new Date(update_time.replace(" ", "T"));
@@ -136,7 +248,10 @@
                         <p><strong>Line:</strong> ${machine.line}</p>
                     </div>`;
 
-                    const modal = new bootstrap.Modal(document.getElementById('machineModal'));
+                    let modalElement = document.getElementById('machineDashboardModal');
+                    console.log("set data id", machine);
+                    modalElement.setAttribute('data-id', machine.id);
+                    const modal = new bootstrap.Modal(modalElement);
                     modal.show();
                 });
 
@@ -193,4 +308,326 @@
             renderMachines(current_filter);
         });
     });
+
+
+    $('#machineDashboardModal').on('show.bs.modal', function (e) {
+        if(e.target != this) return;
+        $('#time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+
+        $('#monthpicker').datepicker({
+            format: "mm/yyyy",       // show month/year only
+            startView: "months",     // start view at months
+            minViewMode: "months",   // limit selection to months only
+            autoclose: true
+        }).datepicker('setDate', new Date());
+
+        const machine_id = $('#machineDashboardModal').attr("data-id");
+        $("#machine-id").val(formatMachineId(machine_id));
+        let date = $("#time").val();
+        console.log("Modal Show: ", machine_id, date);
+
+        loadMachineOverview(machine_id, date);
+        loadLast5Timelines(machine_id, date);
+        handleLoadRunningPercentInMonth();
+    });
+
+    const tooltip = document.getElementById('custom-tooltip');
+
+    document.querySelectorAll('.timeline-block').forEach(block => {
+        block.addEventListener('mousemove', (e) => {
+            const start = block.getAttribute('data-start');
+            const end = block.getAttribute('data-end');
+            const duration = block.getAttribute('data-duration');
+
+            tooltip.style.opacity = '1';
+            tooltip.style.left = e.pageX + 15 + 'px';  // offset a bit right
+            tooltip.style.top = e.pageY + 15 + 'px';   // offset a bit down
+
+            tooltip.innerHTML = `
+                <div><strong>${start} - ${end}</strong></div>
+                <div><strong>Duration:</strong> ${duration}</div>
+            `;
+        });
+
+        block.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+        });
+    });
+
+    function formatMachineId(id) {
+        return '#' + String(id).padStart(3, '0');
+    }
+
+    function getMachineId() {
+        let machineIdStr = $("#machine-id").val();
+        machineIdStr = machineIdStr.replace('#', '');
+        if (isNaN(Number(machineIdStr))) {
+            alert("Machine ID invalid!");
+            return '';
+        }
+        return Number(machineIdStr);
+    }
+
+    $('#search-btn').click(function (e) {
+        e.preventDefault();
+        let date = $("#time").val();
+        let machine_id = getMachineId();
+        if (machine_id == '') return;
+
+        
+        loadMachineOverview(machine_id, date);
+        loadLast5Timelines(machine_id, date);
+        handleLoadRunningPercentInMonth();
+    });
+
+    function loadMachineOverview(machine_id, date) {
+        $.ajax({
+            url: `/machine/api/machine-dashboard`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                console.log(response.workingTime);
+                if (response.workingTime) {
+                    const {
+                        percentRunning,
+                        timeRunning,
+                        timeStopped,
+                        timeDisconnected,
+                        timeChangeOver
+                    } = response.workingTime;
+
+                    $('#machine-id').val(formatMachineId(machine_id));
+
+                    const e1 = $('#percent-running');
+                    e1.fadeOut(200, function () {
+                        $(this).text(percentRunning + '%').fadeIn(200);
+                    });
+
+                    const e2 = $('#time-running');
+                    e2.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
+                    });
+
+                    const e3 = $('#time-stopped');
+                    e3.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
+                    });
+
+                    const e4 = $('#time-changeover');
+                    e4.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
+                    });
+                }
+            }
+        });
+    }
+
+    function convertDecimalHoursToTime(decimalHours) {
+        const hours = Math.floor(decimalHours);
+        const minutes = Math.round((decimalHours - hours) * 60);
+        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    function renderTimeline(containerSelector, data) {
+        const container = document.querySelector(containerSelector);
+        container.innerHTML = "";
+
+        const totalMinutes = 1440; // 24 * 60
+
+        data.forEach(block => {
+            const start = new Date(block.start_time && block.start_time.replace('Z', ''));
+            const end = new Date(block.end_time && block.end_time.replace('Z', ''));
+
+            const startMinutes = start.getHours() * 60 + start.getMinutes();
+            const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+            const leftPercent = (startMinutes / totalMinutes) * 100;
+            const widthPercent = ((endMinutes - startMinutes) / totalMinutes) * 100;
+
+            const div = document.createElement("div");
+            div.className = `timeline-block ${block.status}`;
+            div.style.left = `${leftPercent}%`;
+            div.style.width = `${widthPercent}%`;
+            div.dataset.start = block.data_start;
+            div.dataset.end = block.data_end;
+            div.dataset.duration = block.data_duration;
+
+            container.appendChild(div);
+        });
+    }
+
+    function createTimelineHTML(dateStr) {
+        return `
+                <div class="mb-3">
+                    <div class="timeline-date">${dateStr}</div>
+                    <div class="timeline-container" id="timeline-${dateStr.replaceAll('/', '')}"></div>
+                    <div class="timeline-hours d-flex justify-content-between mt-1">
+                        <span>0h</span><span>3h</span><span>6h</span><span>9h</span><span>12h</span>
+                        <span>15h</span><span>18h</span><span>21h</span><span>24h</span>
+                    </div>
+                </div>
+            `;
+    }
+
+    function createDateObject(dateStr) {
+        let dateParts = dateStr.split("/");
+        return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+    }
+
+    function getLast5Dates(date = new Date()) {
+        const dates = [];
+        for (let i = 0; i < 5; i++) {
+            const d = new Date(date);
+            d.setDate(date.getDate() - i);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const dateStr = `${day}/${month}`;
+            const dateParam = d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+            dates.push({ display: dateStr, param: dateParam });
+        }
+        return dates;
+    }
+
+    function loadLast5Timelines(machine_id, date) {
+        const container = document.getElementById("multi-day-timelines");
+        container.innerHTML = '';
+        const dates = getLast5Dates(createDateObject(date));
+        dates.forEach(({ display, param }) => {
+            // 1. Tạo HTML dòng timeline
+            container.innerHTML += createTimelineHTML(display);
+
+            // 2. Gọi API và render timeline
+            $.ajax({
+                url: `/machine/api/machine-timeline`,
+                method: "GET",
+                data: { machine_id, date: param },
+                dataType: "json",
+                success: function (response) {
+                    renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                }
+            });
+        });
+    }
+
+    function loadLast5Timelines(machine_id, date) {
+        const container = document.getElementById("multi-day-timelines");
+        container.innerHTML = '';
+        const dates = getLast5Dates(createDateObject(date));
+        dates.forEach(({ display, param }) => {
+            // 1. Tạo HTML dòng timeline
+            container.innerHTML += createTimelineHTML(display);
+
+            // 2. Gọi API và render timeline
+            $.ajax({
+                url: `/machine/api/machine-timeline`,
+                method: "GET",
+                data: { machine_id, date: param },
+                dataType: "json",
+                success: function (response) {
+                    renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                }
+            });
+        });
+    }
+
+
+    function getBadgeClass(percent) {
+        if (percent >= 50) return 'percent-high';
+        if (percent > 0) return 'percent-medium';
+        return 'percent-low';
+    }
+
+    function createDayCell(day, month, year, percent) {
+        const cell = document.createElement('div');
+        cell.classList.add('day-cell');
+        cell.title = `${day}/${month + 1}/${year}: ${percent}% running`;
+
+        const dayNum = document.createElement('div');
+        dayNum.classList.add('day-number');
+        dayNum.textContent = day;
+        cell.appendChild(dayNum);
+
+        const badge = document.createElement('div');
+        badge.classList.add('percent-badge', getBadgeClass(percent));
+        badge.textContent = percent + '%';
+        cell.appendChild(badge);
+
+        return cell;
+    }
+
+    function generatePercentData(daysInMonth) {
+        const data = {};
+        for (let d = 1; d <= daysInMonth; d++) {
+            data[d] = Math.floor(Math.random() * 70) + 30;
+        }
+        return data;
+    }
+
+    function generateCalendar(month, year, percentData) {
+        const calendar = document.getElementById('calendar');
+        calendar.innerHTML = ''; // Clear existing content
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+
+        // Add blank cells before the 1st day
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendar.appendChild(emptyCell);
+        }
+
+        // Add days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const percent = percentData[day] || 0; // default to 0 if no data
+            calendar.appendChild(createDayCell(day, month, year, percent));
+        }
+    }
+
+    // Initial calendar for current month
+    //const now = new Date();
+    //generateCalendar(now.getMonth(), now.getFullYear());
+
+    // When month is selected
+    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+
+    function handleLoadRunningPercentInMonth() {
+        const val = $('#monthpicker').val(); // Format: mm/yyyy
+        if (!val) return;
+
+        const parts = val.split('/');
+        const month = parseInt(parts[0], 10) - 1;
+        const year = parseInt(parts[1], 10);
+
+        // generateCalendar(month, year);
+        loadPercentRunningMonth(getMachineId(), month, year);
+    }
+
+    function loadPercentRunningMonth(machine_id, month, year) {
+        const date = '01/' + (month + 1) + '/' + year;
+        $.ajax({
+            url: `/machine/api/machine-month`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+
+                // Convert to { 1: 83, 2: 45, ... }
+                const percentData = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                }
+                generateCalendar(month, year, percentData);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
 </script>
