@@ -32,6 +32,8 @@
     background-color: #ffc107;
 }
 
+.disconnected { background-color: #6c757d; }
+
 .timeline-block:hover {
     transform: scaleY(1.1);
     z-index: 10;
@@ -145,4 +147,24 @@
   margin-top: 6px;
   text-align: center;
   color: grey;
+}
+
+.legend-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 24px;
+    vertical-align: middle;
+}
+
+/* Dùng lại class màu từ timeline-block */
+.legend-box.running { background-color: #28a745; }
+.legend-box.stopped { background-color: #dc3545; }
+.legend-box.changeover { background-color: #fd7e14; }
+.legend-box.disconnected { background-color: #6c757d; }
+
+.timeline-hours {
+    font-size: 12px;
+    color: #666;
 }

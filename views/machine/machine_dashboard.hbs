@@ -4,13 +4,14 @@
     <div class="row mb-4 mt-4">
         <div class="col-md-3">
             <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
-            <input type="text" name="machine-id" id="machine-id" class="form-control" value="{{formatMachineId machine_id}}" placeholder="Machine No">
+            <input type="text" name="machine-id" id="machine-id" class="form-control"
+                value="{{formatMachineId machine_id}}" placeholder="Machine No">
         </div>
         <div class="col-md-3">
             <label for="time" class="form-label"><strong>Date</strong></label>
             <div class="input-group date">
                 <input type="text" name="time" id="time" class="form-control" placeholder="Date">
-                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                <button type="submit" class="btn btn-primary" id="search-btn"><i class="bi bi-funnel"></i>
                     Search</button>
             </div>
         </div>
@@ -21,7 +22,7 @@
             <div class="card border-primary">
                 <div class="card-body">
                     <h5 class="card-title text-primary">Percent Running</h5>
-                    <p class="card-text display-4">92%</p>
+                    <p id="percent-running" class="card-text display-4">{{percentRunning}}%</p>
                 </div>
             </div>
         </div>
@@ -31,7 +32,7 @@
             <div class="card border-success">
                 <div class="card-body">
                     <h5 class="card-title text-success">Hours Running</h5>
-                    <p class="card-text display-4">13.2</p>
+                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime timeRunning}}</p>
                 </div>
             </div>
         </div>
@@ -41,7 +42,7 @@
             <div class="card border-danger">
                 <div class="card-body">
                     <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p class="card-text display-4">1.1</p>
+                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime timeStopped}}</p>
                 </div>
             </div>
         </div>
@@ -51,7 +52,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-warning">Change Over</h5>
-                    <p class="card-text display-4">0.7</p>
+                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime timeChangeOver}}</p>
                 </div>
             </div>
         </div>
@@ -59,66 +60,14 @@
 
     <div class="card flex-fill p-4">
         <h5>Working Timeline</h5>
-
-        <!-- Timeline rows -->
-        <div class="mb-3">
-            <div class="timeline-date">28/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
+        <div class="mb-2 d-flex gap-1 align-items-center">
+            <div><strong>Status Legend:</strong></div>
+            <div class="legend-box running"></div><span>Running</span>
+            <div class="legend-box stopped"></div><span>Stopped</span>
+            <div class="legend-box changeover"></div><span>Changeover</span>
+            <div class="legend-box disconnected"></div><span>Disconnected</span>
         </div>
-
-        <div class="mb-3">
-            <div class="timeline-date">29/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <div class="timeline-date">30/05</div>
-            <div class="timeline-container">
-                <div class="timeline-block running" style="left: 0%; width: 22.4%;" data-start="08:50" data-end="10:40"
-                    data-duration="1h 50m">Running</div>
-                <div class="timeline-block stopped" style="left: 22.4%; width: 14.3%;" data-start="10:40"
-                    data-end="11:50" data-duration="1h 10m">Stopped</div>
-                <div class="timeline-block running" style="left: 36.7%; width: 36.7%;" data-start="11:50"
-                    data-end="14:50" data-duration="3h 0m">Running</div>
-                <div class="timeline-block changeover" style="left: 73.4%; width: 4.1%;" data-start="14:50"
-                    data-end="15:10" data-duration="20m">Changeover</div>
-                <div class="timeline-block running" style="left: 77.5%; width: 22.4%;" data-start="15:10"
-                    data-end="17:00" data-duration="1h 50m">Running</div>
-            </div>
-        </div>
-
-        <!-- Time labels below last timeline only -->
-        <div class="time-labels mb-5">
-            <span>08:50</span>
-            <span>10:00</span>
-            <span>12:00</span>
-            <span>14:00</span>
-            <span>16:00</span>
-            <span>17:00</span>
-        </div>
-
+        <div id="multi-day-timelines"></div>
     </div>
 
     <div class="card flex-fill p-4">
@@ -127,7 +76,7 @@
             <div class="col-md-3">
                 <div class="input-group date">
                     <input type="text" id="monthpicker" class="form-control w-25" placeholder="Select Month" />
-                    <button id="btn-select-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
                         Search</button>
                 </div>
             </div>
@@ -164,15 +113,29 @@
             tooltip.style.top = e.pageY + 15 + 'px';   // offset a bit down
 
             tooltip.innerHTML = `
-          <div><strong>${start} - ${end}</strong></div>
-          <div><strong>Duration:</strong> ${duration}</div>
-        `;
+                <div><strong>${start} - ${end}</strong></div>
+                <div><strong>Duration:</strong> ${duration}</div>
+            `;
         });
 
         block.addEventListener('mouseleave', () => {
             tooltip.style.opacity = '0';
         });
     });
+
+    function formatMachineId(id) {
+        return '#' + String(id).padStart(3, '0');
+    }
+
+    function getMachineId() {
+        let machineIdStr = $("#machine-id").val();
+        machineIdStr = machineIdStr.replace('#', '');
+        if (isNaN(Number(machineIdStr))) {
+            alert("Machine ID invalid!");
+            return '';
+        }
+        return Number(machineIdStr);
+    }
 
     $(document).ready(function () {
         $('#time').datepicker({
@@ -187,13 +150,183 @@
             minViewMode: "months",   // limit selection to months only
             autoclose: true
         }).datepicker('setDate', new Date());
-    });
-</script>
 
-<script>
+        $('#search-btn').click(function (e) {
+            e.preventDefault();
+            let date = $("#time").val();
+            let machine_id = getMachineId();
+            if (machine_id == '') return;
+
+            $.ajax({
+                url: `/machine/api/machine-dashboard`,
+                method: "GET",
+                data: { machine_id, date },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response.workingTime);
+                    if (response.workingTime) {
+                        const {
+                            percentRunning,
+                            timeRunning,
+                            timeStopped,
+                            timeDisconnected,
+                            timeChangeOver
+                        } = response.workingTime;
+
+                        $('#machine-id').val(formatMachineId(machine_id));
+
+                        const e1 = $('#percent-running');
+                        e1.fadeOut(200, function () {
+                            $(this).text(percentRunning + '%').fadeIn(200);
+                        });
+
+                        const e2 = $('#time-running');
+                        e2.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
+                        });
+
+                        const e3 = $('#time-stopped');
+                        e3.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
+                        });
+
+                        const e4 = $('#time-changeover');
+                        e4.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
+                        });
+                    }
+                }
+            });
+
+            loadLast5Timelines(machine_id, date);
+            handleLoadRunningPercentInMonth();
+        });
+
+        function convertDecimalHoursToTime(decimalHours) {
+            const hours = Math.floor(decimalHours);
+            const minutes = Math.round((decimalHours - hours) * 60);
+            return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1; // Months start at 0!
+        let dd = today.getDate();
+
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        const formattedToday = dd + '/' + mm + '/' + yyyy;
+        const currentMonth = '01/' + mm + '/' + yyyy;
+        loadLast5Timelines('1', formattedToday);
+        loadPercentRunningMonth('1', mm - 1, yyyy);
+
+        function renderTimeline(containerSelector, data) {
+            const container = document.querySelector(containerSelector);
+            container.innerHTML = "";
+
+            const totalMinutes = 1440; // 24 * 60
+
+            data.forEach(block => {
+                const start = new Date(block.start_time && block.start_time.replace('Z', ''));
+                const end = new Date(block.end_time && block.end_time.replace('Z', ''));
+
+                const startMinutes = start.getHours() * 60 + start.getMinutes();
+                const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+                const leftPercent = (startMinutes / totalMinutes) * 100;
+                const widthPercent = ((endMinutes - startMinutes) / totalMinutes) * 100;
+
+                const div = document.createElement("div");
+                div.className = `timeline-block ${block.status}`;
+                div.style.left = `${leftPercent}%`;
+                div.style.width = `${widthPercent}%`;
+                div.dataset.start = block.data_start;
+                div.dataset.end = block.data_end;
+                div.dataset.duration = block.data_duration;
+
+                container.appendChild(div);
+            });
+        }
+
+        function createTimelineHTML(dateStr) {
+            return `
+                <div class="mb-3">
+                    <div class="timeline-date">${dateStr}</div>
+                    <div class="timeline-container" id="timeline-${dateStr.replaceAll('/', '')}"></div>
+                    <div class="timeline-hours d-flex justify-content-between mt-1">
+                        <span>0h</span><span>3h</span><span>6h</span><span>9h</span><span>12h</span>
+                        <span>15h</span><span>18h</span><span>21h</span><span>24h</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createDateObject(dateStr) {
+            let dateParts = dateStr.split("/");
+            return new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+        }
+
+        function getLast5Dates(date = new Date()) {
+            const dates = [];
+            for (let i = 0; i < 5; i++) {
+                const d = new Date(date);
+                d.setDate(date.getDate() - i);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const dateStr = `${day}/${month}`;
+                const dateParam = d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
+                dates.push({ display: dateStr, param: dateParam });
+            }
+            return dates;
+        }
+
+        function loadLast5Timelines(machine_id, date) {
+            const container = document.getElementById("multi-day-timelines");
+            container.innerHTML = '';
+            const dates = getLast5Dates(createDateObject(date));
+            dates.forEach(({ display, param }) => {
+                // 1. Tạo HTML dòng timeline
+                container.innerHTML += createTimelineHTML(display);
+
+                // 2. Gọi API và render timeline
+                $.ajax({
+                    url: `/machine/api/machine-timeline`,
+                    method: "GET",
+                    data: { machine_id, date: param },
+                    dataType: "json",
+                    success: function (response) {
+                        renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                    }
+                });
+            });
+        }
+
+        function loadLast5Timelines(machine_id, date) {
+            const container = document.getElementById("multi-day-timelines");
+            container.innerHTML = '';
+            const dates = getLast5Dates(createDateObject(date));
+            dates.forEach(({ display, param }) => {
+                // 1. Tạo HTML dòng timeline
+                container.innerHTML += createTimelineHTML(display);
+
+                // 2. Gọi API và render timeline
+                $.ajax({
+                    url: `/machine/api/machine-timeline`,
+                    method: "GET",
+                    data: { machine_id, date: param },
+                    dataType: "json",
+                    success: function (response) {
+                        renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
+                    }
+                });
+            });
+        }
+    });
+
     function getBadgeClass(percent) {
-        if (percent >= 75) return 'percent-high';
-        if (percent >= 50) return 'percent-medium';
+        if (percent >= 50) return 'percent-high';
+        if (percent > 0) return 'percent-medium';
         return 'percent-low';
     }
 
@@ -223,16 +356,14 @@
         return data;
     }
 
-    function generateCalendar(month, year) {
+    function generateCalendar(month, year, percentData) {
         const calendar = document.getElementById('calendar');
         calendar.innerHTML = ''; // Clear existing content
 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
 
-        const percentData = generatePercentData(daysInMonth);
-
-        // Add blank cells
+        // Add blank cells before the 1st day
         for (let i = 0; i < firstDay; i++) {
             const emptyCell = document.createElement('div');
             calendar.appendChild(emptyCell);
@@ -240,16 +371,19 @@
 
         // Add days
         for (let day = 1; day <= daysInMonth; day++) {
-            calendar.appendChild(createDayCell(day, month, year, percentData[day]));
+            const percent = percentData[day] || 0; // default to 0 if no data
+            calendar.appendChild(createDayCell(day, month, year, percent));
         }
     }
 
     // Initial calendar for current month
-    const now = new Date();
-    generateCalendar(now.getMonth(), now.getFullYear());
+    //const now = new Date();
+    //generateCalendar(now.getMonth(), now.getFullYear());
 
     // When month is selected
-    $('#btn-select-month').on('click', function () {
+    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+
+    function handleLoadRunningPercentInMonth() {
         const val = $('#monthpicker').val(); // Format: mm/yyyy
         if (!val) return;
 
@@ -257,6 +391,31 @@
         const month = parseInt(parts[0], 10) - 1;
         const year = parseInt(parts[1], 10);
 
-        generateCalendar(month, year);
-    });
+        // generateCalendar(month, year);
+        loadPercentRunningMonth(getMachineId(), month, year);
+    }
+
+    function loadPercentRunningMonth(machine_id, month, year) {
+        const date = '01/' + (month + 1) + '/' + year;
+        $.ajax({
+            url: `/machine/api/machine-month`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+
+                // Convert to { 1: 83, 2: 45, ... }
+                const percentData = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                }
+                generateCalendar(month, year, percentData);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
 </script>
