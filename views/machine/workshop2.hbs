@@ -163,8 +163,17 @@
             sensor_id: "####",
             machine_id: "####",
             line: Math.floor(i / (numberOfMachines / lines)) + 1,
-            status: "disconnected"
+            status: "running"
         }));
+        
+        machines[15].status = "stopped";
+        machines[16].status = "stopped";
+        machines[17].status = "stopped";
+
+        machines[25].status = "changeover";
+        machines[26].status = "changeover";
+        machines[27].status = "changeover";
+
         return machines;
     }
 
@@ -172,6 +181,7 @@
     let time_server = null;
 
     function getStatusDisplay(status, update_time) {
+        return `status-${status}`;
         if (!time_server || !update_time) return 'status-disconnected';
 
         const now = new Date(time_server.replace(" ", "T"));
@@ -276,6 +286,7 @@
 
     // Listen for incoming data from WebSocket server
     socket.addEventListener('message', function (event) {
+        return;
         let data = JSON.parse(event.data);
         //console.log("DATA: ", data);
         let machine_states = data.machine_states;
