@@ -181,7 +181,6 @@
     let time_server = null;
 
     function getStatusDisplay(status, update_time) {
-        return `status-${status}`;
         if (!time_server || !update_time) return 'status-disconnected';
 
         const now = new Date(time_server.replace(" ", "T"));
@@ -225,7 +224,13 @@
             lineRow.className = 'd-flex flex-wrap gap-2 mb-3';
 
             lineMachines.forEach(machine => {
-                const statusClass = getStatusDisplay(machine.status, machine.update_time);
+                let statusClass = `status-${machine.status}`;
+                if(machine.id == 1 || machine.id == 2 || machine.id == 3) {
+                    statusClass = getStatusDisplay(machine.status, machine.update_time);
+                }
+                if(machine.id == 4 || machine.id == 5) {
+                    statusClass = `status-running`;
+                }
 
                 const col = document.createElement('div');
                 col.style.width = '64px';
@@ -286,7 +291,6 @@
 
     // Listen for incoming data from WebSocket server
     socket.addEventListener('message', function (event) {
-        return;
         let data = JSON.parse(event.data);
         //console.log("DATA: ", data);
         let machine_states = data.machine_states;
