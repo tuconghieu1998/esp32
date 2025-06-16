@@ -52,6 +52,32 @@
         </div>
     </div>
 
+    <div class="card flex-fill p-4">
+        <h3>Working in month</h3>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="input-group date">
+                    <input type="text" id="monthpicker" class="form-control w-25" placeholder="Select Month" />
+                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                        Search</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar" id="calendar-header">
+            <!-- Weekday headers -->
+            <div><strong>Sun</strong></div>
+            <div><strong>Mon</strong></div>
+            <div><strong>Tue</strong></div>
+            <div><strong>Wed</strong></div>
+            <div><strong>Thu</strong></div>
+            <div><strong>Fri</strong></div>
+            <div><strong>Sat</strong></div>
+        </div>
+        <div class="calendar" id="calendar">
+        </div>
+    </div>
+
     <h4 class="mb-3">Machine Performance Overview</h4>
     <div class="row" id="machine-grid"></div>
 
@@ -64,7 +90,104 @@
             autoclose: true,
             todayHighlight: true
         }).datepicker('setDate', new Date());
+
+        $('#monthpicker').datepicker({
+            format: "mm/yyyy",       // show month/year only
+            startView: "months",     // start view at months
+            minViewMode: "months",   // limit selection to months only
+            autoclose: true
+        }).datepicker('setDate', new Date());
     });
+
+    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+
+    function handleLoadRunningPercentInMonth() {
+        const val = $('#monthpicker').val(); // Format: mm/yyyy
+        if (!val) return;
+
+        const parts = val.split('/');
+        const month = parseInt(parts[0], 10) - 1;
+        const year = parseInt(parts[1], 10);
+
+        // generateCalendar(month, year);
+        loadPercentRunningMonth(month, year);
+    }
+
+    function loadPercentRunningMonth(month, year) {
+        const date = '01/' + (month + 1) + '/' + year;
+        $.ajax({
+            url: `/machine/api/workshop2-month`,
+            method: "GET",
+            data: { date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+
+                // Convert to { 1: 83, 2: 45, ... }
+                const percentData = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                }
+                generateCalendar(month, year, percentData);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
+
+    function getBadgeClass(percent) {
+        if (percent >= 50) return 'percent-high';
+        if (percent > 0) return 'percent-medium';
+        return 'percent-low';
+    }
+
+    function createDayCell(day, month, year, percent) {
+        const cell = document.createElement('div');
+        cell.classList.add('day-cell');
+        cell.title = `${day}/${month + 1}/${year}: ${percent}% running`;
+
+        const dayNum = document.createElement('div');
+        dayNum.classList.add('day-number');
+        dayNum.textContent = day;
+        cell.appendChild(dayNum);
+
+        const badge = document.createElement('div');
+        badge.classList.add('percent-badge', getBadgeClass(percent));
+        badge.textContent = percent + '%';
+        cell.appendChild(badge);
+
+        return cell;
+    }
+
+    function generatePercentData(daysInMonth) {
+        const data = {};
+        for (let d = 1; d <= daysInMonth; d++) {
+            data[d] = Math.floor(Math.random() * 70) + 30;
+        }
+        return data;
+    }
+
+    function generateCalendar(month, year, percentData) {
+        const calendar = document.getElementById('calendar');
+        calendar.innerHTML = ''; // Clear existing content
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+
+        // Add blank cells before the 1st day
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendar.appendChild(emptyCell);
+        }
+
+        // Add days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const percent = percentData[day] || 0; // default to 0 if no data
+            calendar.appendChild(createDayCell(day, month, year, percent));
+        }
+    }
 </script>
 
 <script>

@@ -249,3 +249,76 @@ ORDER BY c.[date];
         }
     }
 }
+
+export async function getTimeWorkshop2RunningInMonth(date) {
+    console.log("getTimeWorkshop2RunningInMonth", date);
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+DECLARE @monthStart DATE = '${date}';
+DECLARE @monthEnd DATE = EOMONTH(@monthStart);
+
+DECLARE @machineCount INT = (
+    SELECT COUNT(DISTINCT machine_id)
+    FROM ws2_working_status
+    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+);
+
+WITH StatusWithLead AS (
+    SELECT *,
+        LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
+    FROM ws2_working_status
+    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+),
+
+StatusExpanded AS (
+    SELECT 
+        machine_id,
+        status,
+        CAST(timestamp AS DATE) AS [date],
+        timestamp AS start_time,
+        ISNULL(next_timestamp, GETDATE()) AS end_time,
+        DATEDIFF(SECOND, timestamp, ISNULL(next_timestamp, GETDATE())) AS duration_seconds
+    FROM StatusWithLead
+),
+
+DailySummary AS (
+    SELECT 
+        [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
+        SUM(CASE WHEN status NOT IN ('running', 'changeover') THEN duration_seconds ELSE 0 END) AS stopped_seconds
+    FROM StatusExpanded
+    GROUP BY [date]
+),
+
+Calendar AS (
+    SELECT DATEADD(DAY, n.number, @monthStart) AS [date]
+    FROM master.dbo.spt_values n
+    WHERE n.type = 'P'
+      AND DATEADD(DAY, n.number, @monthStart) <= @monthEnd
+)
+
+SELECT 
+    c.[date],
+    ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
+    ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
+    ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
+    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_running,
+    FORMAT(ISNULL(d.changeover_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_changeover,
+    FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_stopped
+FROM Calendar c
+LEFT JOIN DailySummary d ON c.[date] = d.[date]
+ORDER BY c.[date];
+        `);
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
