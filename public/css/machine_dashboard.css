@@ -80,22 +80,35 @@
     gap: 5px;
 }
 
+.percent-badges {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 .percent-badge {
-    font-size: 10px;
-    padding: 2px 4px;
-    margin: 2px 0;
-    border-radius: 4px;
-    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 4px 4px;
+    border-radius: 12px;
     color: #fff;
+    min-width: 36px;
+    text-align: center;
 }
 
 .running-badge { background-color: #28a745; }      /* green */
 .stopped-badge { background-color: #dc3545; }      /* red */
-.changeover-badge { background-color: #ffc107; }   /* yellow */
+.changeover-badge { background-color: #FB9E3A; }   /* yellow */
+
+.high-value {opacity: 1;}
+.low-value {opacity: 0.5;}
 
 .day-cell {
-    border: 1px solid #ccc;
-    padding: 4px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    min-height: 80px;
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -103,7 +116,14 @@
 
 .day-number {
     font-weight: bold;
+    font-size: 24px;
     margin-bottom: 4px;
+}
+
+.day-cell.today {
+    border: 2px solid #007bff;
+    background-color: #e8f0fe;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
 }
 
 /* Color scale for percent running */

@@ -6,6 +6,7 @@ npm-shrinkwrap.json
 *.gz
 .env
 public/MES PNS
+*.pem
 
 # Coveralls
 .nyc_output

@@ -97,6 +97,8 @@
             minViewMode: "months",   // limit selection to months only
             autoclose: true
         }).datepicker('setDate', new Date());
+
+        handleLoadRunningPercentInMonth();
     });
 
     $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
@@ -148,6 +150,21 @@
     function createDayCell(day, month, year, running, stopped, changeover) {
         const cell = document.createElement('div');
         cell.classList.add('day-cell');
+
+        const today = new Date();
+        const cellDate = new Date(year, month, day);
+
+        const isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+        const isFuture = cellDate > today;
+
+        if (isToday) {
+            cell.classList.add('today');
+        }
+
         cell.title = `${day}/${month + 1}/${year}
 Running: ${running}%
 Stopped: ${stopped}%
@@ -158,23 +175,31 @@ Changeover: ${changeover}%`;
         dayNum.textContent = day;
         cell.appendChild(dayNum);
 
-        const runningBadge = document.createElement('div');
-        runningBadge.classList.add('percent-badge', getBadgeClass(running), 'running-badge');
-        runningBadge.textContent = `${running}%`;
-        cell.appendChild(runningBadge);
+        if (!isFuture) {
+            const badgesContainer = document.createElement('div');
+            badgesContainer.classList.add('percent-badges');
 
-        const stoppedBadge = document.createElement('div');
-        stoppedBadge.classList.add('percent-badge', getBadgeClass(stopped), 'stopped-badge');
-        stoppedBadge.textContent = `${stopped}%`;
-        cell.appendChild(stoppedBadge);
+            const runningBadge = document.createElement('div');
+            runningBadge.classList.add('percent-badge', 'running-badge', running > 0 ? 'high-value' : 'low-value');
+            runningBadge.textContent = `${running}%`;
+            badgesContainer.appendChild(runningBadge);
 
-        const changeoverBadge = document.createElement('div');
-        changeoverBadge.classList.add('percent-badge', getBadgeClass(changeover), 'changeover-badge');
-        changeoverBadge.textContent = `${changeover}%`;
-        cell.appendChild(changeoverBadge);
+            const stoppedBadge = document.createElement('div');
+            stoppedBadge.classList.add('percent-badge', 'stopped-badge', stopped > 0 ? 'high-value' : 'low-value');
+            stoppedBadge.textContent = `${stopped}%`;
+            badgesContainer.appendChild(stoppedBadge);
+
+            const changeoverBadge = document.createElement('div');
+            changeoverBadge.classList.add('percent-badge', 'changeover-badge', changeover > 0 ? 'high-value' : 'low-value');
+            changeoverBadge.textContent = `${changeover}%`;
+            badgesContainer.appendChild(changeoverBadge);
+
+            cell.appendChild(badgesContainer);
+        }
 
         return cell;
     }
+
 
     function generatePercentData(daysInMonth) {
         const data = {};
