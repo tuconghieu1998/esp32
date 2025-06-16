@@ -80,29 +80,30 @@
     gap: 5px;
 }
 
-.day-cell {
-    border: 1px solid #ddd;
-    padding: 10px;
-    min-height: 80px;
-    position: relative;
-    cursor: default;
+.percent-badge {
+    font-size: 10px;
+    padding: 2px 4px;
+    margin: 2px 0;
     border-radius: 4px;
-    transition: background-color 0.3s ease;
+    text-align: center;
+    color: #fff;
+}
+
+.running-badge { background-color: #28a745; }      /* green */
+.stopped-badge { background-color: #dc3545; }      /* red */
+.changeover-badge { background-color: #ffc107; }   /* yellow */
+
+.day-cell {
+    border: 1px solid #ccc;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .day-number {
     font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.percent-badge {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    font-size: 0.85rem;
-    padding: 2px 6px;
-    border-radius: 12px;
-    color: white;
+    margin-bottom: 4px;
 }
 
 /* Color scale for percent running */

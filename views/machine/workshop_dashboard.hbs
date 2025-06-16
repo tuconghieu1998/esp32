@@ -122,14 +122,16 @@
             dataType: "json",
             success: function (response) {
                 const data = response.data || [];
-
-                // Convert to { 1: 83, 2: 45, ... }
-                const percentData = {};
+                const percentRunning = {};
+                const percentStopped = {};
+                const percentChangeover = {};
                 for (const entry of data) {
                     const day = new Date(entry.date).getDate();
-                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                    percentRunning[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                    percentStopped[day] = parseFloat(entry.percent_stopped || 0).toFixed(0);
+                    percentChangeover[day] = parseFloat(entry.percent_changeover || 0).toFixed(0);
                 }
-                generateCalendar(month, year, percentData);
+                generateCalendar(month, year, percentRunning, percentStopped, percentChangeover);
             },
             error: function () {
                 alert('Failed to load running data.');
@@ -143,20 +145,33 @@
         return 'percent-low';
     }
 
-    function createDayCell(day, month, year, percent) {
+    function createDayCell(day, month, year, running, stopped, changeover) {
         const cell = document.createElement('div');
         cell.classList.add('day-cell');
-        cell.title = `${day}/${month + 1}/${year}: ${percent}% running`;
+        cell.title = `${day}/${month + 1}/${year}
+Running: ${running}%
+Stopped: ${stopped}%
+Changeover: ${changeover}%`;
 
         const dayNum = document.createElement('div');
         dayNum.classList.add('day-number');
         dayNum.textContent = day;
         cell.appendChild(dayNum);
 
-        const badge = document.createElement('div');
-        badge.classList.add('percent-badge', getBadgeClass(percent));
-        badge.textContent = percent + '%';
-        cell.appendChild(badge);
+        const runningBadge = document.createElement('div');
+        runningBadge.classList.add('percent-badge', getBadgeClass(running), 'running-badge');
+        runningBadge.textContent = `${running}%`;
+        cell.appendChild(runningBadge);
+
+        const stoppedBadge = document.createElement('div');
+        stoppedBadge.classList.add('percent-badge', getBadgeClass(stopped), 'stopped-badge');
+        stoppedBadge.textContent = `${stopped}%`;
+        cell.appendChild(stoppedBadge);
+
+        const changeoverBadge = document.createElement('div');
+        changeoverBadge.classList.add('percent-badge', getBadgeClass(changeover), 'changeover-badge');
+        changeoverBadge.textContent = `${changeover}%`;
+        cell.appendChild(changeoverBadge);
 
         return cell;
     }
@@ -169,7 +184,7 @@
         return data;
     }
 
-    function generateCalendar(month, year, percentData) {
+    function generateCalendar(month, year, percentRunning, percentStopped, percentChangeover) {
         const calendar = document.getElementById('calendar');
         calendar.innerHTML = ''; // Clear existing content
 
@@ -184,8 +199,7 @@
 
         // Add days
         for (let day = 1; day <= daysInMonth; day++) {
-            const percent = percentData[day] || 0; // default to 0 if no data
-            calendar.appendChild(createDayCell(day, month, year, percent));
+            calendar.appendChild(createDayCell(day, month, year, percentRunning[day] || 0, percentStopped[day] || 0, percentChangeover[day] || 0));
         }
     }
 </script>

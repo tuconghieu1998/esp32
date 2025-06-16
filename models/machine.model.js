@@ -288,7 +288,7 @@ DailySummary AS (
         [date],
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
         SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-        SUM(CASE WHEN status NOT IN ('running', 'changeover') THEN duration_seconds ELSE 0 END) AS stopped_seconds
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
     FROM StatusExpanded
     GROUP BY [date]
 ),
