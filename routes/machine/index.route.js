@@ -5,7 +5,7 @@ import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
 expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
-import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInMonth } from '../../models/machine.model.js';
+import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth } from '../../models/machine.model.js';
 import moment from 'moment';
 import { convertDateFormat } from '../../utils/helpers.js';
 
@@ -107,6 +107,18 @@ router.get("/api/machine-month", async (req, res) => {
     });
 });
 
+router.get("/api/workshop2-date", async (req, res) => {
+    let { date } = req.query;
+    let dateFormat = new Date().toISOString().split('T')[0];
+    if (date && date != '') {
+        dateFormat = convertDateFormat(date);
+    }
+    const data = await getTimeWorkshop2RunningInDate(dateFormat);
+    res.json({
+        data
+    });
+});
+
 router.get("/api/workshop2-month", async (req, res) => {
     let { date } = req.query;
     let dateFormat = new Date().toISOString().split('T')[0];
@@ -120,7 +132,16 @@ router.get("/api/workshop2-month", async (req, res) => {
 });
 
 router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
-    res.render('machine/workshop_dashboard.hbs');
+    const date = getCurrentDate();
+    const data = await getTimeWorkshop2RunningInDate(date);
+    let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
+    if(data && data[0]) {
+        percent_running = data[0].percent_running;
+        running_hours = data[0].running_hours;
+        stopped_hours = data[0].stopped_hours;
+        changeover_hours = data[0].changeover_hours;
+    }
+    res.render('machine/workshop_dashboard.hbs', {percent_running, running_hours, stopped_hours, changeover_hours});
 });
 
 router.get('/machine-config', authenticate, async (req, res, next) => {

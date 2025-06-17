@@ -5,7 +5,7 @@
         <div class="col-md-3">
             <div class="input-group date">
                 <input type="text" name="time" id="time" class="form-control" placeholder="Date">
-                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                <button id="search-btn" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
                     Search</button>
             </div>
         </div>
@@ -16,7 +16,7 @@
             <div class="card border-primary">
                 <div class="card-body">
                     <h5 class="card-title text-primary">Percent Running</h5>
-                    <p class="card-text display-4">92%</p>
+                    <p id="percent-running" class="card-text display-4">{{percent_running}}%</p>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
             <div class="card border-success">
                 <div class="card-body">
                     <h5 class="card-title text-success">Hours Running</h5>
-                    <p class="card-text display-4">1336.2</p>
+                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime running_hours}}</p>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
             <div class="card border-danger">
                 <div class="card-body">
                     <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p class="card-text display-4">111.1</p>
+                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime stopped_hours}}</p>
                 </div>
             </div>
         </div>
@@ -46,7 +46,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-warning">Change Over</h5>
-                    <p class="card-text display-4">25.7</p>
+                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime changeover_hours}}</p>
                 </div>
             </div>
         </div>
@@ -83,6 +83,7 @@
 
 
 </div>
+<script src="/js/machine_utils.js"></script>
 <script>
     $(document).ready(function () {
         $('#time').datepicker({
@@ -98,8 +99,58 @@
             autoclose: true
         }).datepicker('setDate', new Date());
 
+        loadOverView(getTodayFormatted());
         handleLoadRunningPercentInMonth();
     });
+
+    $('#search-btn').click(function (e) {
+        e.preventDefault();
+        let date = $("#time").val();
+        loadOverView(date);
+    });
+
+    function loadOverView(date) {
+        $.ajax({
+            url: `/machine/api/workshop2-date`,
+            method: "GET",
+            data: { date },
+            dataType: "json",
+            success: function (response) {
+                console.log("loadOverView", response.data);
+                if (response.data && response.data[0]) {
+                    const {
+                        percent_running,
+                        running_hours,
+                        stopped_hours,
+                        changeover_hours
+                    } = response.data[0];
+
+                    const e1 = $('#percent-running');
+                    e1.fadeOut(200, function () {
+                        $(this).text(percent_running + '%').fadeIn(200);
+                    });
+
+                    const e2 = $('#time-running');
+                    e2.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(running_hours)).fadeIn(200);
+                    });
+
+                    const e3 = $('#time-stopped');
+                    e3.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(stopped_hours)).fadeIn(200);
+                    });
+
+                    const e4 = $('#time-changeover');
+                    e4.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(changeover_hours)).fadeIn(200);
+                    });
+                }
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
 
     $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
 

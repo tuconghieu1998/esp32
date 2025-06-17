@@ -322,3 +322,77 @@ ORDER BY c.[date];
         }
     }
 }
+
+export async function getTimeWorkshop2RunningInDate(date) {
+    console.log("getTimeWorkshop2RunningInDate", date);
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+DECLARE @targetDate DATE = '${date}';
+DECLARE @machineCount INT = (
+    SELECT COUNT(DISTINCT machine_id)
+    FROM ws2_working_status
+    WHERE CAST(timestamp AS DATE) = @targetDate
+);
+
+WITH StatusWithLead AS (
+    SELECT *,
+        LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
+    FROM ws2_working_status
+    WHERE CAST(timestamp AS DATE) = @targetDate
+),
+
+StatusExpanded AS (
+    SELECT 
+        machine_id,
+        status,
+        CAST(timestamp AS DATE) AS [date],
+        timestamp AS start_time,
+        CASE 
+            WHEN next_timestamp IS NOT NULL THEN next_timestamp
+            WHEN @targetDate = CAST(GETDATE() AS DATE) THEN GETDATE()
+            ELSE DATEADD(DAY, 1, @targetDate)
+        END AS end_time,
+        DATEDIFF(
+            SECOND, 
+            timestamp, 
+            CASE 
+                WHEN next_timestamp IS NOT NULL THEN next_timestamp
+                WHEN @targetDate = CAST(GETDATE() AS DATE) THEN GETDATE()
+                ELSE DATEADD(DAY, 1, @targetDate)
+            END
+        ) AS duration_seconds
+    FROM StatusWithLead
+),
+
+DailyStatus AS (
+    SELECT 
+        [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+    FROM StatusExpanded
+    GROUP BY [date]
+)
+
+SELECT 
+    [date],
+    FORMAT(running_seconds / 3600.0, 'N2') AS running_hours,
+    FORMAT(changeover_seconds / 3600.0, 'N2') AS changeover_hours,
+    FORMAT(stopped_seconds / 3600.0, 'N2') AS stopped_hours,
+    FORMAT(running_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_running,
+    FORMAT(changeover_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_changeover,
+    FORMAT(stopped_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_stopped
+FROM DailyStatus;
+        `);
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
