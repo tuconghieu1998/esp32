@@ -135,14 +135,26 @@ router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
     const date = getCurrentDate();
     const data = await getTimeWorkshop2RunningInDate(date);
     let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
-    if(data && data[0]) {
+    if (data && data[0]) {
         percent_running = data[0].percent_running;
         running_hours = data[0].running_hours;
         stopped_hours = data[0].stopped_hours;
         changeover_hours = data[0].changeover_hours;
     }
-    res.render('machine/workshop_dashboard.hbs', {percent_running, running_hours, stopped_hours, changeover_hours});
+    let max_percent = getMaxPercentPassedToday();
+    let sub_percent = (max_percent - percent_running).toFixed(2);
+    res.render('machine/workshop_dashboard.hbs', { percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
 });
+
+function getMaxPercentPassedToday() {
+    // Expecting format 'dd/mm/yyyy'
+    const now = new Date();
+    const secondsPerDay = 86400;
+    const secondsSinceMidnight =
+        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const percent = (secondsSinceMidnight / secondsPerDay) * 100;
+    return percent.toFixed(2);
+}
 
 router.get('/machine-config', authenticate, async (req, res, next) => {
     res.render('machine/machine_config.hbs');

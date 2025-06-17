@@ -38,3 +38,26 @@ function convertDecimalHoursToTime(decimalHours) {
     const minutes = Math.round((decimalHours - hours) * 60);
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
 }
+
+// format dd/mm/yyyy
+function getMaxPercentPassedToday(dateStr) {
+    // Expecting format 'dd/mm/yyyy'
+    const [day, month, year] = dateStr.split('/').map(Number);
+    const target = new Date(year, month - 1, day); // month is 0-based
+    const now = new Date();
+    const secondsPerDay = 86400;
+
+    const isToday =
+        target.getFullYear() === now.getFullYear() &&
+        target.getMonth() === now.getMonth() &&
+        target.getDate() === now.getDate();
+
+    if (isToday) {
+        const secondsSinceMidnight =
+            now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const percent = (secondsSinceMidnight / secondsPerDay) * 100;
+        return percent.toFixed(2);
+    } else {
+        return "100.00";
+    }
+}

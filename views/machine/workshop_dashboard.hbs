@@ -16,14 +16,32 @@
             <div class="col-md-3 mb-4">
                 <div class="card border-primary">
                     <div class="card-body">
+                        <h5 class="card-title text-success">Total Percent</h5>
+                        <p id="max-percent" class="card-text display-4">{{max_percent}}%</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-primary">
+                    <div class="card-body">
                         <h5 class="card-title text-primary">Percent Running</h5>
-                        <p id="percent-running" class="card-text display-4">{{percent_running}}%</p>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Left: Main percent -->
+                            <p id="percent-running" class="card-text display-4 mb-0 mr-3">
+                                {{percent_running}}%
+                            </p>
+                            <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
+                                (-{{sub_percent}}%)
+                            </p>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
             <!-- Hours Running -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-2 mb-4">
                 <div class="card border-success">
                     <div class="card-body">
                         <h5 class="card-title text-success">Hours Running</h5>
@@ -33,7 +51,7 @@
             </div>
 
             <!-- Hours Stopped -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-2 mb-4">
                 <div class="card border-danger">
                     <div class="card-body">
                         <h5 class="card-title text-danger">Hours Stopped</h5>
@@ -43,7 +61,7 @@
             </div>
 
             <!-- Hours Change Over -->
-            <div class="col-md-3 mb-4">
+            <div class="col-md-2 mb-4">
                 <div class="card border-warning">
                     <div class="card-body">
                         <h5 class="card-title text-warning">Change Over</h5>
@@ -163,7 +181,7 @@
             autoclose: true
         }).datepicker('setDate', new Date());
 
-        loadOverView(getTodayFormatted());
+        // loadOverView(getTodayFormatted());
         handleLoadRunningPercentInMonth();
     });
 
@@ -188,6 +206,11 @@
                     stopped_hours = response.data[0].stopped_hours;
                     changeover_hours = response.data[0].changeover_hours;
                 }
+
+                const percent = getMaxPercentPassedToday(date);
+                $("#max-percent").text(percent + "%").fadeIn(200);
+                $("#sub-percent").text(-(percent - percent_running).toFixed(2) + "%").fadeIn(200);
+
                 const e1 = $('#percent-running');
                 e1.fadeOut(200, function () {
                     $(this).text(percent_running + '%').fadeIn(200);
