@@ -16,48 +16,68 @@
             </div>
         </div>
     </div>
-    <div class="row text-center mb-4">
+    <div class="row text-center">
         <!-- Percent Running -->
-        <div class="col-md-3 mb-4">
+        <div class="col-md-6 mb-2">
             <div class="card border-primary">
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Percent Running</h5>
-                    <p id="percent-running" class="card-text display-4">{{percentRunning}}%</p>
+                    <h5 class="card-title text-primary">Total Percent</h5>
+                    <p id="max-percent" class="card-text display-4">{{max_percent}}%</p>
                 </div>
             </div>
         </div>
+        <div class="col-md-6 mb-2">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Percent Running</h5>
 
+                    <div class="d-flex justify-content-center align-items-center gap-4">
+                        <!-- Left: Main percent -->
+                        <p id="percent-running" class="card-text display-4 mb-0 mr-3">
+                            {{percent_running}}%
+                        </p>
+                        <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
+                            (-{{sub_percent}}%)
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row text-center mb-4">
         <!-- Hours Running -->
-        <div class="col-md-3 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-success">
                 <div class="card-body">
                     <h5 class="card-title text-success">Hours Running</h5>
-                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime timeRunning}}</p>
+                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime running_hours}}</p>
                 </div>
             </div>
         </div>
 
         <!-- Hours Stopped -->
-        <div class="col-md-3 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-danger">
                 <div class="card-body">
                     <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime timeStopped}}</p>
+                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime stopped_hours}}</p>
                 </div>
             </div>
         </div>
 
         <!-- Hours Change Over -->
-        <div class="col-md-3 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-warning">Change Over</h5>
-                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime timeChangeOver}}</p>
+                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime
+                        changeover_hours}}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="card flex-fill p-4">
         <h5>Working Timeline</h5>
         <div class="mb-2 d-flex gap-1 align-items-center">
@@ -166,6 +186,9 @@
 
                         $('#machine-id').val(formatMachineId(machine_id));
 
+                        const percent = getMaxPercentPassedToday(date);
+                        $("#max-percent").text(percent + "%").fadeIn(200);
+                        $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
                         const e1 = $('#percent-running');
                         e1.fadeOut(200, function () {
                             $(this).text(percentRunning + '%').fadeIn(200);

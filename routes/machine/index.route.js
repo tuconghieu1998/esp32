@@ -61,14 +61,17 @@ async function getMachineWorkingTimeByStatus(machineId, date) {
 router.get('/machine-dashboard/:machine_id', authenticate, async (req, res, next) => {
     const machine_id = req.params.machine_id;
     const date = getCurrentDate();
-    const {
-        percentRunning,
-        timeRunning,
-        timeStopped,
-        timeDisconnected,
-        timeChangeOver
-    } = await getMachineWorkingTimeByStatus(machine_id, date);
-    res.render('machine/machine_dashboard.hbs', { machine_id, percentRunning, timeRunning, timeStopped, timeChangeOver, timeDisconnected });
+    const data = await getMachineWorkingTimeByStatus(machine_id, date);
+    let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
+    if (data) {
+        percent_running = data.percentRunning;
+        running_hours = data.timeRunning;
+        stopped_hours = data.timeStopped;
+        changeover_hours = data.timeChangeOver;
+    }
+    let max_percent = getMaxPercentPassedToday();
+    let sub_percent = (max_percent - percent_running).toFixed(2);
+    res.render('machine/machine_dashboard.hbs', { machine_id, percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
 });
 
 router.get("/api/machine-dashboard", async (req, res) => {

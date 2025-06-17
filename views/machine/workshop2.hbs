@@ -8,15 +8,18 @@
             </label>
             <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="running">
-                <span>Running</span><div class="legend-box-filter running"></div>
+                <span>Running</span>
+                <div class="legend-box-filter running"></div>
             </label>
             <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="stopped">
-                <span>Stopped</span><div class="legend-box-filter stopped"></div>
+                <span>Stopped</span>
+                <div class="legend-box-filter stopped"></div>
             </label>
             <label class="form-check form-check-inline px-3">
                 <input class="form-check-input" type="radio" name="statusFilter" value="changeover">
-                <span>Changeover</span><div class="legend-box-filter changeover"></div>
+                <span>Changeover</span>
+                <div class="legend-box-filter changeover"></div>
             </label>
         </div>
         <div class="row g-2" id="machineGrid"></div>
@@ -49,8 +52,8 @@
                     <div class="row mb-4 mt-4">
                         <div class="col-md-3">
                             <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
-                            <input type="text" name="machine-id" id="machine-id" class="form-control"
-                                value="" placeholder="Machine No">
+                            <input type="text" name="machine-id" id="machine-id" class="form-control" value=""
+                                placeholder="Machine No">
                         </div>
                         <div class="col-md-3">
                             <label for="time" class="form-label"><strong>Date</strong></label>
@@ -62,19 +65,38 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row text-center mb-4">
+                    <div class="row text-center">
                         <!-- Percent Running -->
-                        <div class="col-md-3 mb-4">
+                        <div class="col-md-6 mb-2">
                             <div class="card border-primary">
                                 <div class="card-body">
-                                    <h5 class="card-title text-primary">Percent Running</h5>
-                                    <p id="percent-running" class="card-text display-4">0.00%</p>
+                                    <h5 class="card-title text-primary">Total Percent</h5>
+                                    <p id="max-percent" class="card-text display-4">0.00%</p>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Percent Running</h5>
 
+                                    <div class="d-flex justify-content-center align-items-center gap-4">
+                                        <!-- Left: Main percent -->
+                                        <p id="percent-running" class="card-text display-4 mb-0 mr-3">
+                                            0.00%
+                                        </p>
+                                        <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
+                                            (-0.00%)
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center mb-4">
                         <!-- Hours Running -->
-                        <div class="col-md-3 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card border-success">
                                 <div class="card-body">
                                     <h5 class="card-title text-success">Hours Running</h5>
@@ -84,7 +106,7 @@
                         </div>
 
                         <!-- Hours Stopped -->
-                        <div class="col-md-3 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card border-danger">
                                 <div class="card-body">
                                     <h5 class="card-title text-danger">Hours Stopped</h5>
@@ -94,11 +116,12 @@
                         </div>
 
                         <!-- Hours Change Over -->
-                        <div class="col-md-3 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card border-warning">
                                 <div class="card-body">
                                     <h5 class="card-title text-warning">Change Over</h5>
-                                    <p id="time-changeover" class="card-text display-4">0:00</p>
+                                    <p id="time-changeover" class="card-text display-4">0:00
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +189,7 @@
             line: Math.floor(i / (numberOfMachines / lines)) + 1,
             status: "running"
         }));
-        
+
         machines[15].status = "stopped";
         machines[16].status = "stopped";
         machines[17].status = "stopped";
@@ -226,10 +249,10 @@
 
             lineMachines.forEach(machine => {
                 let statusClass = `status-${machine.status}`;
-                if(machine.id == 1 || machine.id == 2 || machine.id == 3) {
+                if (machine.id == 1 || machine.id == 2 || machine.id == 3) {
                     statusClass = getStatusDisplay(machine.status, machine.update_time);
                 }
-                if(machine.id == 4 || machine.id == 5) {
+                if (machine.id == 4 || machine.id == 5) {
                     statusClass = `status-running`;
                 }
 
@@ -321,7 +344,7 @@
 
 
     $('#machineDashboardModal').on('show.bs.modal', function (e) {
-        if(e.target != this) return;
+        if (e.target != this) return;
         $('#time').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
@@ -388,7 +411,7 @@
         let machine_id = getMachineId();
         if (machine_id == '') return;
 
-        
+
         loadMachineOverview(machine_id, date);
         loadLast5Timelines(machine_id, date);
         handleLoadRunningPercentInMonth();
@@ -412,6 +435,10 @@
                     } = response.workingTime;
 
                     $('#machine-id').val(formatMachineId(machine_id));
+
+                    const percent = getMaxPercentPassedToday(date);
+                    $("#max-percent").text(percent + "%").fadeIn(200);
+                    $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
 
                     const e1 = $('#percent-running');
                     e1.fadeOut(200, function () {
