@@ -567,29 +567,106 @@
     }
 
 
-    function getBadgeClass(percent) {
-        if (percent >= 50) return 'percent-high';
-        if (percent > 0) return 'percent-medium';
-        return 'percent-low';
+    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+
+    function handleLoadRunningPercentInMonth() {
+        const val = $('#monthpicker').val(); // Format: mm/yyyy
+        if (!val) return;
+
+        const parts = val.split('/');
+        const month = parseInt(parts[0], 10) - 1;
+        const year = parseInt(parts[1], 10);
+
+        let machine_id = '1';
+
+        // generateCalendar(month, year);
+        loadPercentRunningMonth(machine_id ,month, year);
     }
 
-    function createDayCell(day, month, year, percent) {
+    function loadPercentRunningMonth(machine_id, month, year) {
+        const date = '01/' + (month + 1) + '/' + year;
+        $.ajax({
+            url: `/machine/api/machine-month`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+                const percentRunning = {};
+                const percentStopped = {};
+                const percentChangeover = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentRunning[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                    percentStopped[day] = parseFloat(entry.percent_stopped || 0).toFixed(0);
+                    percentChangeover[day] = parseFloat(entry.percent_changeover || 0).toFixed(0);
+                }
+                generateCalendar(month, year, percentRunning, percentStopped, percentChangeover);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
+
+    function createDayCell(day, month, year, running, stopped, changeover) {
         const cell = document.createElement('div');
         cell.classList.add('day-cell');
-        cell.title = `${day}/${month + 1}/${year}: ${percent}% running`;
+
+        const today = new Date();
+        const cellDate = new Date(year, month, day);
+
+        const isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+        const isFuture = cellDate > today;
+
+        if (isToday) {
+            cell.classList.add('today');
+        }
+
+        cell.title = `${day}/${month + 1}/${year}
+Running: ${running}%
+Stopped: ${stopped}%
+Changeover: ${changeover}%`;
+
+        cell.addEventListener('click', () => {
+            const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+            onDayCellClick(dateStr); // Call your handler
+        });
 
         const dayNum = document.createElement('div');
         dayNum.classList.add('day-number');
         dayNum.textContent = day;
         cell.appendChild(dayNum);
 
-        const badge = document.createElement('div');
-        badge.classList.add('percent-badge', getBadgeClass(percent));
-        badge.textContent = percent + '%';
-        cell.appendChild(badge);
+        if (!isFuture) {
+            const badgesContainer = document.createElement('div');
+            badgesContainer.classList.add('percent-badges');
+
+            const runningBadge = document.createElement('div');
+            runningBadge.classList.add('percent-badge', 'running-badge', running > 0 ? 'high-value' : 'low-value');
+            runningBadge.textContent = `${running}%`;
+            badgesContainer.appendChild(runningBadge);
+
+            const stoppedBadge = document.createElement('div');
+            stoppedBadge.classList.add('percent-badge', 'stopped-badge', stopped > 0 ? 'high-value' : 'low-value');
+            stoppedBadge.textContent = `${stopped}%`;
+            badgesContainer.appendChild(stoppedBadge);
+
+            const changeoverBadge = document.createElement('div');
+            changeoverBadge.classList.add('percent-badge', 'changeover-badge', changeover > 0 ? 'high-value' : 'low-value');
+            changeoverBadge.textContent = `${changeover}%`;
+            badgesContainer.appendChild(changeoverBadge);
+
+            cell.appendChild(badgesContainer);
+        }
 
         return cell;
     }
+
 
     function generatePercentData(daysInMonth) {
         const data = {};
@@ -599,7 +676,7 @@
         return data;
     }
 
-    function generateCalendar(month, year, percentData) {
+    function generateCalendar(month, year, percentRunning, percentStopped, percentChangeover) {
         const calendar = document.getElementById('calendar');
         calendar.innerHTML = ''; // Clear existing content
 
@@ -614,51 +691,7 @@
 
         // Add days
         for (let day = 1; day <= daysInMonth; day++) {
-            const percent = percentData[day] || 0; // default to 0 if no data
-            calendar.appendChild(createDayCell(day, month, year, percent));
+            calendar.appendChild(createDayCell(day, month, year, percentRunning[day] || 0, percentStopped[day] || 0, percentChangeover[day] || 0));
         }
-    }
-
-    // Initial calendar for current month
-    //const now = new Date();
-    //generateCalendar(now.getMonth(), now.getFullYear());
-
-    // When month is selected
-    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
-
-    function handleLoadRunningPercentInMonth() {
-        const val = $('#monthpicker').val(); // Format: mm/yyyy
-        if (!val) return;
-
-        const parts = val.split('/');
-        const month = parseInt(parts[0], 10) - 1;
-        const year = parseInt(parts[1], 10);
-
-        // generateCalendar(month, year);
-        loadPercentRunningMonth(getMachineId(), month, year);
-    }
-
-    function loadPercentRunningMonth(machine_id, month, year) {
-        const date = '01/' + (month + 1) + '/' + year;
-        $.ajax({
-            url: `/machine/api/machine-month`,
-            method: "GET",
-            data: { machine_id, date },
-            dataType: "json",
-            success: function (response) {
-                const data = response.data || [];
-
-                // Convert to { 1: 83, 2: 45, ... }
-                const percentData = {};
-                for (const entry of data) {
-                    const day = new Date(entry.date).getDate();
-                    percentData[day] = parseFloat(entry.percent_running || 0).toFixed(0);
-                }
-                generateCalendar(month, year, percentData);
-            },
-            error: function () {
-                alert('Failed to load running data.');
-            }
-        });
     }
 </script>

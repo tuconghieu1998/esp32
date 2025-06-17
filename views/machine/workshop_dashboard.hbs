@@ -296,12 +296,6 @@
         });
     }
 
-    function getBadgeClass(percent) {
-        if (percent >= 50) return 'percent-high';
-        if (percent > 0) return 'percent-medium';
-        return 'percent-low';
-    }
-
     function onDayCellClick(dateStr) {
         let modalElement = document.getElementById('workshopDashboardModal');
         modalElement.setAttribute('data-date', dateStr);

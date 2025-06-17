@@ -208,17 +208,29 @@ StatusExpanded AS (
         status,
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
-        ISNULL(next_timestamp, GETDATE()) AS end_time,
-        DATEDIFF(SECOND, timestamp, ISNULL(next_timestamp, GETDATE())) AS duration_seconds
+        CASE 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+                THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
+                THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
     FROM StatusWithLead
 ),
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM StatusExpanded
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+),
 
-DailyRunning AS (
+DailySummary AS (
     SELECT 
         [date],
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-        SUM(duration_seconds) AS total_tracked_seconds
-    FROM StatusExpanded
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+    FROM FilteredStatus
     GROUP BY [date]
 ),
 
@@ -231,12 +243,14 @@ Calendar AS (
 
 SELECT 
     c.[date],
-    ISNULL(d.running_seconds, 0) AS running_seconds,
-    FORMAT(ISNULL(d.running_seconds, 0) / 60.0, 'N2') AS running_minutes,
-    FORMAT(ISNULL(d.running_seconds, 0) / 3600.0, 'N2') AS running_hours,
-    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / 86400, 'N2') AS percent_running
+    ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
+    ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
+    ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
+    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / (86400), 'N2') AS percent_running,
+    FORMAT(ISNULL(d.changeover_seconds, 0) * 100.0 / (86400), 'N2') AS percent_changeover,
+    FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400), 'N2') AS percent_stopped
 FROM Calendar c
-LEFT JOIN DailyRunning d ON c.[date] = d.[date]
+LEFT JOIN DailySummary d ON c.[date] = d.[date]
 ORDER BY c.[date];
         `);
         return result.recordset || [];
