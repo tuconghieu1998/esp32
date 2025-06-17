@@ -1,88 +1,152 @@
-<div class="container mt-5">
-    <h2>Workshop 2 Dashboard</h2>
-    <!-- Date Filter -->
-    <div class="row mb-4 mt-4">
-        <div class="col-md-3">
-            <div class="input-group date">
-                <input type="text" name="time" id="time" class="form-control" placeholder="Date">
-                <button id="search-btn" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
-                    Search</button>
-            </div>
-        </div>
-    </div>
-    <div class="row text-center mb-4">
-        <!-- Percent Running -->
-        <div class="col-md-3 mb-4">
-            <div class="card border-primary">
-                <div class="card-body">
-                    <h5 class="card-title text-primary">Percent Running</h5>
-                    <p id="percent-running" class="card-text display-4">{{percent_running}}%</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hours Running -->
-        <div class="col-md-3 mb-4">
-            <div class="card border-success">
-                <div class="card-body">
-                    <h5 class="card-title text-success">Hours Running</h5>
-                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime running_hours}}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hours Stopped -->
-        <div class="col-md-3 mb-4">
-            <div class="card border-danger">
-                <div class="card-body">
-                    <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime stopped_hours}}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hours Change Over -->
-        <div class="col-md-3 mb-4">
-            <div class="card border-warning">
-                <div class="card-body">
-                    <h5 class="card-title text-warning">Change Over</h5>
-                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime changeover_hours}}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card flex-fill p-4">
-        <h3>Working in month</h3>
-        <div class="row mb-4">
+<main class="content">
+    <div class="container">
+        <h2>Workshop 2 Dashboard</h2>
+        <!-- Date Filter -->
+        <div class="row mb-4 mt-4">
             <div class="col-md-3">
                 <div class="input-group date">
-                    <input type="text" id="monthpicker" class="form-control w-25" placeholder="Select Month" />
-                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                    <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                    <button id="search-btn" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
                         Search</button>
                 </div>
             </div>
         </div>
+        <div class="row text-center mb-4">
+            <!-- Percent Running -->
+            <div class="col-md-3 mb-4">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Percent Running</h5>
+                        <p id="percent-running" class="card-text display-4">{{percent_running}}%</p>
+                    </div>
+                </div>
+            </div>
 
-        <div class="calendar" id="calendar-header">
-            <!-- Weekday headers -->
-            <div><strong>Sun</strong></div>
-            <div><strong>Mon</strong></div>
-            <div><strong>Tue</strong></div>
-            <div><strong>Wed</strong></div>
-            <div><strong>Thu</strong></div>
-            <div><strong>Fri</strong></div>
-            <div><strong>Sat</strong></div>
+            <!-- Hours Running -->
+            <div class="col-md-3 mb-4">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Hours Running</h5>
+                        <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime running_hours}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hours Stopped -->
+            <div class="col-md-3 mb-4">
+                <div class="card border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">Hours Stopped</h5>
+                        <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime stopped_hours}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hours Change Over -->
+            <div class="col-md-3 mb-4">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">Change Over</h5>
+                        <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime
+                            changeover_hours}}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="calendar" id="calendar">
+
+        <div class="card flex-fill p-4">
+            <h3>Working in month</h3>
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="input-group date">
+                        <input type="text" id="monthpicker" class="form-control w-25" placeholder="Select Month" />
+                        <button id="btn-search-month" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                            Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar" id="calendar-header">
+                <!-- Weekday headers -->
+                <div><strong>Sun</strong></div>
+                <div><strong>Mon</strong></div>
+                <div><strong>Tue</strong></div>
+                <div><strong>Wed</strong></div>
+                <div><strong>Thu</strong></div>
+                <div><strong>Fri</strong></div>
+                <div><strong>Sat</strong></div>
+            </div>
+            <div class="calendar" id="calendar">
+            </div>
         </div>
     </div>
+    <!-- Machine Detail Modal -->
+    <div class="modal fade" id="workshopDashboardModal" tabindex="-1" aria-labelledby="workshopDashboardModalLabel"
+        aria-hidden="true" data-id="">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="workshopDashboardModalLabel">Workshop 2</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="p-3" id="modalDashoardContent">
+                    <div class="row mb-4 mt-4">
+                        <div class="col-md-3">
+                            <div class="input-group date">
+                                <input type="text" name="time" id="modal-time" class="form-control" placeholder="Date">
+                                <button id="modal-search-btn" type="submit" class="btn btn-primary"><i
+                                        class="bi bi-funnel"></i>
+                                    Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center mb-4">
+                        <!-- Percent Running -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Percent Running</h5>
+                                    <p id="modal-percent-running" class="card-text display-4">0.00%</p>
+                                </div>
+                            </div>
+                        </div>
 
-    <h4 class="mb-3">Machine Performance Overview</h4>
-    <div class="row" id="machine-grid"></div>
+                        <!-- Hours Running -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Hours Running</h5>
+                                    <p id="modal-time-running" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
 
+                        <!-- Hours Stopped -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-danger">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger">Hours Stopped</h5>
+                                    <p id="modal-time-stopped" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
 
-</div>
+                        <!-- Hours Change Over -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning">Change Over</h5>
+                                    <p id="modal-time-changeover" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 <script src="/js/machine_utils.js"></script>
 <script>
     $(document).ready(function () {
@@ -117,34 +181,32 @@
             dataType: "json",
             success: function (response) {
                 console.log("loadOverView", response.data);
+                let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
                 if (response.data && response.data[0]) {
-                    const {
-                        percent_running,
-                        running_hours,
-                        stopped_hours,
-                        changeover_hours
-                    } = response.data[0];
-
-                    const e1 = $('#percent-running');
-                    e1.fadeOut(200, function () {
-                        $(this).text(percent_running + '%').fadeIn(200);
-                    });
-
-                    const e2 = $('#time-running');
-                    e2.fadeOut(200, function () {
-                        $(this).text(convertDecimalHoursToTime(running_hours)).fadeIn(200);
-                    });
-
-                    const e3 = $('#time-stopped');
-                    e3.fadeOut(200, function () {
-                        $(this).text(convertDecimalHoursToTime(stopped_hours)).fadeIn(200);
-                    });
-
-                    const e4 = $('#time-changeover');
-                    e4.fadeOut(200, function () {
-                        $(this).text(convertDecimalHoursToTime(changeover_hours)).fadeIn(200);
-                    });
+                    percent_running = response.data[0].percent_running;
+                    running_hours = response.data[0].running_hours;
+                    stopped_hours = response.data[0].stopped_hours;
+                    changeover_hours = response.data[0].changeover_hours;
                 }
+                const e1 = $('#percent-running');
+                e1.fadeOut(200, function () {
+                    $(this).text(percent_running + '%').fadeIn(200);
+                });
+
+                const e2 = $('#time-running');
+                e2.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(running_hours)).fadeIn(200);
+                });
+
+                const e3 = $('#time-stopped');
+                e3.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(stopped_hours)).fadeIn(200);
+                });
+
+                const e4 = $('#time-changeover');
+                e4.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(changeover_hours)).fadeIn(200);
+                });
             },
             error: function () {
                 alert('Failed to load running data.');
@@ -198,6 +260,72 @@
         return 'percent-low';
     }
 
+    function onDayCellClick(dateStr) {
+        let modalElement = document.getElementById('workshopDashboardModal');
+        modalElement.setAttribute('data-date', dateStr);
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+    }
+
+    $('#workshopDashboardModal').on('show.bs.modal', function (e) {
+        if (e.target != this) return;
+        $('#modal-time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+        const date = $('#workshopDashboardModal').attr("data-date");
+        $('#modal-time').val(date);
+        loadDataModal(date);
+    });
+
+    $('#modal-search-btn').click(function (e) {
+        e.preventDefault();
+        let date = $("#modal-time").val();
+        loadDataModal(date);
+    });
+
+    function loadDataModal(date) {
+        $.ajax({
+            url: `/machine/api/workshop2-date`,
+            method: "GET",
+            data: { date },
+            dataType: "json",
+            success: function (response) {
+                console.log("loadDataModal", response.data);
+                let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
+                if (response.data && response.data[0]) {
+                    percent_running = response.data[0].percent_running;
+                    running_hours = response.data[0].running_hours;
+                    stopped_hours = response.data[0].stopped_hours;
+                    changeover_hours = response.data[0].changeover_hours;
+                }
+                const e1 = $('#modal-percent-running');
+                e1.fadeOut(200, function () {
+                    $(this).text(percent_running + '%').fadeIn(200);
+                });
+
+                const e2 = $('#modal-time-running');
+                e2.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(running_hours)).fadeIn(200);
+                });
+
+                const e3 = $('#modal-time-stopped');
+                e3.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(stopped_hours)).fadeIn(200);
+                });
+
+                const e4 = $('#modal-time-changeover');
+                e4.fadeOut(200, function () {
+                    $(this).text(convertDecimalHoursToTime(changeover_hours)).fadeIn(200);
+                });
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
+
     function createDayCell(day, month, year, running, stopped, changeover) {
         const cell = document.createElement('div');
         cell.classList.add('day-cell');
@@ -220,6 +348,11 @@
 Running: ${running}%
 Stopped: ${stopped}%
 Changeover: ${changeover}%`;
+
+        cell.addEventListener('click', () => {
+            const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+            onDayCellClick(dateStr); // Call your handler
+        });
 
         const dayNum = document.createElement('div');
         dayNum.classList.add('day-number');
@@ -280,8 +413,10 @@ Changeover: ${changeover}%`;
     }
 </script>
 
+
 <script>
     const grid = document.getElementById("machine-grid");
+    if (!grid) return;
 
     for (let i = 1; i <= 200; i++) {
         const percent = Math.floor(Math.random() * 70) + 30; // Random 30%–100%

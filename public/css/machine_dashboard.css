@@ -112,6 +112,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
 }
 
 .day-number {
@@ -120,9 +121,22 @@
     margin-bottom: 4px;
 }
 
+/* Hover effect */
+.day-cell:hover {
+  background-color: #f0f8ff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+  z-index: 1;
+}
+
+/* Optionally scale up */
+.day-cell:hover .day-number {
+  font-weight: bold;
+  color: #007bff;
+}
+
 .day-cell.today {
     border: 2px solid #007bff;
-    background-color: #e8f0fe;
+    background-color: #eaf4ff;
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
 }
 
