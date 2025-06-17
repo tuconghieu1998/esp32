@@ -148,6 +148,7 @@
         </div>
     </div>
 </main>
+<script src="/js/machine_utils.js"></script>
 <script>
     function generateMachines(num) {
         const numberOfMachines = 200;
@@ -434,12 +435,6 @@
                 }
             }
         });
-    }
-
-    function convertDecimalHoursToTime(decimalHours) {
-        const hours = Math.floor(decimalHours);
-        const minutes = Math.round((decimalHours - hours) * 60);
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
     }
 
     function renderTimeline(containerSelector, data) {
