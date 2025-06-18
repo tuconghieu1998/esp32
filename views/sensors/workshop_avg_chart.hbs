@@ -194,6 +194,26 @@
 
                     // Create pagination buttons
                     createPageNumber('pagination', response.currentPage, response.totalPages);
+                    // Handle Pagination Clicks
+                    $(document).on("click", ".page-link", function (event) {
+                        event.preventDefault();
+                        let page = $(this).data("page");
+                        loadPage(page);
+                    });
+
+                    // Handle "Enter" Key Press
+                    $("#gotoPage").on("keypress", function (e) {
+                        if (e.which === 13) { // Enter key
+                            let page = parseInt($(this).val());
+                            let minPage = parseInt($(this).attr("min"), 10);
+                            let maxPage = parseInt($(this).attr("max"), 10);
+                            if (page >= minPage && page <= maxPage) {
+                                loadPage(page); // Function to load the selected page
+                            } else {
+                                alert("Invalid page number!");
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -212,7 +232,6 @@
 
         // Handle "Enter" Key Press
         $("#gotoPage").on("keypress", function (e) {
-            console.log('keypress', $(this).min, $(this).max, e.which)
             if (e.which === 13) { // Enter key
                 let page = parseInt($(this).val());
                 let minPage = parseInt($(this).attr("min"), 10);

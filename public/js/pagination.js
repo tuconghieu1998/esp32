@@ -55,30 +55,4 @@ function createPageNumber(pageId, currentPage, totalPages) {
                    placeholder="Page" style="width: 80px; margin-left: 20px; display: inline-block; text-align: center;">
         </li>
     `);
-
-    // Rebind click event after updating pagination
-    $(".page-link").click(function (event) {
-        event.preventDefault();
-        let page = $(this).data("page");
-        loadPage(page);
-    });
-
-    $("#gotoPage").keypress((e) => gotoPage(e));
-}
-
-function loadPage(page) {
-    console.log("TODO: handle loadPage");
-}
-
-function gotoPage(e) {
-    if (e.which === 13) { // Enter key
-        let page = parseInt($(this).val());
-        let minPage = parseInt($(this).attr("min"), 10);
-        let maxPage = parseInt($(this).attr("max"), 10);
-        if (page >= minPage && page <= maxPage) {
-            loadPage(page); // Function to load the selected page
-        } else {
-            alert("Invalid page number!");
-        }
-    }
 }
