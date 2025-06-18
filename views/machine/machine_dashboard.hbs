@@ -213,7 +213,7 @@
             });
 
             loadLast5Timelines(machine_id, date);
-            handleLoadRunningPercentInMonth();
+            handleLoadRunningPercentInMonth(machine_id);
         });
 
         let machineId = '1';
@@ -323,9 +323,12 @@
         }
     });
 
-    $('#btn-search-month').on('click', handleLoadRunningPercentInMonth);
+    $('#btn-search-month').on('click', function() {
+        let machine_id = getMachineId();
+        handleLoadRunningPercentInMonth(machine_id);
+    });
 
-    function handleLoadRunningPercentInMonth() {
+    function handleLoadRunningPercentInMonth(machineId) {
         const val = $('#monthpicker').val(); // Format: mm/yyyy
         if (!val) return;
 
@@ -333,10 +336,8 @@
         const month = parseInt(parts[0], 10) - 1;
         const year = parseInt(parts[1], 10);
 
-        let machine_id = '1';
-
         // generateCalendar(month, year);
-        loadPercentRunningMonth(machine_id ,month, year);
+        loadPercentRunningMonth(machineId ,month, year);
     }
 
     function loadPercentRunningMonth(machine_id, month, year) {
@@ -389,8 +390,8 @@ Stopped: ${stopped}%
 Changeover: ${changeover}%`;
 
         cell.addEventListener('click', () => {
-            const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
-            onDayCellClick(dateStr); // Call your handler
+            //const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+            //onDayCellClick(dateStr); // Call your handler
         });
 
         const dayNum = document.createElement('div');
