@@ -7,7 +7,7 @@ expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
 import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopReport } from '../../models/machine.model.js';
 import moment from 'moment';
-import { convertDateFormat } from '../../utils/helpers.js';
+import { convertDateFormat, createWorkBookWorkshopReport, sendResponseExcelDownload } from '../../utils/helpers.js';
 
 const DELAY_SEND_WS = 1000;
 const clients = new Set();
@@ -55,6 +55,17 @@ router.get('/api/workshop-report', authenticate, async (req, res, next) => {
         console.log(e);
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+router.get("/api/workshop-report/excel", authenticate, async (req, res) => {
+    let { start_date, end_date } = req.query;
+
+    const today = new Date().toISOString().split('T')[0];
+    start_date = start_date ? convertDateFormat(start_date) : today;
+    end_date = end_date ? convertDateFormat(end_date) : today;
+
+    let data = await getWorkshopReport(start_date, end_date);
+    await sendResponseExcelDownload(res, createWorkBookWorkshopReport(data), `Workshop2_${start_date}_${end_date}.xlsx`);
 });
 
 router.get('/ws2', async (req, res, next) => {

@@ -120,4 +120,17 @@
             }
         });
     }
+
+    function exportExcel() {
+        let start_date = $("#start-time").val();
+        let end_date = $("#end-time").val();
+
+        console.log("Exporting...");
+
+        // Construct query string
+        let queryString = $.param({ start_date, end_date });
+
+        // Trigger file download
+        window.location.href = `/machine/api/workshop-report/excel?${queryString}`;
+    }
 </script>

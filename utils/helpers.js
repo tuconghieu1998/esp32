@@ -63,6 +63,29 @@ export const createWorkBookWorkshopData = (data) => {
     return workbook;
 };
 
+export const createWorkBookWorkshopReport = (data) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data");
+
+    // Define columns
+    worksheet.columns = [
+        { header: "Date", key: "date", width: 15 },
+        { header: "Machine ID", key: "machine_id", width: 15 },
+        { header: "Line", key: "line", width: 15 },
+        { header: "Time Running(h)", key: "running_hours", width: 30 },
+        { header: "Time Stopped(h)", key: "stopped_hours", width: 30 },
+        { header: "Time Changeover(h)", key: "changeover_hours", width: 30 },
+        { header: "Percent Running(%)", key: "percent_running", width: 30 },
+        { header: "Percent Stopped(%)", key: "percent_stopped", width: 30 },
+        { header: "Percent Changeover(%)", key: "percent_changeover", width: 30 },
+    ];
+
+    // Add rows
+    data.forEach((row) => worksheet.addRow(row));
+
+    return workbook;
+};
+
 export const sendResponseExcelDownload = async(res, workbook, filename = 'data.xlsx') => {
     // Set response headers
     res.setHeader(
