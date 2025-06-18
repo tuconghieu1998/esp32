@@ -5,7 +5,7 @@ import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
 expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
-import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth } from '../../models/machine.model.js';
+import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopReport } from '../../models/machine.model.js';
 import moment from 'moment';
 import { convertDateFormat } from '../../utils/helpers.js';
 
@@ -14,14 +14,60 @@ const clients = new Set();
 const MACHINE_200_SERVER_URL = process.env.MACHINE_200_SERVER_URL;
 
 router.get('/', authenticate, (req, res, next) => {
-    res.render('machine');
+    try {
+        res.render('machine');
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/workshop-report', authenticate, (req, res, next) => {
+    try {
+        res.render('machine/workshop_report.hbs');
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/api/workshop-report', authenticate, async (req, res, next) => {
+    try {
+        let { start_date, end_date, page } = req.query;
+        page = page || 1;
+        const limit = 20; // Number of items per page
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const today = new Date().toISOString().split('T')[0];
+        start_date = start_date ? convertDateFormat(start_date) : today;
+        end_date = end_date ? convertDateFormat(end_date) : today;
+
+        let data = await getWorkshopReport(start_date, end_date);
+        const total_pages = Math.ceil(data.length / limit);
+        data = data.slice(startIndex, endIndex);
+
+        res.json({ data, current_page: page, limit, total_pages });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get('/ws2', async (req, res, next) => {
-    let machines = MACHINES_DATA;
-    res.render('machine/workshop2.hbs', {
-        machines
-    });
+    try {
+        let machines = MACHINES_DATA;
+        res.render('machine/workshop2.hbs', {
+            machines
+        });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 async function getMachineWorkingTimeByStatus(machineId, date) {
@@ -59,94 +105,136 @@ async function getMachineWorkingTimeByStatus(machineId, date) {
 }
 
 router.get('/machine-dashboard/:machine_id', authenticate, async (req, res, next) => {
-    const machine_id = req.params.machine_id;
-    const date = getCurrentDate();
-    const data = await getMachineWorkingTimeByStatus(machine_id, date);
-    let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
-    if (data) {
-        percent_running = data.percentRunning;
-        running_hours = data.timeRunning;
-        stopped_hours = data.timeStopped;
-        changeover_hours = data.timeChangeOver;
+    try {
+        const machine_id = req.params.machine_id;
+        const date = getCurrentDate();
+        const data = await getMachineWorkingTimeByStatus(machine_id, date);
+        let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
+        if (data) {
+            percent_running = data.percentRunning;
+            running_hours = data.timeRunning;
+            stopped_hours = data.timeStopped;
+            changeover_hours = data.timeChangeOver;
+        }
+        let max_percent = getMaxPercentPassedToday();
+        let sub_percent = (max_percent - percent_running).toFixed(2);
+        res.render('machine/machine_dashboard.hbs', { machine_id, percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
     }
-    let max_percent = getMaxPercentPassedToday();
-    let sub_percent = (max_percent - percent_running).toFixed(2);
-    res.render('machine/machine_dashboard.hbs', { machine_id, percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get("/api/machine-dashboard", async (req, res) => {
-    let { machine_id, date } = req.query;
-    let dateFormat = new Date().toISOString().split('T')[0];
-    if (date && date != '') {
-        dateFormat = convertDateFormat(date);
+    try {
+        let { machine_id, date } = req.query;
+        let dateFormat = new Date().toISOString().split('T')[0];
+        if (date && date != '') {
+            dateFormat = convertDateFormat(date);
+        }
+        const workingTime = await getMachineWorkingTimeByStatus(machine_id, dateFormat);
+        res.json({
+            workingTime
+        });
     }
-    const workingTime = await getMachineWorkingTimeByStatus(machine_id, dateFormat);
-    res.json({
-        workingTime
-    });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get("/api/machine-timeline", async (req, res) => {
-    let { machine_id, date } = req.query;
-    let dateFormat = new Date().toISOString().split('T')[0];
-    if (date && date != '') {
-        dateFormat = convertDateFormat(date);
+    try {
+        let { machine_id, date } = req.query;
+        let dateFormat = new Date().toISOString().split('T')[0];
+        if (date && date != '') {
+            dateFormat = convertDateFormat(date);
+        }
+        const data = await getTimeLineMachineWorking(machine_id, dateFormat);
+        res.json({
+            data
+        });
     }
-    const data = await getTimeLineMachineWorking(machine_id, dateFormat);
-    res.json({
-        data
-    });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get("/api/machine-month", async (req, res) => {
-    let { machine_id, date } = req.query;
-    let dateFormat = new Date().toISOString().split('T')[0];
-    if (date && date != '') {
-        dateFormat = convertDateFormat(date);
+    try {
+        let { machine_id, date } = req.query;
+        let dateFormat = new Date().toISOString().split('T')[0];
+        if (date && date != '') {
+            dateFormat = convertDateFormat(date);
+        }
+        const data = await getTimeMachineRunningInMonth(machine_id, dateFormat);
+        res.json({
+            data
+        });
     }
-    const data = await getTimeMachineRunningInMonth(machine_id, dateFormat);
-    res.json({
-        data
-    });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get("/api/workshop2-date", async (req, res) => {
-    let { date } = req.query;
-    let dateFormat = new Date().toISOString().split('T')[0];
-    if (date && date != '') {
-        dateFormat = convertDateFormat(date);
+    try {
+        let { date } = req.query;
+        let dateFormat = new Date().toISOString().split('T')[0];
+        if (date && date != '') {
+            dateFormat = convertDateFormat(date);
+        }
+        const data = await getTimeWorkshop2RunningInDate(dateFormat);
+        res.json({
+            data
+        });
     }
-    const data = await getTimeWorkshop2RunningInDate(dateFormat);
-    res.json({
-        data
-    });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get("/api/workshop2-month", async (req, res) => {
-    let { date } = req.query;
-    let dateFormat = new Date().toISOString().split('T')[0];
-    if (date && date != '') {
-        dateFormat = convertDateFormat(date);
+    try {
+        let { date } = req.query;
+        let dateFormat = new Date().toISOString().split('T')[0];
+        if (date && date != '') {
+            dateFormat = convertDateFormat(date);
+        }
+        const data = await getTimeWorkshop2RunningInMonth(dateFormat);
+        res.json({
+            data
+        });
     }
-    const data = await getTimeWorkshop2RunningInMonth(dateFormat);
-    res.json({
-        data
-    });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
-    const date = getCurrentDate();
-    const data = await getTimeWorkshop2RunningInDate(date);
-    let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
-    if (data && data[0]) {
-        percent_running = data[0].percent_running;
-        running_hours = data[0].running_hours;
-        stopped_hours = data[0].stopped_hours;
-        changeover_hours = data[0].changeover_hours;
+    try {
+        const date = getCurrentDate();
+        const data = await getTimeWorkshop2RunningInDate(date);
+        let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
+        if (data && data[0]) {
+            percent_running = data[0].percent_running;
+            running_hours = data[0].running_hours;
+            stopped_hours = data[0].stopped_hours;
+            changeover_hours = data[0].changeover_hours;
+        }
+        let max_percent = getMaxPercentPassedToday();
+        let sub_percent = (max_percent - percent_running).toFixed(2);
+        res.render('machine/workshop_dashboard.hbs', { percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
     }
-    let max_percent = getMaxPercentPassedToday();
-    let sub_percent = (max_percent - percent_running).toFixed(2);
-    res.render('machine/workshop_dashboard.hbs', { percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 function getMaxPercentPassedToday() {
@@ -160,7 +248,13 @@ function getMaxPercentPassedToday() {
 }
 
 router.get('/machine-config', authenticate, async (req, res, next) => {
-    res.render('machine/machine_config.hbs');
+    try {
+        res.render('machine/machine_config.hbs');
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 function getCurrentDate() {
@@ -174,13 +268,18 @@ function getCurrentTime() {
 
 // WebSocket route for machine data
 router.ws('/socket/ws2', (ws, req) => {
-    console.log('WebSocket client connected');
-    clients.add(ws);
+    try {
+        console.log('WebSocket client connected');
+        clients.add(ws);
 
-    ws.on('close', () => {
-        console.log('Client disconnected');
-        clients.delete(ws);
-    });
+        ws.on('close', () => {
+            console.log('Client disconnected');
+            clients.delete(ws);
+        });
+    }
+    catch (e) {
+        console.error(e);
+    }
 });
 
 // Function to fetch machine data
@@ -210,16 +309,20 @@ function hasClientReady() {
 
 // Function to simulate and broadcast machine data
 async function broadcastMachineData() {
-    if (hasClientReady()) {
-        const updated = await updateMachinesData();
-        if (!updated) return;
-        const data = JSON.stringify({ machine_states: MACHINES_DATA, time_server: MACHINE_TIME_SERVER });
+    try {
+        if (hasClientReady()) {
+            const updated = await updateMachinesData();
+            if (!updated) return;
+            const data = JSON.stringify({ machine_states: MACHINES_DATA, time_server: MACHINE_TIME_SERVER });
 
-        for (const client of clients) {
-            if (client.readyState === 1) {
-                client.send(data);
+            for (const client of clients) {
+                if (client.readyState === 1) {
+                    client.send(data);
+                }
             }
         }
+    } catch (error) {
+        console.error('Error fetching machine data:', error);
     }
 }
 

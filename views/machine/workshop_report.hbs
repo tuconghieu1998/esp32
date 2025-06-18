@@ -1,0 +1,123 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Details Data</h5>
+                    </div>
+                    <div>
+                        <form method="GET" id="filterForm" class="row g-3 p-2">
+                            <div class="col-md-3">
+                                <label for="time" class="form-label"><small><strong>Start Date</strong></small></label>
+                                <input type="text" name="time" id="start-time" class="form-control" placeholder="Date">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="time" class="form-label"><small><strong>End Date</strong></small></label>
+                                <div class="input-group date">
+                                    <input type="text" name="time" id="end-time" class="form-control"
+                                        placeholder="Date">
+                                    <button id="btn-search" type="submit" class="btn btn-primary"><i
+                                            class="bi bi-funnel"></i>
+                                        Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="p-2">
+                        <a href="javascript:void(0)" onclick="exportExcel()" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                    </div>
+                    <table class="table table-hover my-0">
+                        <thead>
+                            <tr>
+                                <th class="d-none d-xl-table-cell">Date</th>
+                                <th class="d-none d-xl-table-cell">Machine ID</th>
+                                <th class="d-none d-xl-table-cell">Line</th>
+                                <th class="d-none d-md-table-cell">Time Running(h)</th>
+                                <th class="d-none d-md-table-cell">Time Stopped(h)</th>
+                                <th class="d-none d-md-table-cell">Time Changeover(h)</th>
+                                <th class="d-none d-md-table-cell">Percent Running(%)</th>
+                                <th class="d-none d-md-table-cell">Percent Stopped(%)</th>
+                                <th class="d-none d-md-table-cell">Percent Changeover(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-3" id="pagination">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="/js/machine_utils.js"></script>
+<script src="/js/pagination.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#start-time').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+        $('#end-time').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+
+        // load today when refresh page
+        loadPage(1);
+    });
+
+    $('#btn-search').click(function (e) {
+        e.preventDefault();
+        loadPage(1);
+    });
+
+    function loadPage(page) {
+        let start_date = $("#start-time").val();
+        let end_date = $("#end-time").val();
+        loadData(start_date, end_date, page);
+    }
+
+    function loadData(start_date, end_date, page = 1) {
+        $.ajax({
+            url: `/machine/api/workshop-report`,
+            method: "GET",
+            data: { start_date, end_date, page },
+            dataType: "json",
+            success: function (response) {
+                let tableBody = $("#tableBody");
+                let pagination = $("#pagination");
+                // Clear old data
+                tableBody.empty();
+                pagination.empty();
+                // Populate table with new data
+                response.data.forEach((item, index) => {
+                    tableBody.append(`
+                        <tr>
+                            <td class="d-none d-xl-table-cell">${formatTimestamp(item.date)}</td>
+                            <td class="d-none d-xl-table-cell">${formatMachineId(item.machine_id)}</td>
+                            <td class="d-none d-xl-table-cell">${item.line}</td>
+                            <td class="d-none d-md-table-cell">${item.running_hours.toFixed(2)}</td>
+                            <td class="d-none d-md-table-cell">${item.stopped_hours.toFixed(2)}</td>
+                            <td class="d-none d-md-table-cell">${item.changeover_hours.toFixed(2)}</td>
+                            <td class="d-none d-md-table-cell">${item.percent_running}</td>
+                            <td class="d-none d-md-table-cell">${item.percent_stopped}</td>
+                            <td class="d-none d-md-table-cell">${item.percent_changeover}</td>
+                        </tr>
+                    `);
+                });
+
+                // Create pagination buttons
+                createPageNumber('pagination', response.current_page, response.total_pages);
+            }
+        });
+    }
+</script>

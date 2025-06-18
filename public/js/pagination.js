@@ -1,5 +1,5 @@
 function createPageItem(page, currentPage) {
-    return `<li class="page-item ${page === currentPage ? 'active' : ''}">
+    return `<li class="page-item ${page == currentPage ? 'active' : ''}">
         <a class="page-link" href="#" data-page="${page}">${page}</a>
     </li>`;
 }

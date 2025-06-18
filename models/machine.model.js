@@ -410,3 +410,77 @@ FROM DailyStatus;
         }
     }
 }
+
+export async function getWorkshopReport(startDate, endDate) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+DECLARE @monthStart DATE = '${startDate}';
+DECLARE @monthEnd DATE = '${endDate}';
+
+WITH StatusWithLead AS (
+    SELECT *,
+        LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
+    FROM ws2_working_status
+    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+),
+
+StatusExpanded AS (
+    SELECT 
+        machine_id,
+        status,
+        CAST(timestamp AS DATE) AS [date],
+        timestamp AS start_time,
+        CASE 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+                THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
+                THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
+    FROM StatusWithLead
+),
+
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM StatusExpanded
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+),
+
+DailySummary AS (
+    SELECT machine_id, 
+        [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+    FROM FilteredStatus
+    GROUP BY machine_id, [date]
+)
+
+SELECT 
+    d.machine_id,
+	c.line,
+	d.[date],
+    ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
+    ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
+    ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
+    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / (86400), 'N2') AS percent_running,
+    FORMAT(ISNULL(d.changeover_seconds, 0) * 100.0 / (86400), 'N2') AS percent_changeover,
+    FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400), 'N2') AS percent_stopped
+FROM DailySummary d 
+LEFT JOIN ws2_machine_config c ON d.machine_id = c.machine_id 
+ORDER BY d.machine_id, d.[date];
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    } finally {
+        if (pool) {
+            await closeConnection(); // Close connection after request
+        }
+    }
+}
