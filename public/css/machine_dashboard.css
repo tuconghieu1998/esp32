@@ -20,7 +20,6 @@
     align-items: center;
     font-size: 13px;
     font-weight: bold;
-    border-right: 1px solid #fff;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
