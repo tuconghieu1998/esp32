@@ -46,6 +46,7 @@ function convertMachineId(machineIdStr) {
 }
 
 function convertDecimalHoursToTime(decimalHours) {
+    decimalHours = decimalHours.replaceAll(',', '');
     const hours = Math.floor(decimalHours);
     const minutes = Math.round((decimalHours - hours) * 60);
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
