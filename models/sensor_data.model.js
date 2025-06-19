@@ -1,4 +1,4 @@
-import { getConnection, closeConnection } from "../db.js";
+import { getConnection } from "../db.js";
 
 const table_name = "sensor_data";
 
@@ -15,10 +15,6 @@ export async function getListSensors() {
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -36,10 +32,6 @@ export async function getSensorsByFactory(factory) {
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -63,10 +55,6 @@ export async function getLastDataEachSensor() {
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 
 
@@ -108,10 +96,6 @@ ORDER BY f.factory;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 
 
@@ -133,10 +117,6 @@ ORDER BY timestamp DESC;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 
 
@@ -165,10 +145,6 @@ ORDER BY date DESC, hour ASC;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -195,10 +171,6 @@ ORDER BY date DESC, hour ASC;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -225,10 +197,6 @@ ORDER BY factory ASC, date DESC, hour ASC;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 
 
@@ -253,9 +221,5 @@ ORDER BY sensor_id;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 

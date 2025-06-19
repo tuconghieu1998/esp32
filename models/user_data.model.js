@@ -1,4 +1,4 @@
-import { getConnection, closeConnection } from "../db.js";
+import { getConnection } from "../db.js";
 
 export async function getUserByUserName(username) {
     let pool;
@@ -12,9 +12,5 @@ export async function getUserByUserName(username) {
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 } 

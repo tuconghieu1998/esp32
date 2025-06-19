@@ -1,4 +1,4 @@
-import { getConnection, closeConnection } from "../db.js";
+import { getConnection } from "../db.js";
 
 const table_config = "ws2_machine_config";
 const table_data = "ws2_working_status";
@@ -16,10 +16,6 @@ export async function getListMachines() {
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -74,10 +70,6 @@ ORDER BY log_date, status;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -176,10 +168,6 @@ ORDER BY start_time;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -257,10 +245,6 @@ ORDER BY c.[date];
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -330,10 +314,6 @@ ORDER BY c.[date];
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -404,10 +384,6 @@ FROM DailyStatus;
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }
 
@@ -478,9 +454,5 @@ ORDER BY d.machine_id, d.[date];
     } catch (err) {
         console.error(err);
         return [];
-    } finally {
-        if (pool) {
-            await closeConnection(); // Close connection after request
-        }
     }
 }

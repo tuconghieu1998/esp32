@@ -12,6 +12,7 @@ import accountRoute from './routes/account/index.route.js';
 import machineRoute from './routes/machine/index.route.js';
 import session from 'express-session';
 import { authenticate, authenticateWebSocket } from './middlewares/middleware.js';
+import { closeConnection } from './db.js';
 
 dotenv.config();
 // const key = fs.readFileSync('./privatekey.pem', 'utf8');
@@ -155,3 +156,8 @@ app.post('/check-ping', async (req, res) => {
     }
 });
 
+process.on('SIGINT', async () => {
+    console.log("Shutting down gracefully...");
+    await closeConnection();
+    process.exit(0);
+});
