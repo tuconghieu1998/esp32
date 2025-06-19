@@ -447,7 +447,7 @@ SELECT
     FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400), 'N2') AS percent_stopped
 FROM DailySummary d 
 LEFT JOIN ws2_machine_config c ON d.machine_id = c.machine_id 
-ORDER BY d.machine_id, d.[date];
+ORDER BY CAST(d.machine_id AS INT), d.[date];
         `);
 
         return result.recordset || [];
