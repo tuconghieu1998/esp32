@@ -2,7 +2,6 @@ import sql from "mssql";
 import dotenv from "dotenv";
 
 dotenv.config(); // Load environment variables
-let poolPromise;
 
 // Database configuration
 const config = {
@@ -21,13 +20,12 @@ const config = {
     },
 };
 
+const appPool = new sql.ConnectionPool(config);
+
 // Function to get a connection pool
 async function getConnection() {
     try {
-        if (!poolPromise) {
-            poolPromise = await sql.connect(config);
-        }
-        return poolPromise;
+        return await appPool.connect();
     } catch (err) {
         console.error("Database Connection Failed", err);
         throw err;
@@ -37,13 +35,7 @@ async function getConnection() {
 // Function to close the pool
 async function closeConnection() {
     try {
-        if (poolPromise) {
-            const pool = await poolPromise; // Ensure we have the resolved pool
-            if (pool.connected) {
-                await pool.close();
-            }
-            poolPromise = null; // Reset after closing
-        }
+        appPool.close();
     } catch (err) {
         console.error("Error closing connection", err);
     }
