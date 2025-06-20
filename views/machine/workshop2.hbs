@@ -260,6 +260,13 @@
                 lineHeader.textContent = `Line ${lineNumber}-${lineNumber + 1}`;
                 grid.appendChild(lineHeader);
             }
+            else if (!linesMap.has(lineNumber-1)) {
+                // Add line header
+                const lineHeader = document.createElement('div');
+                lineHeader.className = 'fw-bold mt-3 mb-2';
+                lineHeader.textContent = `Line ${lineNumber - 1}-${lineNumber}`;
+                grid.appendChild(lineHeader);
+            }
 
             // Container for machines in this line
             const lineRow = document.createElement('div');
