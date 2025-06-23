@@ -46,10 +46,17 @@ function convertMachineId(machineIdStr) {
 }
 
 function convertDecimalHoursToTime(decimalHours) {
-    decimalHours = decimalHours.replaceAll(',', '');
+    decimalHours = String(decimalHours).replaceAll(',', '');
     const hours = Math.floor(decimalHours);
     const minutes = Math.round((decimalHours - hours) * 60);
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
+}
+
+function convertHoursToHHMM(decimalHours) {
+    decimalHours = String(decimalHours).replaceAll(',', '');
+    const hours = Math.floor(decimalHours);
+    const minutes = Math.round((decimalHours - hours) * 60);
+    return `${hours}h${minutes.toString().padStart(2, '0')}m`;
 }
 
 // format dd/mm/yyyy

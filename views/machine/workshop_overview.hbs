@@ -1,0 +1,483 @@
+<main class="content">
+    <div class="container">
+        <h2>Workshop 2 Heatmap</h2>
+        <!-- Date Filter -->
+        <div class="row mb-4 mt-4">
+            <div class="col-md-3">
+                <div class="input-group date">
+                    <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                    <button id="search-btn" type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i>
+                        Search</button>
+                </div>
+            </div>
+        </div>
+        <div id="heatmap-machine-grid" class="heatmap-machine-grid"></div>
+    </div>
+    <!-- Machine Detail Modal -->
+    <div class="modal fade" id="machineDashboardModal" tabindex="-1" aria-labelledby="machineDashboardModalLabel"
+        aria-hidden="true" data-id="">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="machineDashboardModalLabel">Weaving Machine Dashboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="p-3" id="modalMachineDashoardContent">
+                    <div class="row mb-4 mt-4">
+                        <div class="col-md-3">
+                            <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
+                            <input type="text" name="machine-id" id="machine-id" class="form-control" value=""
+                                placeholder="Machine No">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="modal-time" class="form-label"><strong>Date</strong></label>
+                            <div class="input-group date">
+                                <input type="text" name="modal-time" id="modal-time" class="form-control" placeholder="Date">
+                                <button type="submit" class="btn btn-primary" id="search-btn"><i
+                                        class="bi bi-funnel"></i>
+                                    Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <!-- Percent Running -->
+                        <div class="col-md-6 mb-2">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">Total Percent</h5>
+                                    <p id="max-percent" class="card-text display-4">0.00%</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Percent Running</h5>
+
+                                    <div class="d-flex justify-content-center align-items-center gap-4">
+                                        <!-- Left: Main percent -->
+                                        <p id="percent-running" class="card-text display-4 mb-0 mr-3">
+                                            0.00%
+                                        </p>
+                                        <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
+                                            (-0.00%)
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center mb-4">
+                        <!-- Hours Running -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">Hours Running</h5>
+                                    <p id="time-running" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Stopped -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-danger">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger">Hours Stopped</h5>
+                                    <p id="time-stopped" class="card-text display-4">0:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hours Change Over -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning">Change Over</h5>
+                                    <p id="time-changeover" class="card-text display-4">0:00
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card flex-fill p-4">
+                        <h5>Working Timeline</h5>
+                        <div class="mb-2 d-flex gap-1 align-items-center">
+                            <div><strong>Status Legend:</strong></div>
+                            <div class="legend-box running"></div><span>Running</span>
+                            <div class="legend-box stopped"></div><span>Stopped</span>
+                            <div class="legend-box changeover"></div><span>Changeover</span>
+                            <div class="legend-box disconnected"></div><span>Disconnected</span>
+                        </div>
+                        <div id="multi-day-timelines"></div>
+                    </div>
+
+                    <div class="card flex-fill p-4">
+                        <h3>Working in month</h3>
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="input-group date">
+                                    <input type="text" id="modal-monthpicker" class="form-control w-25"
+                                        placeholder="Select Month" />
+                                    <button id="btn-search-month" type="submit" class="btn btn-primary"><i
+                                            class="bi bi-funnel"></i>
+                                        Search</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="calendar" id="calendar-header">
+                            <!-- Weekday headers -->
+                            <div><strong>Sun</strong></div>
+                            <div><strong>Mon</strong></div>
+                            <div><strong>Tue</strong></div>
+                            <div><strong>Wed</strong></div>
+                            <div><strong>Thu</strong></div>
+                            <div><strong>Fri</strong></div>
+                            <div><strong>Sat</strong></div>
+                        </div>
+                        <div class="calendar" id="calendar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="heatmap-tooltip" class="heatmap-tooltip"></div>
+</main>
+<!-- Tooltip element -->
+<div id="custom-tooltip" style="z-index: 9999;"></div>
+<script src="/js/machine_utils.js"></script>
+<script src="/js/timeline.js"></script>
+<script>
+    const WORKSHOP_LAYOUT = [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+        [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
+        [55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72],
+        [73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90],
+        [91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108],
+        [109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126],
+        [127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144],
+        [145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162],
+        [163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180],
+        [181, 182, 183, 184, 185, 186, 187, 188, 189, 190],
+        [191, 192, 193, 194, 195, 196, 197, 198, 199, 200]
+    ];
+
+    let dateSearch = null;
+
+    $(document).ready(function () {
+        $('#time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+
+        dateSearch = $('#time').val();
+        loadData(dateSearch, dateSearch);
+    });
+
+    $('#search-btn').click(function (e) {
+        e.preventDefault();
+
+        dateSearch = $('#time').val();
+        loadData(dateSearch, dateSearch);
+    });
+
+    const heatmapTooltip = document.getElementById('heatmap-tooltip');
+
+    function loadData(start_date, end_date) {
+        $.ajax({
+            url: `/machine/api/workshop-heatmap`,
+            method: "GET",
+            data: { start_date, end_date },
+            dataType: "json",
+            success: function (response) {
+                const { data } = response;
+                const container = document.getElementById('heatmap-machine-grid');
+                container.innerHTML = '';
+
+                WORKSHOP_LAYOUT.forEach((row, lineIndex) => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'heatmap-machine-row';
+
+                    // Create line number box
+                    const lineLabel = document.createElement('div');
+                    lineLabel.className = 'heatmap-line-label';
+                    lineLabel.textContent = `Line ${lineIndex + 1}`;
+                    rowDiv.appendChild(lineLabel);
+
+                    row.forEach(machineId => {
+                        const runningHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].running_hours : 0);
+                        const stoppedHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].stopped_hours : 0);
+                        const changeoverHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].changeover_hours : 0);
+                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : 0;
+                        const opacity = runningPercent / 100;
+
+                        const box = document.createElement('div');
+                        box.className = 'heatmap-machine-box';
+                        box.textContent = machineId;
+                        box.style.backgroundColor = `rgba(0, 128, 0, ${opacity})`;
+
+                        box.addEventListener('mouseenter', (e) => {
+                            heatmapTooltip.innerText = `Machine: ${machineId}\nLine: ${lineIndex + 1}\nRunning: ${runningHours}\nPercent: ${runningPercent}%\nStopped: ${stoppedHours}\nChangeover: ${changeoverHours}`;
+                            heatmapTooltip.style.opacity = '1';
+                            heatmapTooltip.style.left = e.pageX + 15 + 'px'; // offset right
+                            heatmapTooltip.style.top = e.pageY + 15 + 'px';  // offset down
+                        });
+
+                        box.addEventListener('mousemove', (e) => {
+                            heatmapTooltip.style.left = e.pageX + 15 + 'px';
+                            heatmapTooltip.style.top = e.pageY + 15 + 'px';
+                        });
+
+                        box.addEventListener('mouseleave', () => {
+                            heatmapTooltip.style.opacity = '0';
+                        });
+
+                        box.addEventListener('click', () => {
+                            let modalElement = document.getElementById('machineDashboardModal');
+                            modalElement.setAttribute('data-id', machineId);
+                            const modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        });
+
+                        rowDiv.appendChild(box);
+                    });
+
+                    container.appendChild(rowDiv);
+                });
+            }
+        });
+    }
+
+
+    $('#machineDashboardModal').on('show.bs.modal', function (e) {
+        if (e.target != this) return;
+        $('#modal-time').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+
+        $('#modal-monthpicker').datepicker({
+            format: "mm/yyyy",       // show month/year only
+            startView: "months",     // start view at months
+            minViewMode: "months",   // limit selection to months only
+            autoclose: true
+        }).datepicker('setDate', new Date());
+
+        const machine_id = $('#machineDashboardModal').attr("data-id");
+        $("#machine-id").val(formatMachineId(machine_id));
+        $("#modal-time").val(dateSearch);
+        console.log("Modal Show: ", machine_id, dateSearch);
+
+        loadMachineOverview(machine_id, dateSearch);
+        loadLast5Timelines(machine_id, dateSearch);
+        handleLoadRunningPercentInMonth(machine_id);
+    });
+
+    function formatMachineId(id) {
+        return '#' + String(id).padStart(3, '0');
+    }
+
+    function getMachineId() {
+        let machineIdStr = $("#machine-id").val();
+        machineIdStr = machineIdStr.replace('#', '');
+        if (isNaN(Number(machineIdStr))) {
+            alert("Machine ID invalid!");
+            return '';
+        }
+        return Number(machineIdStr);
+    }
+
+    $('#search-btn').click(function (e) {
+        e.preventDefault();
+        let date = $("#modal-time").val();
+        let machine_id = getMachineId();
+        if (machine_id == '') return;
+
+
+        loadMachineOverview(machine_id, date);
+        loadLast5Timelines(machine_id, date);
+        handleLoadRunningPercentInMonth(machine_id);
+    });
+
+    function loadMachineOverview(machine_id, date) {
+        $.ajax({
+            url: `/machine/api/machine-dashboard`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                console.log(response.workingTime);
+                if (response.workingTime) {
+                    const {
+                        percentRunning,
+                        timeRunning,
+                        timeStopped,
+                        timeDisconnected,
+                        timeChangeOver
+                    } = response.workingTime;
+
+                    $('#machine-id').val(formatMachineId(machine_id));
+
+                    const percent = getMaxPercentPassedToday(date);
+                    $("#max-percent").text(percent + "%").fadeIn(200);
+                    $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
+
+                    const e1 = $('#percent-running');
+                    e1.fadeOut(200, function () {
+                        $(this).text(percentRunning + '%').fadeIn(200);
+                    });
+
+                    const e2 = $('#time-running');
+                    e2.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
+                    });
+
+                    const e3 = $('#time-stopped');
+                    e3.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
+                    });
+
+                    const e4 = $('#time-changeover');
+                    e4.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
+                    });
+                }
+            }
+        });
+    }
+
+    $('#btn-search-month').on('click', function () {
+        let machine_id = getMachineId();
+        handleLoadRunningPercentInMonth(machine_id);
+    });
+
+    function handleLoadRunningPercentInMonth(machineId) {
+        const val = $('#modal-monthpicker').val(); // Format: mm/yyyy
+        if (!val) return;
+
+        const parts = val.split('/');
+        const month = parseInt(parts[0], 10) - 1;
+        const year = parseInt(parts[1], 10);
+
+        // generateCalendar(month, year);
+        loadPercentRunningMonth(machineId, month, year);
+    }
+
+    function loadPercentRunningMonth(machine_id, month, year) {
+        const date = '01/' + (month + 1) + '/' + year;
+        $.ajax({
+            url: `/machine/api/machine-month`,
+            method: "GET",
+            data: { machine_id, date },
+            dataType: "json",
+            success: function (response) {
+                const data = response.data || [];
+                const percentRunning = {};
+                const percentStopped = {};
+                const percentChangeover = {};
+                for (const entry of data) {
+                    const day = new Date(entry.date).getDate();
+                    percentRunning[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                    percentStopped[day] = parseFloat(entry.percent_stopped || 0).toFixed(0);
+                    percentChangeover[day] = parseFloat(entry.percent_changeover || 0).toFixed(0);
+                }
+                generateCalendar(month, year, percentRunning, percentStopped, percentChangeover);
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
+
+    function createDayCell(day, month, year, running, stopped, changeover) {
+        const cell = document.createElement('div');
+        cell.classList.add('day-cell');
+
+        const today = new Date();
+        const cellDate = new Date(year, month, day);
+
+        const isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+        const isFuture = cellDate > today;
+
+        if (isToday) {
+            cell.classList.add('today');
+        }
+
+        cell.title = `${day}/${month + 1}/${year}
+Running: ${running}%
+Stopped: ${stopped}%
+Changeover: ${changeover}%`;
+
+        cell.addEventListener('click', () => {
+            //const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+            //onDayCellClick(dateStr); // Call your handler
+        });
+
+        const dayNum = document.createElement('div');
+        dayNum.classList.add('day-number');
+        dayNum.textContent = day;
+        cell.appendChild(dayNum);
+
+        if (!isFuture) {
+            const badgesContainer = document.createElement('div');
+            badgesContainer.classList.add('percent-badges');
+
+            const runningBadge = document.createElement('div');
+            runningBadge.classList.add('percent-badge', 'running-badge', running > 0 ? 'high-value' : 'low-value');
+            runningBadge.textContent = `${running}%`;
+            badgesContainer.appendChild(runningBadge);
+
+            const stoppedBadge = document.createElement('div');
+            stoppedBadge.classList.add('percent-badge', 'stopped-badge', stopped > 0 ? 'high-value' : 'low-value');
+            stoppedBadge.textContent = `${stopped}%`;
+            badgesContainer.appendChild(stoppedBadge);
+
+            const changeoverBadge = document.createElement('div');
+            changeoverBadge.classList.add('percent-badge', 'changeover-badge', changeover > 0 ? 'high-value' : 'low-value');
+            changeoverBadge.textContent = `${changeover}%`;
+            badgesContainer.appendChild(changeoverBadge);
+
+            cell.appendChild(badgesContainer);
+        }
+
+        return cell;
+    }
+
+
+    function generatePercentData(daysInMonth) {
+        const data = {};
+        for (let d = 1; d <= daysInMonth; d++) {
+            data[d] = Math.floor(Math.random() * 70) + 30;
+        }
+        return data;
+    }
+
+    function generateCalendar(month, year, percentRunning, percentStopped, percentChangeover) {
+        const calendar = document.getElementById('calendar');
+        calendar.innerHTML = ''; // Clear existing content
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+
+        // Add blank cells before the 1st day
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            calendar.appendChild(emptyCell);
+        }
+
+        // Add days
+        for (let day = 1; day <= daysInMonth; day++) {
+            calendar.appendChild(createDayCell(day, month, year, percentRunning[day] || 0, percentStopped[day] || 0, percentChangeover[day] || 0));
+        }
+    }
+</script>

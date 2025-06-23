@@ -5,7 +5,7 @@ import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
 expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
-import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopReport } from '../../models/machine.model.js';
+import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopMachineRunTime, getWorkshopReport } from '../../models/machine.model.js';
 import moment from 'moment';
 import { convertDateFormat, createWorkBookWorkshopReport, sendResponseExcelDownload } from '../../utils/helpers.js';
 
@@ -241,6 +241,34 @@ router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
         let max_percent = getMaxPercentPassedToday();
         let sub_percent = (max_percent - percent_running).toFixed(2);
         res.render('machine/workshop_dashboard.hbs', { percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/workshop-heatmap', authenticate, async (req, res, next) => {
+    try {
+        res.render('machine/workshop_overview.hbs');
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get('/api/workshop-heatmap', authenticate, async (req, res, next) => {
+    try {
+        let { start_date, end_date } = req.query;
+
+        const today = new Date().toISOString().split('T')[0];
+        start_date = start_date ? convertDateFormat(start_date) : today;
+        end_date = end_date ? convertDateFormat(end_date) : today;
+
+        let data = await getWorkshopMachineRunTime(start_date, end_date);
+
+        res.json({ data });
     }
     catch (e) {
         console.log(e);

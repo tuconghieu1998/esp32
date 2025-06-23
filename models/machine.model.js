@@ -456,3 +456,81 @@ ORDER BY CAST(d.machine_id AS INT), d.[date];
         return [];
     }
 }
+
+export async function getWorkshopMachineRunTime(startDate, endDate) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+DECLARE @monthStart DATE = '${startDate}';
+DECLARE @monthEnd DATE = '${endDate}';
+
+WITH StatusWithLead AS (
+    SELECT *,
+        LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
+    FROM ws2_working_status
+    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+),
+
+StatusExpanded AS (
+    SELECT 
+        machine_id,
+        status,
+        CAST(timestamp AS DATE) AS [date],
+        timestamp AS start_time,
+        CASE 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+                THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
+                THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
+    FROM StatusWithLead
+),
+
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM StatusExpanded
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+),
+
+DailySummary AS (
+    SELECT machine_id, 
+           [date],
+           SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
+           SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
+           SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+    FROM FilteredStatus
+    GROUP BY machine_id, [date]
+),
+
+MachineDayCounts AS (
+    SELECT machine_id, COUNT(DISTINCT [date]) AS day_count
+    FROM DailySummary
+    GROUP BY machine_id
+)
+
+SELECT 
+    d.machine_id,
+    c.line,
+    MAX(d.[date]) AS latest_date,
+    ISNULL(SUM(d.running_seconds), 0) / 3600.0 AS running_hours,
+    ISNULL(SUM(d.changeover_seconds), 0) / 3600.0 AS changeover_hours,
+    ISNULL(SUM(d.stopped_seconds), 0) / 3600.0 AS stopped_hours,
+    FORMAT(ISNULL(SUM(d.running_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_running,
+    FORMAT(ISNULL(SUM(d.changeover_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_changeover,
+    FORMAT(ISNULL(SUM(d.stopped_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_stopped
+FROM DailySummary d 
+JOIN MachineDayCounts mc ON d.machine_id = mc.machine_id
+LEFT JOIN ws2_machine_config c ON d.machine_id = c.machine_id
+GROUP BY d.machine_id, c.line, mc.day_count
+ORDER BY CAST(d.machine_id AS INT);
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}

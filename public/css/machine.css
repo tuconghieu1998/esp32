@@ -36,3 +36,59 @@
     transition: background-color 0.4s ease;
     background-color: #d1ffd1; /* light green */
 }
+
+#heatmap-machine-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    max-width: 100%;
+}
+
+.heatmap-machine-row {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.heatmap-line-label {
+    width: 60px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #444;
+    text-align: left;
+    margin-right: 8px;
+}
+
+.heatmap-machine-box {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background-color: green; /* Base background color */
+    border: .5px solid #1f23280d; /* Border around each cell */
+    border-radius: 4px;
+    color: black;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.heatmap-tooltip {
+    position: absolute;
+    padding: 6px 10px;
+    background-color: rgba(0,0,0,0.85);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 16px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+    white-space: pre-line;
+}
