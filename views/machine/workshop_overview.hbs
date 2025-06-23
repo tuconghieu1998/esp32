@@ -213,7 +213,7 @@
                         const runningHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].running_hours : 0);
                         const stoppedHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].stopped_hours : 0);
                         const changeoverHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].changeover_hours : 0);
-                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : 0;
+                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : Math.floor(Math.random() * 101);
                         const opacity = runningPercent / 100;
 
                         const box = document.createElement('div');
