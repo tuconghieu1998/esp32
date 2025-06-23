@@ -103,7 +103,7 @@
     <!-- Machine Detail Modal -->
     <div class="modal fade" id="workshopDashboardModal" tabindex="-1" aria-labelledby="workshopDashboardModalLabel"
         aria-hidden="true" data-id="">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="workshopDashboardModalLabel">Workshop 2</h5>
@@ -456,24 +456,29 @@ Changeover: ${changeover}%`;
 
 
 <script>
-    const grid = document.getElementById("machine-grid");
-    if (!grid) return;
+    $(document).ready(function() {
+        createMachineGrid();
+    });
+    function createMachineGrid() {
+        const grid = document.getElementById("machine-grid");
+        if (!grid) return;
 
-    for (let i = 1; i <= 200; i++) {
-        const percent = Math.floor(Math.random() * 70) + 30; // Random 30%–100%
-        const card = document.createElement("div");
-        card.className = "col-6 col-sm-4 col-md-3 col-lg-2";
+        for (let i = 1; i <= 200; i++) {
+            const percent = Math.floor(Math.random() * 70) + 30; // Random 30%–100%
+            const card = document.createElement("div");
+            card.className = "col-6 col-sm-4 col-md-3 col-lg-2";
 
-        const levelClass = percent >= 75 ? 'high' : (percent >= 50 ? 'medium' : 'low');
+            const levelClass = percent >= 75 ? 'high' : (percent >= 50 ? 'medium' : 'low');
 
-        card.innerHTML = `
-      <div class="machine-card" data-machine-id="${i}">
-        <div><strong>Machine #${String(i).padStart(3, '0')}</strong></div>
-        <div class="percent ${levelClass}">${percent}%</div>
-      </div>
-    `;
+            card.innerHTML = `
+              <div class="machine-card" data-machine-id="${i}">
+                <div><strong>Machine #${String(i).padStart(3, '0')}</strong></div>
+                <div class="percent ${levelClass}">${percent}%</div>
+              </div>
+            `;
 
-        grid.appendChild(card);
+            grid.appendChild(card);
+        }
     }
 
     document.querySelectorAll('.machine-card').forEach(card => {
