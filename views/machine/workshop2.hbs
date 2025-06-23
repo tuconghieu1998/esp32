@@ -25,24 +25,9 @@
         <div class="row g-2" id="machineGrid"></div>
     </div>
     <!-- Machine Detail Modal -->
-    <div class="modal fade" id="machineModal" tabindex="-1" aria-labelledby="machineModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="machineModalLabel">Machine Detail</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="p-3" id="modalMachineContent">
-                    <!-- Details will be inserted here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Machine Detail Modal -->
     <div class="modal fade" id="machineDashboardModal" tabindex="-1" aria-labelledby="machineDashboardModalLabel"
         aria-hidden="true" data-id="">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="machineDashboardModalLabel">Weaving Machine Dashboard</h5>
@@ -298,17 +283,6 @@
                 `;
 
                 col.querySelector('.machine-card').addEventListener('click', () => {
-                    const modalBody = document.getElementById('modalMachineContent');
-                    const modalTitle = document.getElementById('machineModalLabel');
-
-                    modalTitle.textContent = `Machine #${machine.id} Detail`;
-
-                    modalBody.innerHTML = ` <div>
-                        <p><strong>Machine No:</strong> #${machine.id}</p>
-                        <p><strong>Status:</strong> ${machine.status}</p>
-                        <p><strong>Line:</strong> ${machine.line}</p>
-                    </div>`;
-
                     let modalElement = document.getElementById('machineDashboardModal');
                     console.log("set data id", machine);
                     modalElement.setAttribute('data-id', machine.id);
