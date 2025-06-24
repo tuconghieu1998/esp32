@@ -330,10 +330,10 @@ async function getMachineData() {
             return machineData;
             // Do something with the machine data, such as broadcasting it to clients
         }
-        return [];
+        return {};
     } catch (error) {
         //console.error('Error fetching machine data:', error);
-        return [];
+        return {};
     }
 }
 
@@ -373,9 +373,9 @@ let MACHINE_TIME_SERVER;
 
 async function updateMachinesData() {
     let data = await getMachineData();
+    if(Object.keys(data).length == 0) return false;
     let machines = data.machine_states;
     MACHINE_TIME_SERVER = data.current_time;
-    if (machines.length == 0) return false;
     for (let i = 0; i < MACHINES_DATA.length; i++) {
         let sensor_id = MACHINES_DATA[i].sensor_id;
         if (machines[sensor_id]) {
