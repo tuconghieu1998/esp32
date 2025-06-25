@@ -1,3 +1,5 @@
+Enable npm install - Open PowerShell as Admin
+Set-ExecutionPolicy RemoteSigned 
 =======Mở port PowerShell Admin
 New-NetFirewallRule -DisplayName "Allow Node.js" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow
 
