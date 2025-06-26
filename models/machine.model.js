@@ -19,6 +19,116 @@ export async function getListMachines() {
     }
 }
 
+export async function getConfigBySensorId(sensorId) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+            SELECT *
+            FROM ${table_config}
+            where sensor_id = '${sensorId}'
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+export async function getConfigByMachineId(machineId) {
+    let pool;
+    try {
+        pool = await getConnection();
+        const result = await pool.request().query(`
+            SELECT *
+            FROM ${table_config}
+            where machine_id = '${machineId}'
+        `);
+
+        return result.recordset || [];
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+export async function createSensorConfig(config) {
+    let pool;
+    try {
+        pool = await getConnection();
+
+        const result = await pool.request()
+            .input('sensor_id', config.sensor_id)
+            .input('machine_id', config.machine_id)
+            .input('line', config.line)
+            .input('note', config.note || '')
+            .query(`
+                INSERT INTO ${table_config} (sensor_id, machine_id, line, note)
+                VALUES (@sensor_id, @machine_id, @line, @note)
+            `);
+
+        return result.rowsAffected[0] > 0;
+    } catch (err) {
+        console.error('Error creating machine config:', err);
+        return false;
+    }
+}
+
+export async function getLastSensorIdInConfig() {
+    try {
+        const pool = await getConnection();
+        const result = await pool.request().query(`
+            SELECT TOP 1 sensor_id
+            FROM ${table_config}
+            ORDER BY id DESC
+        `);
+        const lastId = result.recordset[0]?.sensor_id || "PZEM0000";
+        return lastId;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+export async function editSensorConfig(config) {
+    try {
+        const {
+            id, sensor_id, machine_id, line, note 
+        } = config;
+        const pool = await getConnection();
+        await pool.request()
+            .input('id', id)
+            .input('sensor_id', sensor_id)
+            .input('machine_id', machine_id)
+            .input('line', line)
+            .input('note', note)
+            .query(`
+                UPDATE ${table_config}
+                SET sensor_id = @sensor_id, machine_id = @machine_id, line = @line, note = @note
+                WHERE id = @id
+            `);
+
+        return true;
+    } catch (err) {
+        console.error('Error creating machine config:', err);
+        return false;
+    }
+}
+
+export async function deleteSensorConfig(id) {
+    try {
+        const pool = await getConnection();
+        await pool.request()
+            .input('id', id)
+            .query(`DELETE FROM ${table_config} WHERE id = @id`);
+        return true;
+    } catch (err) {
+        console.error('Error creating machine config:', err);
+        return false;
+    }
+}
+
 export async function getHoursMachineWorkingByStatus(machineId, date) {
     let pool;
     try {

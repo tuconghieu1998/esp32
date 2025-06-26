@@ -5,9 +5,9 @@ import { authenticate } from '../../middlewares/middleware.js';
 import { WebSocketServer } from 'ws';
 expressWs(router); // Enable WebSocket support on this router
 import axios from 'axios';
-import { getHoursMachineWorkingByStatus, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopMachineRunTime, getWorkshopReport } from '../../models/machine.model.js';
+import { createSensorConfig, deleteSensorConfig, editSensorConfig, getConfigByMachineId, getConfigBySensorId, getHoursMachineWorkingByStatus, getLastSensorIdInConfig, getListMachines, getTimeLineMachineWorking, getTimeMachineRunningInMonth, getTimeWorkshop2RunningInDate, getTimeWorkshop2RunningInMonth, getWorkshopMachineRunTime, getWorkshopReport } from '../../models/machine.model.js';
 import moment from 'moment';
-import { convertDateFormat, createWorkBookWorkshopReport, sendResponseExcelDownload } from '../../utils/helpers.js';
+import { convertDateFormat, createWorkBookWorkshopReport, createWorkBookWS2MachineConfig, sendResponseExcelDownload } from '../../utils/helpers.js';
 
 const DELAY_SEND_WS = 1000;
 const clients = new Set();
@@ -300,7 +300,7 @@ router.get('/api/sensor-config', authenticate, async (req, res, next) => {
     try {
         let { page } = req.query;
         page = page || 1;
-        const limit = 2; // Number of items per page
+        const limit = 20; // Number of items per page
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
 
@@ -317,14 +317,107 @@ router.get('/api/sensor-config', authenticate, async (req, res, next) => {
 });
 
 router.get("/api/sensor-config/excel", authenticate, async (req, res) => {
-    let { start_date, end_date } = req.query;
+    let data = await getListMachines();
+    await sendResponseExcelDownload(res, createWorkBookWS2MachineConfig(data), `Workshop2_MachineConfig.xlsx`);
+});
 
-    const today = new Date().toISOString().split('T')[0];
-    start_date = start_date ? convertDateFormat(start_date) : today;
-    end_date = end_date ? convertDateFormat(end_date) : today;
+router.post('/api/sensor-config', authenticate, async (req, res) => {
+    try {
+        const { sensor_id, machine_id, line, note } = req.body;
+        console.log("POST sensor config", sensor_id, machine_id, line, note);
+        if (!sensor_id || !machine_id || !line) {
+            return res.status(400).json({ message: 'Missing data!' });
+        }
 
-    let data = await getWorkshopReport(start_date, end_date);
-    await sendResponseExcelDownload(res, createWorkBookWorkshopReport(data), `Workshop2_${start_date}_${end_date}.xlsx`);
+        if(isNaN(machine_id)) {
+            return res.status(400).json({ message: 'Machine ID is not valid!' });
+        }
+
+        if(isNaN(line)) {
+            return res.status(400).json({ message: 'Line is not valid!' });
+        }
+
+        let config = await getConfigBySensorId(sensor_id);
+        if(config.length > 0) {
+            return res.status(409).json({ message: 'Sensor ID is exist!' });
+        }
+
+        let success = await createSensorConfig({
+            sensor_id,
+            machine_id,
+            line,
+            note
+        });
+        if(success) {
+            return res.status(200).json({ message: 'Create Sensor Config successfully!'});
+        }
+        return res.status(400).json({ message: 'Create config Error'});
+    }
+    catch (e) {
+        console.error(e);
+        return res.status(400).json({ message: "Bad request" });
+    }
+});
+
+router.put('/api/sensor-config/:id', authenticate, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { sensor_id, machine_id, line, note } = req.body;
+        console.log("PUT sensor config", sensor_id, machine_id, line, note);
+        if (!sensor_id || !machine_id || !line) {
+            return res.status(400).json({ message: 'Missing data!' });
+        }
+
+        if(isNaN(machine_id)) {
+            return res.status(400).json({ message: 'Machine ID is not valid!' });
+        }
+
+        if(isNaN(line)) {
+            return res.status(400).json({ message: 'Line is not valid!' });
+        }
+
+        let success = await editSensorConfig({
+            id,
+            sensor_id,
+            machine_id,
+            line,
+            note
+        });
+        if(success) {
+            return res.status(200).json({ message: 'Edit Sensor Config successfully!'});
+        }
+        return res.status(400).json({ message: 'Edit config Error'});
+    }
+    catch (e) {
+        console.error(e);
+        return res.status(400).json({ message: "Bad request" });
+    }
+});
+
+router.delete('/api/sensor-config/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        console.log("DELETE: ", id);
+        let success = await deleteSensorConfig(id);
+        if(success) {
+            return res.status(200).json({ message: 'Deleted successfully' });
+        }
+        return res.status(400).json({ message: 'Delete failed'});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Delete failed' });
+    }
+});
+
+router.get('/api/sensor-config/last-id', async (req, res) => {
+    try {
+        const lastId = await getLastSensorIdInConfig();
+        console.log("sensor-config/last-id", lastId);
+        res.json({ lastSensorId: lastId });
+    } catch (err) {
+        console.error('Failed to get last sensor ID:', err);
+        res.status(500).json({ message: 'Failed to get last sensor ID.' });
+    }
 });
 
 function getCurrentDate() {

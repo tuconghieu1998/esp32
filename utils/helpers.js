@@ -86,6 +86,24 @@ export const createWorkBookWorkshopReport = (data) => {
     return workbook;
 };
 
+export const createWorkBookWS2MachineConfig = (data) => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data");
+
+    // Define columns
+    worksheet.columns = [
+        { header: "Sensor ID", key: "sensor_id", width: 30 },
+        { header: "Machine No", key: "machine_id", width: 30 },
+        { header: "Line", key: "line", width: 15 },
+        { header: "Note", key: "note", width: 30 }
+    ];
+
+    // Add rows
+    data.forEach((row) => worksheet.addRow(row));
+
+    return workbook;
+};
+
 export const sendResponseExcelDownload = async(res, workbook, filename = 'data.xlsx') => {
     // Set response headers
     res.setHeader(
