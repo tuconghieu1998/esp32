@@ -286,14 +286,45 @@ function getMaxPercentPassedToday() {
     return percent.toFixed(2);
 }
 
-router.get('/machine-config', authenticate, async (req, res, next) => {
+router.get('/sensor-config', authenticate, async (req, res, next) => {
     try {
-        res.render('machine/machine_config.hbs');
+        res.render('machine/sensor_config.hbs');
     }
     catch (e) {
         console.log(e);
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+router.get('/api/sensor-config', authenticate, async (req, res, next) => {
+    try {
+        let { page } = req.query;
+        page = page || 1;
+        const limit = 2; // Number of items per page
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        let data = await getListMachines();
+        const total_pages = Math.ceil(data.length / limit);
+        data = data.slice(startIndex, endIndex);
+
+        res.json({ data, current_page: page, limit, total_pages });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/api/sensor-config/excel", authenticate, async (req, res) => {
+    let { start_date, end_date } = req.query;
+
+    const today = new Date().toISOString().split('T')[0];
+    start_date = start_date ? convertDateFormat(start_date) : today;
+    end_date = end_date ? convertDateFormat(end_date) : today;
+
+    let data = await getWorkshopReport(start_date, end_date);
+    await sendResponseExcelDownload(res, createWorkBookWorkshopReport(data), `Workshop2_${start_date}_${end_date}.xlsx`);
 });
 
 function getCurrentDate() {

@@ -1,0 +1,113 @@
+<main class="content">
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class="col-12 col-lg-12 col-xxl-12 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Sensor Config</h5>
+                    </div>
+                    <div class="p-2">
+                        <a href="javascript:void(0)" onclick="exportExcel()" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                    </div>
+                    <table class="table table-hover my-0">
+                        <thead>
+                            <tr>
+                                <th class="d-none d-xl-table-cell">No</th>
+                                <th class="d-none d-xl-table-cell">Sensor ID</th>
+                                <th class="d-none d-xl-table-cell">Machine No</th>
+                                <th class="d-none d-md-table-cell">Line</th>
+                                <th class="d-none d-md-table-cell">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mt-3" id="pagination">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="/js/machine_utils.js"></script>
+<script src="/js/pagination.js"></script>
+<script>
+    $(document).ready(function () {
+        // load today when refresh page
+        loadPage(1);
+    });
+
+    function loadPage(page) {
+        loadData(page);
+    }
+
+    function loadData(page = 1) {
+        $.ajax({
+            url: `/machine/api/sensor-config`,
+            method: "GET",
+            data: { page },
+            dataType: "json",
+            success: function (response) {
+                let tableBody = $("#tableBody");
+                let pagination = $("#pagination");
+                // Clear old data
+                tableBody.empty();
+                pagination.empty();
+                // Populate table with new data
+                response.data.forEach((item, index) => {
+                    tableBody.append(`
+                        <tr>
+                            <td class="d-none d-xl-table-cell">${(response.current_page - 1) * response.limit + index + 1}</td>
+                            <td class="d-none d-xl-table-cell">${item.sensor_id}</td>
+                            <td class="d-none d-xl-table-cell">${item.machine_id}</td>
+                            <td class="d-none d-md-table-cell">${item.line}</td>
+                            <td class="d-none d-md-table-cell">${item.note || ""}</td>
+                        </tr>
+                    `);
+                });
+
+                // Create pagination buttons
+                createPageNumber('pagination', response.current_page, response.total_pages);
+
+                // Handle Pagination Clicks
+                $(document).on("click", ".page-link", function (event) {
+                    event.preventDefault();
+                    let page = $(this).data("page");
+                    loadPage(page);
+                });
+
+                // Handle "Enter" Key Press
+                $("#gotoPage").on("keypress", function (e) {
+                    if (e.which === 13) { // Enter key
+                        let page = parseInt($(this).val());
+                        let minPage = parseInt($(this).attr("min"), 10);
+                        let maxPage = parseInt($(this).attr("max"), 10);
+                        if (page >= minPage && page <= maxPage) {
+                            loadPage(page); // Function to load the selected page
+                        } else {
+                            alert("Invalid page number!");
+                        }
+                    }
+
+                });
+            }
+        });
+    }
+
+    function exportExcel() {
+        let start_date = $("#start-time").val();
+        let end_date = $("#end-time").val();
+
+        console.log("Exporting...");
+
+        // Construct query string
+        let queryString = $.param({ start_date, end_date });
+
+        // Trigger file download
+        window.location.href = `/machine/api/workshop-report/excel?${queryString}`;
+    }
+</script>
