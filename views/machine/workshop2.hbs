@@ -265,9 +265,6 @@
                 if (machine.id == 1 || machine.id == 2 || machine.id == 3) {
                     statusClass = getStatusDisplay(machine.status, machine.update_time);
                 }
-                if (machine.id == 4 || machine.id == 5) {
-                    statusClass = `status-running`;
-                }
 
                 const col = document.createElement('div');
                 col.style.width = '64px';
@@ -323,11 +320,13 @@
         time_server = data.time_server;
         for (let i = 0; i < machine_states.length; i++) {
             let machine_id = machine_states[i].machine_id;
-            if (machines[machine_id - 1]) {
-                machines[machine_id - 1].sensor_id = machine_states[i].sensor_id;
-                machines[machine_id - 1].machine_id = machine_states[i].machine_id;
-                machines[machine_id - 1].status = machine_states[i].status;
-                machines[machine_id - 1].update_time = machine_states[i].update_time;
+            if (machine_id == 1 || machine_id == 2 || machine_id == 3) {
+                if (machines[machine_id - 1]) {
+                    machines[machine_id - 1].sensor_id = machine_states[i].sensor_id;
+                    machines[machine_id - 1].machine_id = machine_states[i].machine_id;
+                    machines[machine_id - 1].status = machine_states[i].status;
+                    machines[machine_id - 1].update_time = machine_states[i].update_time;
+                }
             }
         }
         renderMachines(current_filter);
