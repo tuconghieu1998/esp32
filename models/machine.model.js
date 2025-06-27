@@ -10,6 +10,7 @@ export async function getListMachines() {
         const result = await pool.request().query(`
             SELECT *
             FROM ${table_config}
+            ORDER BY sensor_id ASC
         `);
 
         return result.recordset || [];
