@@ -329,16 +329,16 @@ router.post('/api/sensor-config', authenticate, async (req, res) => {
             return res.status(400).json({ message: 'Missing data!' });
         }
 
-        if(isNaN(machine_id)) {
+        if (isNaN(machine_id)) {
             return res.status(400).json({ message: 'Machine ID is not valid!' });
         }
 
-        if(isNaN(line)) {
+        if (isNaN(line)) {
             return res.status(400).json({ message: 'Line is not valid!' });
         }
 
         let config = await getConfigBySensorId(sensor_id);
-        if(config.length > 0) {
+        if (config.length > 0) {
             return res.status(409).json({ message: 'Sensor ID is exist!' });
         }
 
@@ -348,10 +348,10 @@ router.post('/api/sensor-config', authenticate, async (req, res) => {
             line,
             note
         });
-        if(success) {
-            return res.status(200).json({ message: 'Create Sensor Config successfully!'});
+        if (success) {
+            return res.status(200).json({ message: 'Create Sensor Config successfully!' });
         }
-        return res.status(400).json({ message: 'Create config Error'});
+        return res.status(400).json({ message: 'Create config Error' });
     }
     catch (e) {
         console.error(e);
@@ -368,11 +368,11 @@ router.put('/api/sensor-config/:id', authenticate, async (req, res) => {
             return res.status(400).json({ message: 'Missing data!' });
         }
 
-        if(isNaN(machine_id)) {
+        if (isNaN(machine_id)) {
             return res.status(400).json({ message: 'Machine ID is not valid!' });
         }
 
-        if(isNaN(line)) {
+        if (isNaN(line)) {
             return res.status(400).json({ message: 'Line is not valid!' });
         }
 
@@ -383,10 +383,10 @@ router.put('/api/sensor-config/:id', authenticate, async (req, res) => {
             line,
             note
         });
-        if(success) {
-            return res.status(200).json({ message: 'Edit Sensor Config successfully!'});
+        if (success) {
+            return res.status(200).json({ message: 'Edit Sensor Config successfully!' });
         }
-        return res.status(400).json({ message: 'Edit config Error'});
+        return res.status(400).json({ message: 'Edit config Error' });
     }
     catch (e) {
         console.error(e);
@@ -399,13 +399,36 @@ router.delete('/api/sensor-config/:id', async (req, res) => {
     try {
         console.log("DELETE: ", id);
         let success = await deleteSensorConfig(id);
-        if(success) {
+        if (success) {
             return res.status(200).json({ message: 'Deleted successfully' });
         }
-        return res.status(400).json({ message: 'Delete failed'});
+        return res.status(400).json({ message: 'Delete failed' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Delete failed' });
+    }
+});
+
+router.put('/api/sync-sensor-config', async (req, res) => {
+    try {
+        let success = await syncMachinesConfig();
+        if (success) {
+            return res.status(200).json({ message: 'Sync config successfully' });
+        }
+        return res.status(400).json({ message: 'Sync config failed' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Sync config failed' });
+    }
+});
+
+router.get('/api/check-sync-config', async (req, res) => {
+    try {
+        let hasChange = await checkSyncConfig();
+        return res.status(200).json({ has_change: hasChange });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Sync config failed' });
     }
 });
 
@@ -448,7 +471,7 @@ router.ws('/socket/ws2', (ws, req) => {
 // Function to fetch machine data
 async function getMachineData() {
     try {
-        const response = await axios.get(MACHINE_200_SERVER_URL);
+        const response = await axios.get(MACHINE_200_SERVER_URL + "/machine_data");
         if (response.status == 200) {
             const machineData = response.data;
             return machineData;
@@ -492,12 +515,13 @@ async function broadcastMachineData() {
 // Periodically broadcast data
 setInterval(broadcastMachineData, DELAY_SEND_WS);
 
-let MACHINES_DATA = await initMachines();
+let MACHINES_DATA = [];
 let MACHINE_TIME_SERVER;
+await initMachines();
 
 async function updateMachinesData() {
     let data = await getMachineData();
-    if(Object.keys(data).length == 0) return false;
+    if (Object.keys(data).length == 0) return false;
     let machines = data.machine_states;
     MACHINE_TIME_SERVER = data.current_time;
     for (let i = 0; i < MACHINES_DATA.length; i++) {
@@ -511,23 +535,89 @@ async function updateMachinesData() {
 }
 
 async function initMachines() {
-    // get machines config from db
-    let machinesConfig = [];
-    machinesConfig = await getListMachines();
+    try {
+        // get machines config from db
+        let machinesConfig = [];
+        machinesConfig = await getListMachines();
 
-    // init array machines data
-    let machines = [];
-    let currentTime = getCurrentTime();
-    for (let i = 0; i < machinesConfig.length; i++) {
-        machines.push({
-            sensor_id: machinesConfig[i].sensor_id,
-            machine_id: machinesConfig[i].machine_id,
-            line: machinesConfig[i].line,
-            status: 'disconnected',
-            update_time: currentTime,
-        });
+        // init array machines data
+        let machines = [];
+        let currentTime = getCurrentTime();
+        for (let i = 0; i < machinesConfig.length; i++) {
+            machines.push({
+                sensor_id: machinesConfig[i].sensor_id,
+                machine_id: machinesConfig[i].machine_id,
+                line: machinesConfig[i].line,
+                status: 'disconnected',
+                update_time: currentTime,
+            });
+        }
+        MACHINES_DATA = machines;
+        return true;
     }
-    return machines;
+    catch (e) {
+        return false;
+    }
+}
+
+async function syncMachinesConfig() {
+    let success1 = await initMachines();
+    let success2 = await syncMachines200ServerConfig();
+    return success1 && success2;
+}
+
+async function syncMachines200ServerConfig() {
+    try {
+        const response = await axios.put(MACHINE_200_SERVER_URL + "/sync_machine_config");
+        if (response.status == 200) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        //console.error('Error fetching machine data:', error);
+        return false;
+    }
+}
+
+function simplify(config) {
+    return config.map(({ sensor_id, machine_id, line }) => ({
+        sensor_id,
+        machine_id,
+        line
+    }));
+}
+
+function areConfigsEqual(a, b) {
+    if (a.length !== b.length) return false;
+
+    const sortAndStringify = (arr) =>
+        JSON.stringify([...arr].sort((x, y) => x.sensor_id.localeCompare(y.sensor_id)));
+
+    return sortAndStringify(simplify(a)) === sortAndStringify(simplify(b));
+}
+
+async function checkSyncConfig() {
+    try {
+        const currentConfig = await getListMachines();  // DB config
+        const config1 = MACHINES_DATA;
+        const data = await getMachineData(); 
+        const config2 = Object.values(data.machine_states);
+
+        const match1 = areConfigsEqual(currentConfig, config1);
+        const match2 = areConfigsEqual(currentConfig, config2);
+
+        console.log("checkSyncConfig", match1, match2);
+
+        if (!match1 || !match2) {
+            return true;
+        }
+
+        return false;
+
+    } catch (error) {
+        console.error("Error checking config sync:", error);
+        return false;
+    }
 }
 
 export default router;

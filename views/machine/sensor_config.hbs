@@ -13,6 +13,9 @@
                         <button type="button" class="btn btn-primary" onclick="addConfig()">
                             Add Sensor Config
                         </button>
+                        <button id="syncConfigBtn" type="button" class="btn btn-warning" onclick="syncConfig()">
+                            Sync Config
+                        </button>
                     </div>
                     <table class="table table-hover my-0">
                         <thead>
@@ -115,6 +118,7 @@
     $(document).ready(function () {
         // load today when refresh page
         loadPage(currentPage);
+        checkSyncConfig();
     });
 
     function loadPage(page = 1) {
@@ -215,6 +219,11 @@
         sendDeleteConfig(id);
     }
 
+    function syncConfig() {
+        if (!confirm("Sync config to server?")) return;
+        sendSyncConfig();
+    }
+
     function getNextSensorId(lastId) {
         const match = lastId.match(/^PZEM(\d+)$/);
         if (!match) return "PZEM0001";
@@ -308,6 +317,7 @@
             success: function (response) {
                 alert("Create config successfully!");
                 loadPage(totalPages);
+                handleNotifySyncConfig(true);
             },
             error: function (xhr, status, error) {
                 let message = "error";
@@ -334,6 +344,7 @@
             success: function (response) {
                 alert("Edit config successfully!");
                 loadPage(currentPage);
+                checkSyncConfig();
             },
             error: function (xhr, status, error) {
                 let message = "error";
@@ -351,10 +362,66 @@
             method: "DELETE",
             success: function () {
                 loadPage(currentPage);
+                handleNotifySyncConfig(true);
             },
             error: function (xhr) {
                 alert(xhr.responseJSON?.message || "Delete failed");
             }
         });
+    }
+
+    function sendSyncConfig() {
+        $.ajax({
+            url: `/machine/api/sync-sensor-config`,
+            method: "PUT",
+            success: function () {
+                alert("Sync config successfully!");
+                handleNotifySyncConfig(false);
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.message || "Sync failed");
+            }
+        });
+    }
+
+    function checkSyncConfig() {
+        $.ajax({
+            url: `/machine/api/check-sync-config`,
+            method: "GET",
+            success: function (response) {
+                let hasChange = response.has_change;
+                console.log("checkSyncConfig", hasChange); 
+                handleNotifySyncConfig(hasChange);
+            },
+            error: function (xhr) {
+
+            }
+        });
+    }
+
+    function handleNotifySyncConfig(hasChange = false) {
+        let btn = $("#syncConfigBtn");
+
+        if (hasChange) {
+            // Add notify icon (🔔 or red dot)
+            if (!btn.find(".notify-icon").length) {
+                btn.append(`
+                        <span class="notify-icon ms-2" style="
+                            display: inline-block;
+                            width: 18px;
+                            height: 18px;
+                            line-height: 18px;
+                            text-align: center;
+                            background-color: red;
+                            color: white;
+                            border-radius: 50%;
+                            font-weight: bold;
+                            font-size: 14px;
+                        ">!</span>`);
+            }
+        } else {
+            // Remove notify icon
+            btn.find(".notify-icon").remove();
+        }
     }
 </script>
