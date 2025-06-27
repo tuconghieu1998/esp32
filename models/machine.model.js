@@ -424,9 +424,57 @@ StatusExpanded AS (
         status,
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
-        ISNULL(next_timestamp, GETDATE()) AS end_time,
-        DATEDIFF(SECOND, timestamp, ISNULL(next_timestamp, GETDATE())) AS duration_seconds
+        CASE 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+                THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
+                THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
     FROM StatusWithLead
+),
+
+SplitCrossDay AS (
+    -- Case 1: Same date, no split needed
+    SELECT 
+        machine_id,
+        status,
+        CAST(start_time AS DATE) AS [date],
+        start_time,
+        end_time
+    FROM StatusExpanded
+    WHERE CAST(start_time AS DATE) = CAST(end_time AS DATE)
+
+    UNION ALL
+
+    -- Case 2: First part: from start_time to 00:00:00 of the next day
+    SELECT 
+        machine_id,
+        status,
+        CAST(start_time AS DATE) AS [date],
+        start_time,
+        CAST(DATEADD(DAY, 1, CAST(start_time AS DATE)) AS DATETIME) AS end_time
+    FROM StatusExpanded
+    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
+
+    UNION ALL
+
+    -- Case 3: Second part: from 00:00:00 to original end_time
+    SELECT 
+        machine_id,
+        status,
+        CAST(end_time AS DATE) AS [date],
+        CAST(end_time AS DATE) AS start_time,
+        end_time
+    FROM StatusExpanded
+    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
+),
+
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM SplitCrossDay
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
 ),
 
 DailySummary AS (
@@ -435,7 +483,7 @@ DailySummary AS (
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
         SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
         SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
-    FROM StatusExpanded
+    FROM FilteredStatus
     GROUP BY [date]
 ),
 
@@ -451,9 +499,9 @@ SELECT
     ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
     ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
     ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
-    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_running,
-    FORMAT(ISNULL(d.changeover_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_changeover,
-    FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400 * @machineCount), 'N2') AS percent_stopped
+    CAST(ISNULL(d.running_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(d.changeover_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(d.stopped_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_stopped
 FROM Calendar c
 LEFT JOIN DailySummary d ON c.[date] = d.[date]
 ORDER BY c.[date];
@@ -523,9 +571,9 @@ SELECT
     FORMAT(running_seconds / 3600.0, 'N2') AS running_hours,
     FORMAT(changeover_seconds / 3600.0, 'N2') AS changeover_hours,
     FORMAT(stopped_seconds / 3600.0, 'N2') AS stopped_hours,
-    FORMAT(running_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_running,
-    FORMAT(changeover_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_changeover,
-    FORMAT(stopped_seconds * 100.0 / (@machineCount * 86400), 'N2') AS percent_stopped
+    CAST(running_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_running,
+    CAST(changeover_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(stopped_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_stopped
 FROM DailyStatus;
         `);
         return result.recordset || [];
