@@ -601,6 +601,7 @@ async function checkSyncConfig() {
         const currentConfig = await getListMachines();  // DB config
         const config1 = MACHINES_DATA;
         const data = await getMachineData(); 
+        if(!data || !data.machine_states) return false;
         const config2 = Object.values(data.machine_states);
 
         const match1 = areConfigsEqual(currentConfig, config1);
