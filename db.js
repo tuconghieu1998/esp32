@@ -18,6 +18,7 @@ const config = {
         encrypt: true, // Use encryption if required
         trustServerCertificate: true, // Use this for local development
     },
+    requestTimeout: 60000,
 };
 
 const appPool = new sql.ConnectionPool(config);
