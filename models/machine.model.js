@@ -430,32 +430,42 @@ FilteredStatus AS (
 
 DailyCalculated AS (
     SELECT 
-        machine_id,
         [date],
+        count(DISTINCT  machine_id) as machine_count,
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
         SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
         SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM FilteredStatus
-    GROUP BY machine_id, [date]
+    GROUP BY [date]
+),
+
+StoredSummary AS (
+    SELECT 
+        [date],
+        count(DISTINCT  machine_id) as machine_count,
+        SUM(running_hours) AS running_hours,
+        SUM(changeover_hours) AS changeover_hours,
+        SUM(stopped_hours) AS stopped_hours
+    FROM ws2_working_date
+    WHERE [date] BETWEEN @monthStart AND @monthEnd
+    GROUP BY date
 )
 
 SELECT 
-    COALESCE(c.machine_id, w.machine_id) AS machine_id,
     COALESCE(c.date, w.date) AS [date],
 
     ROUND(ISNULL(c.running_hours, w.running_hours), 2) AS running_hours,
     ROUND(ISNULL(c.changeover_hours, w.changeover_hours), 2) AS changeover_hours,
     ROUND(ISNULL(c.stopped_hours, w.stopped_hours), 2) AS stopped_hours,
 
-    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_running,
-    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_changeover,
-    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_stopped
+    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count))  AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count)) AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count)) AS DECIMAL(5,2)) AS percent_stopped
 
 FROM DailyCalculated c
-FULL OUTER JOIN ws2_working_date w
-    ON c.machine_id = w.machine_id AND c.date = w.date
+FULL OUTER JOIN StoredSummary w
+    ON c.date = w.date
 WHERE COALESCE(c.date, w.date) BETWEEN @monthStart AND @monthEnd
-ORDER BY [date], machine_id;
         `);
         return result.recordset || [];
     } catch (err) {
@@ -505,34 +515,42 @@ StatusExpanded AS (
 
 DailyCalculated AS (
     SELECT 
-        machine_id,
-        line,
         [date],
+        count(DISTINCT  machine_id) as machine_count,
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
         SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
         SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM StatusExpanded
-    GROUP BY machine_id, line, [date]
+    GROUP BY [date]
+),
+
+StoredSummary AS (
+    SELECT 
+        [date],
+        count(DISTINCT  machine_id) as machine_count,
+        SUM(running_hours) AS running_hours,
+        SUM(changeover_hours) AS changeover_hours,
+        SUM(stopped_hours) AS stopped_hours
+    FROM ws2_working_date
+    WHERE CAST(date AS DATE) = @targetDate
+    GROUP BY [date]
 )
 
 SELECT
-    COALESCE(c.machine_id, w.machine_id) AS machine_id,
-    COALESCE(c.line, w.line) AS line,
     COALESCE(c.date, w.date) AS [date],
 
     ROUND(ISNULL(c.running_hours, w.running_hours), 2) AS running_hours,
     ROUND(ISNULL(c.changeover_hours, w.changeover_hours), 2) AS changeover_hours,
     ROUND(ISNULL(c.stopped_hours, w.stopped_hours), 2) AS stopped_hours,
 
-    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_running,
-    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_changeover,
-    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_stopped
+    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count))  AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count)) AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / (24 * ISNULL(c.machine_count, w.machine_count)) AS DECIMAL(5,2)) AS percent_stopped
 
 FROM DailyCalculated c
-FULL OUTER JOIN ws2_working_date w
-    ON c.machine_id = w.machine_id AND c.date = w.date
+FULL OUTER JOIN StoredSummary w
+    ON c.date = w.date
 WHERE COALESCE(c.date, w.date) = @targetDate
-ORDER BY machine_id;
         `);
         return result.recordset || [];
     } catch (err) {
