@@ -83,34 +83,20 @@ router.get('/ws2', async (req, res, next) => {
 
 async function getMachineWorkingTimeByStatus(machineId, date) {
     const workingData = await getHoursMachineWorkingByStatus(machineId, date);
-    let timeRunning = 0, timeStopped = 0, timeChangeOver = 0, timeDisconnected = 0;
-    for (const row of workingData) {
-        const time = row.total_duration;
-        switch (row.status) {
-            case 'running':
-                timeRunning += time;
-                break;
-            case 'stopped':
-                timeStopped += time;
-                break;
-            case 'changeover':
-                timeChangeOver += time;
-                break;
-            case 'disconnected':
-                timeDisconnected += time;
-                break;
-        }
+    let timeRunning = 0, timeStopped = 0, timeChangeOver = 0;
+
+    for(const row of workingData) {
+        timeRunning = row['running_hours'];
+        timeStopped = row['stopped_hours'];
+        timeChangeOver = row['changeover_hours'];
     }
-    let percentRunning = (timeRunning / 86400 * 100).toFixed(2);
-    timeRunning = (timeRunning / 3600).toFixed(2);
-    timeStopped = (timeStopped / 3600).toFixed(2);
-    timeChangeOver = (timeChangeOver / 3600).toFixed(2);
-    timeDisconnected = (timeDisconnected / 3600).toFixed(2);
+    
+    let percentRunning = (timeRunning / 24 * 100).toFixed(2);
+
     return {
         percentRunning,
         timeRunning,
         timeStopped,
-        timeDisconnected,
         timeChangeOver
     }
 }

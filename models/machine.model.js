@@ -135,14 +135,20 @@ export async function getHoursMachineWorkingByStatus(machineId, date) {
     try {
         pool = await getConnection();
         const result = await pool.request().query(`
-WITH ordered_status AS (
+DECLARE @machineId VARCHAR(50) = '${machineId}';
+DECLARE @date DATE = '${date}';
+
+;WITH OrderedStatus AS (
     SELECT
         *,
         LEAD([timestamp]) OVER (PARTITION BY machine_id ORDER BY [timestamp]) AS next_timestamp
-    FROM ${table_data}
-    WHERE CAST([timestamp] AS DATE) = '${date}' and machine_id = '${machineId}'
+    FROM ws2_working_status
+    WHERE 
+        CAST([timestamp] AS DATE) = @date 
+        AND machine_id = @machineId
 ),
-status_durations AS (
+
+StatusDurations AS (
     SELECT
         machine_id,
         sensor_id,
@@ -151,30 +157,48 @@ status_durations AS (
         [timestamp],
         next_timestamp,
         DATEDIFF(SECOND, [timestamp], ISNULL(next_timestamp, GETDATE())) AS duration_seconds
-    FROM ordered_status
+    FROM OrderedStatus
     WHERE next_timestamp IS NOT NULL
 ),
-adjusted_status AS (
+
+AdjustedStatus AS (
     SELECT
         machine_id,
         sensor_id,
         log_date,
-        -- Nếu trạng thái là 'running' và thời gian > 30 phút ⇒ chuyển thành 'disconnected'
         CASE 
-            WHEN (status = 'running' OR status = 'stopped' OR status = 'changeover') AND duration_seconds > 1800 THEN 'disconnected'
+            WHEN status IN ('running', 'stopped', 'changeover') AND duration_seconds > 1800 THEN 'disconnected'
             ELSE status
         END AS status,
         duration_seconds
-    FROM status_durations
+    FROM StatusDurations
+),
+
+DailyCalculated AS (
+    SELECT
+        machine_id,
+        log_date AS [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_running_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_stopped_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_changeover_hours
+    FROM AdjustedStatus
+    GROUP BY machine_id, log_date
 )
+
 SELECT
-    log_date,
-    status,
-	SUM(duration_seconds) AS total_duration,
-    CONVERT(varchar, DATEADD(SECOND, SUM(duration_seconds), 0), 108) AS total_duration_str
-FROM adjusted_status
-GROUP BY log_date, status
-ORDER BY log_date, status;
+    COALESCE(d.[date], wd.[date]) AS [date],
+    COALESCE(d.machine_id, wd.machine_id) AS machine_id,
+
+    ROUND(ISNULL(d.calc_running_hours, wd.running_hours), 2) AS running_hours,
+    ROUND(ISNULL(d.calc_stopped_hours, wd.stopped_hours), 2) AS stopped_hours,
+    ROUND(ISNULL(d.calc_changeover_hours, wd.changeover_hours), 2) AS changeover_hours
+
+FROM DailyCalculated d
+FULL OUTER JOIN ws2_working_date wd
+    ON wd.machine_id = d.machine_id AND wd.[date] = d.[date]
+WHERE 
+    COALESCE(d.machine_id, wd.machine_id) = @machineId
+    AND COALESCE(d.[date], wd.[date]) = @date;
         `);
 
         return result.recordset || [];
@@ -293,12 +317,13 @@ DECLARE @machineId VARCHAR(50) = '${machineId}';
 DECLARE @monthStart DATE = '${date}';
 DECLARE @monthEnd DATE = EOMONTH(@monthStart);
 
-WITH StatusWithLead AS (
+;WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
     WHERE machine_id = @machineId
-      AND timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+      AND timestamp >= @monthStart 
+      AND timestamp < DATEADD(DAY, 1, @monthEnd)
 ),
 
 StatusExpanded AS (
@@ -317,76 +342,46 @@ StatusExpanded AS (
     FROM StatusWithLead
 ),
 
-SplitCrossDay AS (
-    -- Case 1: Same date, no split needed
-    SELECT 
-        machine_id,
-        status,
-        CAST(start_time AS DATE) AS [date],
-        start_time,
-        end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) = CAST(end_time AS DATE)
-
-    UNION ALL
-
-    -- Case 2: First part: from start_time to 00:00:00 of the next day
-    SELECT 
-        machine_id,
-        status,
-        CAST(start_time AS DATE) AS [date],
-        start_time,
-        CAST(DATEADD(DAY, 1, CAST(start_time AS DATE)) AS DATETIME) AS end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
-
-    UNION ALL
-
-    -- Case 3: Second part: from 00:00:00 to original end_time
-    SELECT 
-        machine_id,
-        status,
-        CAST(end_time AS DATE) AS [date],
-        CAST(end_time AS DATE) AS start_time,
-        end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
-),
-
 FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
-    FROM SplitCrossDay
+    FROM StatusExpanded
     WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
 ),
 
-DailySummary AS (
+DailyCalculated AS (
     SELECT 
         [date],
-        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+        machine_id,
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM FilteredStatus
-    GROUP BY [date]
+    GROUP BY machine_id, [date]
 ),
 
 Calendar AS (
-    SELECT DATEADD(DAY, n.number, @monthStart) AS [date]
-    FROM master.dbo.spt_values n
-    WHERE n.type = 'P'
-      AND DATEADD(DAY, n.number, @monthStart) <= @monthEnd
+    SELECT DATEADD(DAY, number, @monthStart) AS [date]
+    FROM master.dbo.spt_values
+    WHERE type = 'P'
+      AND DATEADD(DAY, number, @monthStart) <= @monthEnd
 )
 
 SELECT 
     c.[date],
-    ROUND(ISNULL(d.running_seconds, 0) / 3600.0, 2) AS running_hours,
-    ROUND(ISNULL(d.changeover_seconds, 0) / 3600.0, 2) AS changeover_hours,
-    ROUND(ISNULL(d.stopped_seconds, 0) / 3600.0, 2) AS stopped_hours,
-    CAST(ISNULL(d.running_seconds, 0) * 100.0 / 86400 AS DECIMAL(5,2)) AS percent_running,
-    CAST(ISNULL(d.changeover_seconds, 0) * 100.0 / 86400 AS DECIMAL(5,2)) AS percent_changeover,
-    CAST(ISNULL(d.stopped_seconds, 0) * 100.0 / 86400 AS DECIMAL(5,2)) AS percent_stopped
+    @machineId AS machine_id,
+
+    ROUND(ISNULL(dc.running_hours, wd.running_hours), 2) AS running_hours,
+    ROUND(ISNULL(dc.changeover_hours, wd.changeover_hours), 2) AS changeover_hours,
+    ROUND(ISNULL(dc.stopped_hours, wd.stopped_hours), 2) AS stopped_hours,
+
+    CAST(ISNULL(dc.running_hours, wd.running_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(dc.changeover_hours, wd.changeover_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(dc.stopped_hours, wd.stopped_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_stopped
+
 FROM Calendar c
-LEFT JOIN DailySummary d ON c.[date] = d.[date]
+LEFT JOIN DailyCalculated dc ON dc.[date] = c.[date] AND dc.machine_id = @machineId
+LEFT JOIN ws2_working_date wd ON wd.[date] = c.[date] AND wd.machine_id = @machineId
 ORDER BY c.[date];
         `);
         return result.recordset || [];
@@ -405,13 +400,7 @@ export async function getTimeWorkshop2RunningInMonth(date) {
 DECLARE @monthStart DATE = '${date}';
 DECLARE @monthEnd DATE = EOMONTH(@monthStart);
 
-DECLARE @machineCount INT = (
-    SELECT COUNT(DISTINCT machine_id)
-    FROM ws2_working_status
-    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
-);
-
-WITH StatusWithLead AS (
+;WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
@@ -425,86 +414,48 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
-                THEN next_timestamp
-            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
-                THEN GETDATE()
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
     FROM StatusWithLead
 ),
 
-SplitCrossDay AS (
-    -- Case 1: Same date, no split needed
-    SELECT 
-        machine_id,
-        status,
-        CAST(start_time AS DATE) AS [date],
-        start_time,
-        end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) = CAST(end_time AS DATE)
-
-    UNION ALL
-
-    -- Case 2: First part: from start_time to 00:00:00 of the next day
-    SELECT 
-        machine_id,
-        status,
-        CAST(start_time AS DATE) AS [date],
-        start_time,
-        CAST(DATEADD(DAY, 1, CAST(start_time AS DATE)) AS DATETIME) AS end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
-
-    UNION ALL
-
-    -- Case 3: Second part: from 00:00:00 to original end_time
-    SELECT 
-        machine_id,
-        status,
-        CAST(end_time AS DATE) AS [date],
-        CAST(end_time AS DATE) AS start_time,
-        end_time
-    FROM StatusExpanded
-    WHERE CAST(start_time AS DATE) <> CAST(end_time AS DATE)
-),
-
 FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
-    FROM SplitCrossDay
+    FROM StatusExpanded
     WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
 ),
 
-DailySummary AS (
+DailyCalculated AS (
     SELECT 
+        machine_id,
         [date],
-        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM FilteredStatus
-    GROUP BY [date]
-),
-
-Calendar AS (
-    SELECT DATEADD(DAY, n.number, @monthStart) AS [date]
-    FROM master.dbo.spt_values n
-    WHERE n.type = 'P'
-      AND DATEADD(DAY, n.number, @monthStart) <= @monthEnd
+    GROUP BY machine_id, [date]
 )
 
 SELECT 
-    c.[date],
-    ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
-    ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
-    ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
-    CAST(ISNULL(d.running_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_running,
-    CAST(ISNULL(d.changeover_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_changeover,
-    CAST(ISNULL(d.stopped_seconds, 0) * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_stopped
-FROM Calendar c
-LEFT JOIN DailySummary d ON c.[date] = d.[date]
-ORDER BY c.[date];
+    COALESCE(c.machine_id, w.machine_id) AS machine_id,
+    COALESCE(c.date, w.date) AS [date],
+
+    ROUND(ISNULL(c.running_hours, w.running_hours), 2) AS running_hours,
+    ROUND(ISNULL(c.changeover_hours, w.changeover_hours), 2) AS changeover_hours,
+    ROUND(ISNULL(c.stopped_hours, w.stopped_hours), 2) AS stopped_hours,
+
+    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_stopped
+
+FROM DailyCalculated c
+FULL OUTER JOIN ws2_working_date w
+    ON c.machine_id = w.machine_id AND c.date = w.date
+WHERE COALESCE(c.date, w.date) BETWEEN @monthStart AND @monthEnd
+ORDER BY [date], machine_id;
         `);
         return result.recordset || [];
     } catch (err) {
@@ -520,13 +471,8 @@ export async function getTimeWorkshop2RunningInDate(date) {
         pool = await getConnection();
         const result = await pool.request().query(`
 DECLARE @targetDate DATE = '${date}';
-DECLARE @machineCount INT = (
-    SELECT COUNT(DISTINCT machine_id)
-    FROM ws2_working_status
-    WHERE CAST(timestamp AS DATE) = @targetDate
-);
 
-WITH StatusWithLead AS (
+;WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
@@ -536,6 +482,7 @@ WITH StatusWithLead AS (
 StatusExpanded AS (
     SELECT 
         machine_id,
+        line,
         status,
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
@@ -556,25 +503,36 @@ StatusExpanded AS (
     FROM StatusWithLead
 ),
 
-DailyStatus AS (
+DailyCalculated AS (
     SELECT 
+        machine_id,
+        line,
         [date],
-        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM StatusExpanded
-    GROUP BY [date]
+    GROUP BY machine_id, line, [date]
 )
 
-SELECT 
-    [date],
-    FORMAT(running_seconds / 3600.0, 'N2') AS running_hours,
-    FORMAT(changeover_seconds / 3600.0, 'N2') AS changeover_hours,
-    FORMAT(stopped_seconds / 3600.0, 'N2') AS stopped_hours,
-    CAST(running_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_running,
-    CAST(changeover_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_changeover,
-    CAST(stopped_seconds * 100.0 / NULLIF(86400 * @machineCount, 0) AS DECIMAL(5,2)) AS percent_stopped
-FROM DailyStatus;
+SELECT
+    COALESCE(c.machine_id, w.machine_id) AS machine_id,
+    COALESCE(c.line, w.line) AS line,
+    COALESCE(c.date, w.date) AS [date],
+
+    ROUND(ISNULL(c.running_hours, w.running_hours), 2) AS running_hours,
+    ROUND(ISNULL(c.changeover_hours, w.changeover_hours), 2) AS changeover_hours,
+    ROUND(ISNULL(c.stopped_hours, w.stopped_hours), 2) AS stopped_hours,
+
+    CAST(ISNULL(c.running_hours, w.running_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_running,
+    CAST(ISNULL(c.changeover_hours, w.changeover_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_changeover,
+    CAST(ISNULL(c.stopped_hours, w.stopped_hours) * 100.0 / 24 AS DECIMAL(5,2)) AS percent_stopped
+
+FROM DailyCalculated c
+FULL OUTER JOIN ws2_working_date w
+    ON c.machine_id = w.machine_id AND c.date = w.date
+WHERE COALESCE(c.date, w.date) = @targetDate
+ORDER BY machine_id;
         `);
         return result.recordset || [];
     } catch (err) {
@@ -588,14 +546,14 @@ export async function getWorkshopReport(startDate, endDate) {
     try {
         pool = await getConnection();
         const result = await pool.request().query(`
-DECLARE @monthStart DATE = '${startDate}';
-DECLARE @monthEnd DATE = '${endDate}';
+DECLARE @startDate DATE = '${startDate}';
+DECLARE @endDate DATE = '${endDate}';
 
 WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
-    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+    WHERE timestamp >= @startDate AND timestamp < DATEADD(DAY, 1, @endDate)
 ),
 
 StatusExpanded AS (
@@ -605,10 +563,8 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
-                THEN next_timestamp
-            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
-                THEN GETDATE()
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
     FROM StatusWithLead
@@ -621,29 +577,44 @@ FilteredStatus AS (
     WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
 ),
 
-DailySummary AS (
-    SELECT machine_id, 
-        [date],
-        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+DailyCalculated AS (
+    SELECT 
+        machine_id,
+        CAST([date] AS DATE) AS [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM FilteredStatus
     GROUP BY machine_id, [date]
 )
 
 SELECT 
-    d.machine_id,
-	c.line,
-	d.[date],
-    ISNULL(d.running_seconds, 0) / 3600.0 AS running_hours,
-    ISNULL(d.changeover_seconds, 0) / 3600.0 AS changeover_hours,
-    ISNULL(d.stopped_seconds, 0) / 3600.0 AS stopped_hours,
-    FORMAT(ISNULL(d.running_seconds, 0) * 100.0 / (86400), 'N2') AS percent_running,
-    FORMAT(ISNULL(d.changeover_seconds, 0) * 100.0 / (86400), 'N2') AS percent_changeover,
-    FORMAT(ISNULL(d.stopped_seconds, 0) * 100.0 / (86400), 'N2') AS percent_stopped
-FROM DailySummary d 
-LEFT JOIN ws2_machine_config c ON d.machine_id = c.machine_id 
-ORDER BY CAST(d.machine_id AS INT), d.[date];
+    COALESCE(r.machine_id, w.machine_id) AS machine_id,
+    ISNULL(cfg.line, '-') AS line,
+    COALESCE(r.date, w.date) AS [date],
+
+    ROUND(COALESCE(r.running_hours, w.running_hours, 0), 2) AS running_hours,
+    ROUND(COALESCE(r.changeover_hours, w.changeover_hours, 0), 2) AS changeover_hours,
+    ROUND(COALESCE(r.stopped_hours, w.stopped_hours, 0), 2) AS stopped_hours,
+
+    FORMAT(COALESCE(r.running_hours, w.running_hours, 0) * 100.0 / 24.0, 'N2') AS percent_running,
+    FORMAT(COALESCE(r.changeover_hours, w.changeover_hours, 0) * 100.0 / 24.0, 'N2') AS percent_changeover,
+    FORMAT(COALESCE(r.stopped_hours, w.stopped_hours, 0) * 100.0 / 24.0, 'N2') AS percent_stopped,
+
+    CASE 
+        WHEN r.machine_id IS NOT NULL THEN 'real-time'
+        ELSE 'stored'
+    END AS data_source
+
+FROM DailyCalculated r
+FULL OUTER JOIN ws2_working_date w
+    ON r.machine_id = w.machine_id AND r.date = w.date
+
+LEFT JOIN ws2_machine_config cfg
+    ON COALESCE(r.machine_id, w.machine_id) = cfg.machine_id
+
+WHERE COALESCE(r.date, w.date) BETWEEN @startDate AND @endDate
+ORDER BY machine_id, [date];
         `);
 
         return result.recordset || [];
@@ -658,27 +629,26 @@ export async function getWorkshopMachineRunTime(startDate, endDate) {
     try {
         pool = await getConnection();
         const result = await pool.request().query(`
-DECLARE @monthStart DATE = '${startDate}';
-DECLARE @monthEnd DATE = '${endDate}';
+DECLARE @startDate DATE = '${startDate}';
+DECLARE @endDate DATE = '${endDate}';
 
 WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
-    WHERE timestamp >= @monthStart AND timestamp < DATEADD(DAY, 1, @monthEnd)
+    WHERE timestamp >= @startDate AND timestamp < DATEADD(DAY, 1, @endDate)
 ),
 
 StatusExpanded AS (
     SELECT 
         machine_id,
+        line,
         status,
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
-                THEN next_timestamp
-            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
-                THEN GETDATE()
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
     FROM StatusWithLead
@@ -691,37 +661,35 @@ FilteredStatus AS (
     WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
 ),
 
-DailySummary AS (
-    SELECT machine_id, 
-           [date],
-           SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) AS running_seconds,
-           SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) AS changeover_seconds,
-           SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) AS stopped_seconds
+DailyCalculated AS (
+    SELECT 
+        machine_id,
+        line,
+        [date],
+        SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
     FROM FilteredStatus
-    GROUP BY machine_id, [date]
-),
-
-MachineDayCounts AS (
-    SELECT machine_id, COUNT(DISTINCT [date]) AS day_count
-    FROM DailySummary
-    GROUP BY machine_id
+    GROUP BY machine_id, line, [date]
 )
 
 SELECT 
-    d.machine_id,
-    c.line,
-    MAX(d.[date]) AS latest_date,
-    ISNULL(SUM(d.running_seconds), 0) / 3600.0 AS running_hours,
-    ISNULL(SUM(d.changeover_seconds), 0) / 3600.0 AS changeover_hours,
-    ISNULL(SUM(d.stopped_seconds), 0) / 3600.0 AS stopped_hours,
-    FORMAT(ISNULL(SUM(d.running_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_running,
-    FORMAT(ISNULL(SUM(d.changeover_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_changeover,
-    FORMAT(ISNULL(SUM(d.stopped_seconds), 0) * 100.0 / NULLIF(mc.day_count * 86400, 0), 'N2') AS percent_stopped
-FROM DailySummary d 
-JOIN MachineDayCounts mc ON d.machine_id = mc.machine_id
-LEFT JOIN ws2_machine_config c ON d.machine_id = c.machine_id
-GROUP BY d.machine_id, c.line, mc.day_count
-ORDER BY CAST(d.machine_id AS INT);
+    COALESCE(c.machine_id, w.machine_id) AS machine_id,
+    COALESCE(c.date, w.date) AS [date],
+
+    ROUND(COALESCE(c.running_hours, w.running_hours, 0), 2) AS running_hours,
+    ROUND(COALESCE(c.changeover_hours, w.changeover_hours, 0), 2) AS changeover_hours,
+    ROUND(COALESCE(c.stopped_hours, w.stopped_hours, 0), 2) AS stopped_hours,
+
+    FORMAT(COALESCE(c.running_hours, w.running_hours, 0) * 100.0 / 24.0, 'N2') AS percent_running,
+    FORMAT(COALESCE(c.changeover_hours, w.changeover_hours, 0) * 100.0 / 24.0, 'N2') AS percent_changeover,
+    FORMAT(COALESCE(c.stopped_hours, w.stopped_hours, 0) * 100.0 / 24.0, 'N2') AS percent_stopped
+
+FROM ws2_working_date w
+FULL OUTER JOIN DailyCalculated c 
+    ON c.machine_id = w.machine_id AND c.date = w.date
+WHERE COALESCE(c.date, w.date) BETWEEN @startDate AND @endDate
+ORDER BY machine_id, [date];
         `);
 
         return result.recordset || [];

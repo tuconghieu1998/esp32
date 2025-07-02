@@ -98,7 +98,7 @@ app.engine("hbs", engine({
             return '#' + String(id).padStart(3, '0');
         },
         convertDecimalHoursToTime: function(decimalHours) {
-            decimalHours = decimalHours.replaceAll(',', '');
+            decimalHours = String(decimalHours).replaceAll(',', '');
             const hours = Math.floor(decimalHours);
             const minutes = Math.round((decimalHours - hours) * 60);
             return `${hours}:${minutes.toString().padStart(2, '0')}`;
