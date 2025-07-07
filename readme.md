@@ -77,3 +77,6 @@ pm2 list
 SQL Server
 - Enable Properties>Security>SQL Server and Windows Mode
 - Open SQL Config Manager > Enable TCP/IP > Restart
+
+Check port
+netstat -ano | findStr "port_number"
