@@ -3,6 +3,16 @@ Set-ExecutionPolicy RemoteSigned
 =======Mở port PowerShell Admin
 New-NetFirewallRule -DisplayName "Allow Node.js" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow
 
+1. Install dependencies
+npm install
+
+2. Run local
+npm start
+
+3. Deploy
++ npm install -g pm2 pm2-windows-service
++ Set Path: C:\Users\<USER_NAME>\AppData\Roaming\npm 
+
 =====start server
 pm2 start app.js --name esp32
 pm2 save
@@ -15,29 +25,6 @@ pm2 restart esp32
 
 =====Xem list server
 pm2 list
-
-====Auto script:
-@echo off
-cd /d C:\www\ESP32\esp32
-
-echo Pulling latest code from Git...
-git pull origin master
-
-echo Installing dependencies...
-npm install
-
-echo Restarting server with PM2...
-pm2 restart myapp
-
-echo Done!
-pause
-
-==== Stop and Restart
-pm2 stop esp32
-pm2 delete esp32
-pm2 start app.js --name esp32
-pm2 save
-
 
 4. Set Up IIS for Deployment
 
@@ -61,22 +48,9 @@ Click Add Rules → Reverse Proxy.
 Set Destination to: http://localhost:3000
 Click Apply.
 
-5. Run the App as a Windows Service
-
-- Install pm2-windows-service:
-npm install -g pm2 pm2-windows-service
-pm2-service-install
-
-Then, start your app:
-pm2 start server.js --name myapp
-pm2 save
-
-Restart your system and check if the app runs automatically:
-pm2 list
-
-SQL Server
+5. SQL Server
 - Enable Properties>Security>SQL Server and Windows Mode
 - Open SQL Config Manager > Enable TCP/IP > Restart
 
-Check port
+6. Check port
 netstat -ano | findStr "port_number"
