@@ -11,6 +11,16 @@
                 </div>
             </div>
         </div>
+        <div class="row mb-4 mt-4">
+
+            <div class="col-md-12">
+                <button id="decreaseBtn">−</button>
+                <input type="range" min="0" max="99" value="80" id="slider">
+                <button id="increaseBtn">+</button>
+                <div>Base percent: <span class="value" id="valueDisplay">80</span></div>
+            </div>
+
+        </div>
         <div id="heatmap-machine-grid" class="heatmap-machine-grid"></div>
     </div>
     <!-- Machine Detail Modal -->
@@ -32,7 +42,8 @@
                         <div class="col-md-3">
                             <label for="modal-time" class="form-label"><strong>Date</strong></label>
                             <div class="input-group date">
-                                <input type="text" name="modal-time" id="modal-time" class="form-control" placeholder="Date">
+                                <input type="text" name="modal-time" id="modal-time" class="form-control"
+                                    placeholder="Date">
                                 <button type="submit" class="btn btn-primary" id="search-btn"><i
                                         class="bi bi-funnel"></i>
                                     Search</button>
@@ -150,23 +161,10 @@
 <div id="custom-tooltip" style="z-index: 9999;"></div>
 <script src="/js/machine_utils.js"></script>
 <script src="/js/timeline.js"></script>
+<script src="/js/workshop_layout.js"></script>
 <script>
-    const WORKSHOP_LAYOUT = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-        [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
-        [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
-        [55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72],
-        [73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90],
-        [91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108],
-        [109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126],
-        [127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144],
-        [145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162],
-        [163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180],
-        [181, 182, 183, 184, 185, 186, 187, 188, 189, 190],
-        [191, 192, 193, 194, 195, 196, 197, 198, 199, 200]
-    ];
-
     let dateSearch = null;
+    let runningPercentBaseline = 60;
 
     $(document).ready(function () {
         $('#time').datepicker({
@@ -177,6 +175,44 @@
 
         dateSearch = $('#time').val();
         loadData(dateSearch, dateSearch);
+
+        const slider = document.getElementById("slider");
+        const sliderValueDisplay = document.getElementById("valueDisplay");
+        slider.value = runningPercentBaseline;
+        sliderValueDisplay.textContent = runningPercentBaseline;
+
+        slider.addEventListener("change", function () {
+            updateBaseline(parseInt(this.value));
+        });
+
+        // Handle button clicks
+        increaseBtn.addEventListener("click", () => {
+            if (slider.value < 100) {
+                slider.value = parseInt(slider.value) + 1;
+                updateBaseline(parseInt(slider.value));
+            }
+        });
+
+        decreaseBtn.addEventListener("click", () => {
+            if (slider.value > 50) {
+                slider.value = parseInt(slider.value) - 1;
+                updateBaseline(parseInt(slider.value));
+            }
+        });
+
+        // Update function
+        function updateBaseline(value) {
+            runningPercentBaseline = value;
+            sliderValueDisplay.textContent = value;
+
+            const boxes = document.querySelectorAll('.heatmap-machine-box');
+            boxes.forEach(box => {
+                const machineId = parseInt(box.textContent);
+                const percent = parseFloat(box.getAttribute("data-running-percent")) || 0;
+                const normalized = Math.max(0, (percent - runningPercentBaseline) / (100 - runningPercentBaseline));
+                box.style.backgroundColor = `rgba(0, 128, 0, ${normalized})`;
+            });
+        }
     });
 
     $('#search-btn').click(function (e) {
@@ -213,13 +249,14 @@
                         const runningHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].running_hours : 0);
                         const stoppedHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].stopped_hours : 0);
                         const changeoverHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].changeover_hours : 0);
-                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : Math.floor(Math.random() * 101);
-                        const opacity = runningPercent / 100;
+                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : Math.floor(Math.random() * 61) + 40;
+                        const opacity = Math.max(0, (runningPercent - runningPercentBaseline) / (100 - runningPercentBaseline));
 
                         const box = document.createElement('div');
                         box.className = 'heatmap-machine-box';
                         box.textContent = machineId;
                         box.style.backgroundColor = `rgba(0, 128, 0, ${opacity})`;
+                        box.setAttribute("data-running-percent", runningPercent);
 
                         box.addEventListener('mouseenter', (e) => {
                             heatmapTooltip.innerText = `Machine: ${machineId}\nLine: ${lineIndex + 1}\nRunning: ${runningHours}\nPercent: ${runningPercent}%\nStopped: ${stoppedHours}\nChangeover: ${changeoverHours}`;
