@@ -384,7 +384,8 @@
         if (isToday) {
             cell.classList.add('today');
         }
-        else {
+        
+        if(running + stopped + changeover > 100) {
             stopped = 100 - running - changeover; // ensure 100%
         }
 
