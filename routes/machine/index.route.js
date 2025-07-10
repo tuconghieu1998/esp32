@@ -91,7 +91,7 @@ async function getMachineWorkingTimeByStatus(machineId, date) {
         timeChangeOver = row['changeover_hours'];
     }
     
-    let percentRunning = (timeRunning / 24 * 100).toFixed(2);
+    let percentRunning = Math.min(100, (timeRunning / 24 * 100).toFixed(2));
 
     return {
         percentRunning,

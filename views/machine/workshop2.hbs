@@ -489,6 +489,9 @@
         if (isToday) {
             cell.classList.add('today');
         }
+        else {
+            stopped = 100 - running - changeover; // ensure 100%
+        }
 
         cell.title = `${day}/${month + 1}/${year}
 Running: ${running}%

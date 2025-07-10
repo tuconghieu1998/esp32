@@ -138,51 +138,47 @@ export async function getHoursMachineWorkingByStatus(machineId, date) {
 DECLARE @machineId VARCHAR(50) = '${machineId}';
 DECLARE @date DATE = '${date}';
 
-;WITH OrderedStatus AS (
-    SELECT
-        *,
-        LEAD([timestamp]) OVER (PARTITION BY machine_id ORDER BY [timestamp]) AS next_timestamp
+;WITH StatusWithLead AS (
+    SELECT *,
+        LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
-    WHERE 
-        CAST([timestamp] AS DATE) = @date 
-        AND machine_id = @machineId
+    WHERE machine_id = @machineId
+      AND timestamp >= @date 
+      AND timestamp < DATEADD(DAY, 2, @date)
 ),
 
-StatusDurations AS (
-    SELECT
+StatusExpanded AS (
+    SELECT 
         machine_id,
-        sensor_id,
         status,
-        CAST([timestamp] AS DATE) AS log_date,
-        [timestamp],
-        next_timestamp,
-        DATEDIFF(SECOND, [timestamp], ISNULL(next_timestamp, GETDATE())) AS duration_seconds
-    FROM OrderedStatus
-    WHERE next_timestamp IS NOT NULL
+        CAST(timestamp AS DATE) AS [date],
+        timestamp AS start_time,
+        CASE 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+                THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
+                THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
+    FROM StatusWithLead
 ),
 
-AdjustedStatus AS (
-    SELECT
-        machine_id,
-        sensor_id,
-        log_date,
-        CASE 
-            WHEN status IN ('running', 'stopped', 'changeover') AND duration_seconds > 1800 THEN 'disconnected'
-            ELSE status
-        END AS status,
-        duration_seconds
-    FROM StatusDurations
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM StatusExpanded
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30 AND CAST(start_time AS DATE) = @date
 ),
 
 DailyCalculated AS (
-    SELECT
+    SELECT 
+        [date],
         machine_id,
-        log_date AS [date],
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_running_hours,
-        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_stopped_hours,
-        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_changeover_hours
-    FROM AdjustedStatus
-    GROUP BY machine_id, log_date
+        SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_changeover_hours,
+        SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS calc_stopped_hours
+    FROM FilteredStatus
+    GROUP BY machine_id, [date]
 )
 
 SELECT
@@ -308,7 +304,6 @@ ORDER BY start_time;
 
 
 export async function getTimeMachineRunningInMonth(machineId, date) {
-    console.log("getTimeMachineRunningInMonth", machineId, date);
     let pool;
     try {
         pool = await getConnection();
@@ -392,7 +387,6 @@ ORDER BY c.[date];
 }
 
 export async function getTimeWorkshop2RunningInMonth(date) {
-    console.log("getTimeWorkshop2RunningInMonth", date);
     let pool;
     try {
         pool = await getConnection();
@@ -475,7 +469,6 @@ WHERE COALESCE(c.date, w.date) BETWEEN @monthStart AND @monthEnd
 }
 
 export async function getTimeWorkshop2RunningInDate(date) {
-    console.log("getTimeWorkshop2RunningInDate", date);
     let pool;
     try {
         pool = await getConnection();
@@ -486,31 +479,29 @@ DECLARE @targetDate DATE = '${date}';
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
-    WHERE CAST(timestamp AS DATE) = @targetDate
+    WHERE timestamp >= @targetDate 
+      AND timestamp < DATEADD(DAY, 2, @targetDate)
 ),
 
 StatusExpanded AS (
     SELECT 
         machine_id,
-        line,
         status,
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL THEN next_timestamp
-            WHEN @targetDate = CAST(GETDATE() AS DATE) THEN GETDATE()
-            ELSE DATEADD(DAY, 1, @targetDate)
-        END AS end_time,
-        DATEDIFF(
-            SECOND, 
-            timestamp, 
-            CASE 
-                WHEN next_timestamp IS NOT NULL THEN next_timestamp
-                WHEN @targetDate = CAST(GETDATE() AS DATE) THEN GETDATE()
-                ELSE DATEADD(DAY, 1, @targetDate)
-            END
-        ) AS duration_seconds
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
+            ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
+        END AS end_time
     FROM StatusWithLead
+),
+
+FilteredStatus AS (
+    SELECT *,
+        DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
+    FROM StatusExpanded
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30 AND CAST(start_time AS DATE) = @targetDate
 ),
 
 DailyCalculated AS (
@@ -520,7 +511,7 @@ DailyCalculated AS (
         SUM(CASE WHEN status = 'running' THEN duration_seconds ELSE 0 END) / 3600.0 AS running_hours,
         SUM(CASE WHEN status = 'changeover' THEN duration_seconds ELSE 0 END) / 3600.0 AS changeover_hours,
         SUM(CASE WHEN status = 'stopped' THEN duration_seconds ELSE 0 END) / 3600.0 AS stopped_hours
-    FROM StatusExpanded
+    FROM FilteredStatus
     GROUP BY [date]
 ),
 
