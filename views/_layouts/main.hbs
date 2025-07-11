@@ -54,18 +54,18 @@
 								class="align-middle">Dashboard</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/sensors">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Diagrams</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/sensors/chart">
 							<i class="align-middle" data-feather="activity"></i> <span
 								class="align-middle">Charts</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/sensors/workshop-chart">
 							<i class="align-middle" data-feather="activity"></i> <span class="align-middle">Workshop
 								Chart</span>
@@ -82,12 +82,14 @@
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/machine/machine-dashboard/1">
-							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Machine Dashboard</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Machine
+								Dashboard</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/machine/workshop-dashboard">
-							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Workshop 2 Dashboard</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Workshop 2
+								Dashboard</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
@@ -98,12 +100,14 @@
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/machine/workshop-heatmap">
-							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Workshop Heatmap</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Workshop
+								Heatmap</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/machine/sensor-config">
-							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Sensor Config</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">Sensor
+								Config</span>
 						</a>
 					</li>
 					<li class="sidebar-header">
@@ -114,30 +118,30 @@
 							<i class="align-middle" data-feather="grid"></i> <span class="align-middle">MES PNS</span>
 						</a>
 					</li>
-					<li class="sidebar-header">
+					<li class="sidebar-header auth-only">
 						Camera
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/camera">
 							<i class="align-middle" data-feather="video"></i> <span class="align-middle">Factory</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/camera/workshop1">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Workshop 1</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/camera/workshop2">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Workshop 2</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/camera/workshop3">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Workshop 3</span>
 						</a>
 					</li>
-					<li class="sidebar-item">
+					<li class="sidebar-item auth-only">
 						<a class="sidebar-link" href="/camera/workshop4">
 							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Workshop 4</span>
 						</a>
@@ -153,7 +157,7 @@
 				</a>
 				<div class="navbar-collapse collapse">
 					<ul class="navbar-nav navbar-align">
-						<li class="nav-item dropdown">
+						<li class="nav-item dropdown auth-only">
 							<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
 								<div class="position-relative">
 									<i class="align-middle" data-feather="bell"></i>
@@ -222,7 +226,7 @@
 								</div>
 							</div>
 						</li>
-						<li class="nav-item dropdown">
+						<li class="nav-item dropdown auth-only">
 							<a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown"
 								data-bs-toggle="dropdown">
 								<div class="position-relative">
@@ -299,7 +303,7 @@
 								</div>
 							</div>
 						</li>
-						<li class="nav-item dropdown">
+						<li class="nav-item dropdown auth-only">
 							<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#"
 								data-bs-toggle="dropdown">
 								<i class="align-middle" data-feather="settings"></i>
@@ -324,7 +328,8 @@
 							</div>
 						</li>
 						<li class="nav-item dropdown">
-							<button type="button" class="btn btn-outline-danger" id="logout">Log out</button>
+							<button type="button" class="btn btn-outline-danger auth-only" id="logout">Log out</button>
+							<button type="button" class="btn btn-outline-danger" id="login" style="display: none;">Log in</button>
 						</li>
 					</ul>
 				</div>
@@ -382,6 +387,9 @@
 		});
 	</script>
 	<script>
+		document.getElementById("login").addEventListener("click", () => {
+			window.location.href = "/account/login";
+		});
 		document.getElementById("logout").addEventListener("click", () => {
 			fetch('/account/logout', { method: 'POST', credentials: 'include' }) // Notify server to destroy session
 				.then(() => {
@@ -395,6 +403,15 @@
 				}
 				);
 		});
+	</script>
+	<script>
+		window.onload = function () {
+			const token = localStorage.getItem("pnsmrotoken");
+			if (!token) {
+				document.querySelectorAll('.auth-only').forEach(el => el.style.display = 'none');
+				document.getElementById('login').style.display = 'inline-block';
+			}
+		};
 	</script>
 </body>
 

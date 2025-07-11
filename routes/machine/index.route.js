@@ -13,7 +13,7 @@ const DELAY_SEND_WS = 1000;
 const clients = new Set();
 const MACHINE_200_SERVER_URL = process.env.MACHINE_200_SERVER_URL;
 
-router.get('/', authenticate, (req, res, next) => {
+router.get('/', (req, res, next) => {
     try {
         res.render('machine');
     }
@@ -23,7 +23,7 @@ router.get('/', authenticate, (req, res, next) => {
     }
 });
 
-router.get('/workshop-report', authenticate, (req, res, next) => {
+router.get('/workshop-report', (req, res, next) => {
     try {
         res.render('machine/workshop_report.hbs');
     }
@@ -33,7 +33,7 @@ router.get('/workshop-report', authenticate, (req, res, next) => {
     }
 });
 
-router.get('/api/workshop-report', authenticate, async (req, res, next) => {
+router.get('/api/workshop-report', async (req, res, next) => {
     try {
         let { start_date, end_date, page } = req.query;
         page = page || 1;
@@ -57,7 +57,7 @@ router.get('/api/workshop-report', authenticate, async (req, res, next) => {
     }
 });
 
-router.get("/api/workshop-report/excel", authenticate, async (req, res) => {
+router.get("/api/workshop-report/excel", async (req, res) => {
     let { start_date, end_date } = req.query;
 
     const today = new Date().toISOString().split('T')[0];
@@ -101,7 +101,7 @@ async function getMachineWorkingTimeByStatus(machineId, date) {
     }
 }
 
-router.get('/machine-dashboard/:machine_id', authenticate, async (req, res, next) => {
+router.get('/machine-dashboard/:machine_id', async (req, res, next) => {
     try {
         const machine_id = req.params.machine_id;
         const date = getCurrentDate();
@@ -213,7 +213,7 @@ router.get("/api/workshop2-month", async (req, res) => {
     }
 });
 
-router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
+router.get('/workshop-dashboard', async (req, res, next) => {
     try {
         const date = getCurrentDate();
         const data = await getTimeWorkshop2RunningInDate(date);
@@ -234,7 +234,7 @@ router.get('/workshop-dashboard', authenticate, async (req, res, next) => {
     }
 });
 
-router.get('/workshop-heatmap', authenticate, async (req, res, next) => {
+router.get('/workshop-heatmap', async (req, res, next) => {
     try {
         res.render('machine/workshop_overview.hbs');
     }
@@ -244,7 +244,7 @@ router.get('/workshop-heatmap', authenticate, async (req, res, next) => {
     }
 });
 
-router.get('/api/workshop-heatmap', authenticate, async (req, res, next) => {
+router.get('/api/workshop-heatmap', async (req, res, next) => {
     try {
         let { start_date, end_date } = req.query;
 
@@ -380,7 +380,7 @@ router.put('/api/sensor-config/:id', authenticate, async (req, res) => {
     }
 });
 
-router.delete('/api/sensor-config/:id', async (req, res) => {
+router.delete('/api/sensor-config/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     try {
         console.log("DELETE: ", id);
@@ -395,7 +395,7 @@ router.delete('/api/sensor-config/:id', async (req, res) => {
     }
 });
 
-router.put('/api/sync-sensor-config', async (req, res) => {
+router.put('/api/sync-sensor-config', authenticate, async (req, res) => {
     try {
         let success = await syncMachinesConfig();
         if (success) {
@@ -408,7 +408,7 @@ router.put('/api/sync-sensor-config', async (req, res) => {
     }
 });
 
-router.get('/api/check-sync-config', async (req, res) => {
+router.get('/api/check-sync-config', authenticate, async (req, res) => {
     try {
         let hasChange = await checkSyncConfig();
         return res.status(200).json({ has_change: hasChange });
@@ -418,7 +418,7 @@ router.get('/api/check-sync-config', async (req, res) => {
     }
 });
 
-router.get('/api/sensor-config/last-id', async (req, res) => {
+router.get('/api/sensor-config/last-id', authenticate, async (req, res) => {
     try {
         const lastId = await getLastSensorIdInConfig();
         console.log("sensor-config/last-id", lastId);

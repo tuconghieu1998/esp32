@@ -15,7 +15,7 @@ const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const ACCUWEATHER_KEY = process.env.ACCUWEATHER_KEY;
 
 // trang chu
-router.get('/', authenticate, async (req, res, next) => {
+router.get('/', async (req, res, next) => {
     try {
         var now = new Date();
 
@@ -97,7 +97,7 @@ router.get('/weather', async (req, res) => {
     }
 });
 
-router.get("/dashboard/filter", authenticate, async (req, res) => {
+router.get("/dashboard/filter", async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
     // console.log('/dashboard/filter', factory, location, sensor_id, time);
 
@@ -127,7 +127,7 @@ router.get("/dashboard/filter", authenticate, async (req, res) => {
     });
 });
 
-router.get("/dashboard/export-excel", authenticate, async (req, res) => {
+router.get("/dashboard/export-excel", async (req, res) => {
     let { factory, location, sensor_id, time } = req.query;
 
     console.log("dashboard/export-excel", factory, location, time);
@@ -143,18 +143,18 @@ router.get("/dashboard/export-excel", authenticate, async (req, res) => {
 });
 
 // API to get sensor data
-router.get("/api/sensor-data/:id", authenticate, (req, res) => {
+router.get("/api/sensor-data/:id", (req, res) => {
     const sensorId = req.params.id;
     res.json(sensorData.find(item => item.sensorId == sensorId) || { temperature: "N/A", humidity: "N/A" });
 });
 
 // API to get sensor data
-router.get("/api/sensor-data", authenticate, (req, res) => {
+router.get("/api/sensor-data", (req, res) => {
     let { factory } = req.query;
     res.json({ sensors: sensorData });
 });
 
-router.get("/api/chart-data", authenticate, async (req, res) => {
+router.get("/api/chart-data", async (req, res) => {
     let { factory, time } = req.query;
 
     let date;
