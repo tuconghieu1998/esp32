@@ -154,7 +154,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 
                 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
                 THEN GETDATE()
@@ -167,7 +167,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30 AND CAST(start_time AS DATE) = @date
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60 AND CAST(start_time AS DATE) = @date
 ),
 
 DailyCalculated AS (
@@ -259,7 +259,7 @@ StatusWithGapHandling AS (
     SELECT *,
         DATEDIFF(SECOND, timestamp, next_timestamp) AS duration_seconds,
         CASE 
-            WHEN DATEDIFF(SECOND, timestamp, next_timestamp) > 1800 THEN 'disconnected'
+            WHEN DATEDIFF(SECOND, timestamp, next_timestamp) > 3600 THEN 'disconnected'
             ELSE status
         END AS adjusted_status
     FROM StatusWithLead
@@ -328,7 +328,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 
                 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) 
                 THEN GETDATE()
@@ -341,7 +341,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
@@ -408,7 +408,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
@@ -419,7 +419,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
@@ -490,7 +490,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
@@ -501,7 +501,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30 AND CAST(start_time AS DATE) = @targetDate
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60 AND CAST(start_time AS DATE) = @targetDate
 ),
 
 DailyCalculated AS (
@@ -572,7 +572,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
@@ -583,7 +583,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
@@ -656,7 +656,7 @@ StatusExpanded AS (
         CAST(timestamp AS DATE) AS [date],
         timestamp AS start_time,
         CASE 
-            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 30 THEN next_timestamp
+            WHEN next_timestamp IS NOT NULL AND DATEDIFF(MINUTE, timestamp, next_timestamp) <= 60 THEN next_timestamp
             WHEN next_timestamp IS NULL AND CAST(timestamp AS DATE) = CAST(GETDATE() AS DATE) THEN GETDATE()
             ELSE DATEADD(DAY, 1, CAST(timestamp AS DATE))
         END AS end_time
@@ -667,7 +667,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 30
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
