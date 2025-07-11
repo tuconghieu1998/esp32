@@ -490,7 +490,7 @@
             cell.classList.add('today');
         }
 
-        if(running + stopped + changeover > 100) {
+        if(Number(running) + Number(stopped) + Number(changeover) > 100) {
             stopped = 100 - running - changeover; // ensure 100%
         }
 
