@@ -194,7 +194,7 @@
         });
 
         decreaseBtn.addEventListener("click", () => {
-            if (slider.value > 50) {
+            if (slider.value > 0) {
                 slider.value = parseInt(slider.value) - 1;
                 updateBaseline(parseInt(slider.value));
             }
