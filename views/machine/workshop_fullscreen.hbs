@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="AdminKit">
+    <meta name="keywords"
+        content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="/img/icons/icon-48x48.png" />
+
+    <link rel="canonical" href="https://demo-basic.adminkit.io/" />
+
+    <title>PNS CHUN</title>
+
+    <link href="/css/app.css" rel="stylesheet">
+    <link href="/css/custom.css" rel="stylesheet">
+    <link href="/css/machine_fullscreen.css" rel="stylesheet">
+    <link href="/css/machine_dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+
+    <!-- Bootstrap Datepicker -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+
+<body>
+    <main class="content p-1">
+        <div class="container-fluid p-0">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <a href="/" class="btn btn-outline-primary">← Back to Home</a>
+                <h2 id="workshop-title" class="h3 text-center flex-grow-1 mb-0">Machine for Workshop 2</h2>
+                <div style="width: 120px;"></div> <!-- để cân bằng khoảng trắng bên phải -->
+            </div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-6 p-1">
+                        <div id="machineGrid1" class="border rounded bg-light overflow-auto" style="height: 400px;">
+                        </div>
+                    </div>
+                    <div class="col-6 p-1">
+                        <div id="machineGrid2" class="border rounded bg-light overflow-auto" style="height: 400px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 p-1">
+                        <div id="machineGrid3" class="border rounded bg-light overflow-auto" style="height: 400px;">
+                        </div>
+                    </div>
+                    <div class="col-6 p-1">
+                        <div id="machineGrid4" class="border rounded bg-light overflow-auto" style="height: 400px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Machine Detail Modal -->
+        <div class="modal fade" id="machineDashboardModal" tabindex="-1" aria-labelledby="machineDashboardModalLabel"
+            aria-hidden="true" data-id="">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="machineDashboardModalLabel">Weaving Machine Dashboard</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="p-3" id="modalMachineDashoardContent">
+                        <div class="row mb-4 mt-4">
+                            <div class="col-md-3">
+                                <label for="machine-id" class="form-label"><strong>Machine Number</strong></label>
+                                <input type="text" name="machine-id" id="machine-id" class="form-control" value=""
+                                    placeholder="Machine No">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="time" class="form-label"><strong>Date</strong></label>
+                                <div class="input-group date">
+                                    <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                                    <button type="submit" class="btn btn-primary" id="search-btn"><i
+                                            class="bi bi-funnel"></i>
+                                        Search</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <!-- Percent Running -->
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">Total Percent</h5>
+                                        <p id="max-percent" class="card-text display-4">0.00%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">Percent Running</h5>
+
+                                        <div class="d-flex justify-content-center align-items-center gap-4">
+                                            <!-- Left: Main percent -->
+                                            <p id="percent-running" class="card-text display-4 mb-0 mr-3">
+                                                0.00%
+                                            </p>
+                                            <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
+                                                (-0.00%)
+                                            </p>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-center mb-4">
+                            <!-- Hours Running -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">Hours Running</h5>
+                                        <p id="time-running" class="card-text display-4">0:00</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hours Stopped -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-danger">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-danger">Hours Stopped</h5>
+                                        <p id="time-stopped" class="card-text display-4">0:00</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hours Change Over -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-warning">Change Over</h5>
+                                        <p id="time-changeover" class="card-text display-4">0:00
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card flex-fill p-4">
+                            <h5>Working Timeline</h5>
+                            <div class="mb-2 d-flex gap-1 align-items-center">
+                                <div><strong>Status Legend:</strong></div>
+                                <div class="legend-box running"></div><span>Running</span>
+                                <div class="legend-box stopped"></div><span>Stopped</span>
+                                <div class="legend-box changeover"></div><span>Changeover</span>
+                                <div class="legend-box disconnected"></div><span>Disconnected</span>
+                            </div>
+                            <div id="multi-day-timelines"></div>
+                        </div>
+
+                        <div class="card flex-fill p-4">
+                            <h3>Working in month</h3>
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="input-group date">
+                                        <input type="text" id="monthpicker" class="form-control w-25"
+                                            placeholder="Select Month" />
+                                        <button id="btn-search-month" type="submit" class="btn btn-primary"><i
+                                                class="bi bi-funnel"></i>
+                                            Search</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="calendar" id="calendar-header">
+                                <!-- Weekday headers -->
+                                <div><strong>Sun</strong></div>
+                                <div><strong>Mon</strong></div>
+                                <div><strong>Tue</strong></div>
+                                <div><strong>Wed</strong></div>
+                                <div><strong>Thu</strong></div>
+                                <div><strong>Fri</strong></div>
+                                <div><strong>Sat</strong></div>
+                            </div>
+                            <div class="calendar" id="calendar">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="custom-tooltip" style="z-index: 9999;"></div>
+    <!-- Tooltip element -->
+    <script src="/js/machine_utils.js"></script>
+    <script src="/js/timeline.js"></script>
+    <script src="/js/workshop_layout.js"></script>
+    <script>
+        function generateMachines() {
+            const statuses = ['running', 'stopped', 'changeover'];
+
+            const machines = [];
+
+            WORKSHOP_LAYOUT.map((row, index) => {
+                let line = index + 1;
+                for (let id of row) {
+                    machines.push({
+                        id,
+                        sensor_id: "####",
+                        machine_id: id,
+                        line,
+                        status: "running"
+                    });
+                }
+            });
+
+            machines[15].status = "stopped";
+            machines[16].status = "stopped";
+            machines[17].status = "stopped";
+
+            machines[25].status = "changeover";
+            machines[26].status = "changeover";
+            machines[27].status = "changeover";
+
+            return machines;
+        }
+
+        let machines = generateMachines();
+        let time_server = null;
+
+        function getStatusDisplay(status, update_time) {
+            if (!time_server || !update_time) return 'status-disconnected';
+
+            const now = new Date(time_server.replace(" ", "T"));
+            const updated = new Date(update_time.replace(" ", "T"));
+            const diffSeconds = (now - updated) / 1000;
+            const disconnectedThreshold = 300;
+
+            if (diffSeconds > disconnectedThreshold) {
+                return 'status-disconnected';
+            }
+            return `status-${status}`;
+        }
+
+        let current_filter = 'all';
+
+        function getGridId(lineNumber) {
+            if (lineNumber <= 6) return "machineGrid1";
+            if (lineNumber <= 12) return "machineGrid2";
+            if (lineNumber <= 18) return "machineGrid3";
+            return "machineGrid4";
+        }
+
+        function renderMachines(filter = 'all') {
+            document.getElementById('machineGrid1').innerHTML = '';
+            document.getElementById('machineGrid2').innerHTML = '';
+            document.getElementById('machineGrid3').innerHTML = '';
+            document.getElementById('machineGrid4').innerHTML = '';
+
+            const filtered = machines.filter(machine => filter === 'all' || machine.status === filter);
+
+            // Group by line
+            const linesMap = new Map();
+            filtered.forEach(machine => {
+                if (!linesMap.has(machine.line)) {
+                    linesMap.set(machine.line, []);
+                }
+                linesMap.get(machine.line).push(machine);
+            });
+
+            // Render each line
+            linesMap.forEach((lineMachines, lineNumber) => {
+                const grid = document.getElementById(getGridId(lineNumber));
+
+                // Container for machines in this line
+                const lineRow = document.createElement('div');
+                lineRow.className = 'd-flex flex-wrap gap-1';
+
+                const lineHeader = document.createElement('div');
+                lineHeader.className = 'fw-bold text-center p-1 pt-4';
+                lineHeader.textContent = `${lineNumber}`;
+                lineRow.appendChild(lineHeader);
+
+                lineMachines.forEach(machine => {
+                    let statusClass = `status-${machine.status}`;
+                    if (machine.id == 1 || machine.id == 2 || machine.id == 3) {
+                        statusClass = getStatusDisplay(machine.status, machine.update_time);
+                    }
+
+                    const col = document.createElement('div');
+                    col.style.width = '46px';
+
+                    col.innerHTML = `
+                        <div class="machine-card d-flex flex-column align-items-center justify-content-center border rounded"
+                             style="width: 44px; height: 48px; background-color: #f8f9fa; cursor: pointer; padding: 0px; margin-top: 10px;"
+                             title="Machine #${machine.id} - ${machine.status}"
+                             data-id="${machine.id}">
+                            <div class="fw-bold small">#${machine.id}</div>
+                            <div class="status-indicator ${statusClass}"></div>
+                        </div>
+                    `;
+
+                    col.querySelector('.machine-card').addEventListener('click', () => {
+                        let modalElement = document.getElementById('machineDashboardModal');
+                        console.log("set data id", machine);
+                        modalElement.setAttribute('data-id', machine.id);
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                    });
+
+                    lineRow.appendChild(col);
+                });
+
+                grid.appendChild(lineRow);
+            });
+        }
+
+        function getHost() {
+            let host = window.location.host;
+            let match = host.match(/^([\w.-]+):(\d+)$/); // Match IP:port
+
+            if (!match) {
+                host = `${host}:4344`;
+            }
+            else if (match[2] == '80') {
+                host = `${match[1]}:4344`;
+            }
+            return host;
+        }
+
+        const host = getHost();
+        const url = `ws://${host}/machine/socket/ws2`;
+        console.log(url);
+        const socket = new WebSocket(url);
+
+        // Listen for incoming data from WebSocket server
+        socket.addEventListener('message', function (event) {
+            let data = JSON.parse(event.data);
+            //console.log("DATA: ", data);
+            let machine_states = data.machine_states;
+            time_server = data.time_server;
+            for (let i = 0; i < machine_states.length; i++) {
+                let machine_id = machine_states[i].machine_id;
+                if (machine_id == 1 || machine_id == 2 || machine_id == 3) {
+                    let index = machines.findIndex((item) => item.machine_id == machine_id);
+                    if (index != -1) {
+                        machines[index].sensor_id = machine_states[i].sensor_id;
+                        machines[index].machine_id = machine_states[i].machine_id;
+                        machines[index].status = machine_states[i].status;
+                        machines[index].update_time = machine_states[i].update_time;
+                    }
+                }
+            }
+            renderMachines(current_filter);
+        });
+
+        // Initial render
+        renderMachines();
+
+        // Add event listener to filter
+        document.querySelectorAll('input[name="statusFilter"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                current_filter = e.target.value;
+                renderMachines(current_filter);
+            });
+        });
+
+
+        $('#machineDashboardModal').on('show.bs.modal', function (e) {
+            if (e.target != this) return;
+            $('#time').datepicker({
+                format: 'dd/mm/yyyy', // Format to match your filter
+                autoclose: true,
+                todayHighlight: true
+            }).datepicker('setDate', new Date());
+
+            $('#monthpicker').datepicker({
+                format: "mm/yyyy",       // show month/year only
+                startView: "months",     // start view at months
+                minViewMode: "months",   // limit selection to months only
+                autoclose: true
+            }).datepicker('setDate', new Date());
+
+            const machine_id = $('#machineDashboardModal').attr("data-id");
+            $("#machine-id").val(formatMachineId(machine_id));
+            let date = $("#time").val();
+            console.log("Modal Show: ", machine_id, date);
+
+            loadMachineOverview(machine_id, date);
+            loadLast5Timelines(machine_id, date);
+            handleLoadRunningPercentInMonth(machine_id);
+        });
+
+        function formatMachineId(id) {
+            return '#' + String(id).padStart(3, '0');
+        }
+
+        function getMachineId() {
+            let machineIdStr = $("#machine-id").val();
+            machineIdStr = machineIdStr.replace('#', '');
+            if (isNaN(Number(machineIdStr))) {
+                alert("Machine ID invalid!");
+                return '';
+            }
+            return Number(machineIdStr);
+        }
+
+        $('#search-btn').click(function (e) {
+            e.preventDefault();
+            let date = $("#time").val();
+            let machine_id = getMachineId();
+            if (machine_id == '') return;
+
+
+            loadMachineOverview(machine_id, date);
+            loadLast5Timelines(machine_id, date);
+            handleLoadRunningPercentInMonth(machine_id);
+        });
+
+        function loadMachineOverview(machine_id, date) {
+            $.ajax({
+                url: `/machine/api/machine-dashboard`,
+                method: "GET",
+                data: { machine_id, date },
+                dataType: "json",
+                success: function (response) {
+                    console.log(response.workingTime);
+                    if (response.workingTime) {
+                        const {
+                            percentRunning,
+                            timeRunning,
+                            timeStopped,
+                            timeDisconnected,
+                            timeChangeOver
+                        } = response.workingTime;
+
+                        $('#machine-id').val(formatMachineId(machine_id));
+
+                        const percent = getMaxPercentPassedToday(date);
+                        $("#max-percent").text(percent + "%").fadeIn(200);
+                        $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
+
+                        const e1 = $('#percent-running');
+                        e1.fadeOut(200, function () {
+                            $(this).text(percentRunning + '%').fadeIn(200);
+                        });
+
+                        const e2 = $('#time-running');
+                        e2.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
+                        });
+
+                        const e3 = $('#time-stopped');
+                        e3.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
+                        });
+
+                        const e4 = $('#time-changeover');
+                        e4.fadeOut(200, function () {
+                            $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
+                        });
+                    }
+                }
+            });
+        }
+
+        $('#btn-search-month').on('click', function () {
+            let machine_id = getMachineId();
+            handleLoadRunningPercentInMonth(machine_id);
+        });
+
+        function handleLoadRunningPercentInMonth(machineId) {
+            const val = $('#monthpicker').val(); // Format: mm/yyyy
+            if (!val) return;
+
+            const parts = val.split('/');
+            const month = parseInt(parts[0], 10) - 1;
+            const year = parseInt(parts[1], 10);
+
+            // generateCalendar(month, year);
+            loadPercentRunningMonth(machineId, month, year);
+        }
+
+        function loadPercentRunningMonth(machine_id, month, year) {
+            const date = '01/' + (month + 1) + '/' + year;
+            $.ajax({
+                url: `/machine/api/machine-month`,
+                method: "GET",
+                data: { machine_id, date },
+                dataType: "json",
+                success: function (response) {
+                    const data = response.data || [];
+                    const percentRunning = {};
+                    const percentStopped = {};
+                    const percentChangeover = {};
+                    for (const entry of data) {
+                        const day = new Date(entry.date).getDate();
+                        percentRunning[day] = parseFloat(entry.percent_running || 0).toFixed(0);
+                        percentStopped[day] = parseFloat(entry.percent_stopped || 0).toFixed(0);
+                        percentChangeover[day] = parseFloat(entry.percent_changeover || 0).toFixed(0);
+                    }
+                    generateCalendar(month, year, percentRunning, percentStopped, percentChangeover);
+                },
+                error: function () {
+                    alert('Failed to load running data.');
+                }
+            });
+        }
+
+        function createDayCell(day, month, year, running, stopped, changeover) {
+            const cell = document.createElement('div');
+            cell.classList.add('day-cell');
+
+            const today = new Date();
+            const cellDate = new Date(year, month, day);
+
+            const isToday =
+                day === today.getDate() &&
+                month === today.getMonth() &&
+                year === today.getFullYear();
+
+            const isFuture = cellDate > today;
+
+            if (isToday) {
+                cell.classList.add('today');
+            }
+
+            if (Number(running) + Number(stopped) + Number(changeover) > 100) {
+                stopped = 100 - running - changeover; // ensure 100%
+            }
+
+            cell.title = `${day}/${month + 1}/${year}
+Running: ${running}%
+Stopped: ${stopped}%
+Changeover: ${changeover}%`;
+
+            cell.addEventListener('click', () => {
+                //const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+                //onDayCellClick(dateStr); // Call your handler
+            });
+
+            const dayNum = document.createElement('div');
+            dayNum.classList.add('day-number');
+            dayNum.textContent = day;
+            cell.appendChild(dayNum);
+
+            if (!isFuture) {
+                const badgesContainer = document.createElement('div');
+                badgesContainer.classList.add('percent-badges');
+
+                const runningBadge = document.createElement('div');
+                runningBadge.classList.add('percent-badge', 'running-badge', running > 0 ? 'high-value' : 'low-value');
+                runningBadge.textContent = `${running}%`;
+                badgesContainer.appendChild(runningBadge);
+
+                const stoppedBadge = document.createElement('div');
+                stoppedBadge.classList.add('percent-badge', 'stopped-badge', stopped > 0 ? 'high-value' : 'low-value');
+                stoppedBadge.textContent = `${stopped}%`;
+                badgesContainer.appendChild(stoppedBadge);
+
+                const changeoverBadge = document.createElement('div');
+                changeoverBadge.classList.add('percent-badge', 'changeover-badge', changeover > 0 ? 'high-value' : 'low-value');
+                changeoverBadge.textContent = `${changeover}%`;
+                badgesContainer.appendChild(changeoverBadge);
+
+                cell.appendChild(badgesContainer);
+            }
+
+            return cell;
+        }
+
+
+        function generatePercentData(daysInMonth) {
+            const data = {};
+            for (let d = 1; d <= daysInMonth; d++) {
+                data[d] = Math.floor(Math.random() * 70) + 30;
+            }
+            return data;
+        }
+
+        function generateCalendar(month, year, percentRunning, percentStopped, percentChangeover) {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = ''; // Clear existing content
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+
+            // Add blank cells before the 1st day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                calendar.appendChild(emptyCell);
+            }
+
+            // Add days
+            for (let day = 1; day <= daysInMonth; day++) {
+                calendar.appendChild(createDayCell(day, month, year, percentRunning[day] || 0, percentStopped[day] || 0, percentChangeover[day] || 0));
+            }
+        }
+    </script>
+</body>

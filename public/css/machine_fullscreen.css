@@ -1,0 +1,38 @@
+.status-indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-top: 2px;
+}
+
+.status-running {
+    background-color: green;
+    animation: fadePulse 4.5s infinite ease-in-out;
+}
+
+.status-stopped {
+    background-color: red;
+}
+
+.status-disconnected {
+    background-color: grey;
+    opacity: 0.3;
+}
+
+.status-changeover {
+    background-color: orange;
+}
+
+@keyframes fadePulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.flash-change {
+    transition: background-color 0.4s ease;
+    background-color: #d1ffd1; /* light green */
+}

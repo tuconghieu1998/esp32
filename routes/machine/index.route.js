@@ -81,6 +81,20 @@ router.get('/ws2', async (req, res, next) => {
     }
 });
 
+router.get('/ws2-fullscreen', async (req, res, next) => {
+    try {
+        let machines = MACHINES_DATA;
+        res.render('machine/workshop_fullscreen.hbs', {
+            machines,
+            layout: false
+        });
+    }
+    catch (e) {
+        console.log(e);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 async function getMachineWorkingTimeByStatus(machineId, date) {
     const workingData = await getHoursMachineWorkingByStatus(machineId, date);
     let timeRunning = 0, timeStopped = 0, timeChangeOver = 0;
