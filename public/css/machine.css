@@ -7,7 +7,7 @@
 
 .status-running {
     background-color: green;
-    animation: fadePulse 1.5s infinite ease-in-out;
+    animation: fadePulse 4.5s infinite ease-in-out;
 }
 
 .status-stopped {
