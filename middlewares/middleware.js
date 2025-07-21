@@ -1,5 +1,13 @@
 import jwt from 'jsonwebtoken';
+import session from 'express-session';
+
 const secretKey = process.env.JWT_SECRET;
+
+export const sessionConfig = session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: true,
+});
 
 export const authenticate = (req, res, next) => {
     if (!req.session.user) {
@@ -25,7 +33,7 @@ export const authenticateWebSocket = (ws, req, next) => {
 
         req.user = user; // Attach user data to request
 
-        if(user.role != 'ADMIN' && user.role != 'SECURITY') {
+        if (user.role != 'ADMIN' && user.role != 'SECURITY') {
             ws.close(4003, "No authenticated!");
             return;
         }

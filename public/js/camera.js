@@ -141,7 +141,7 @@ async function openModal(cameraIP) {
             const host = getHost();
 
             socket = await loadPlayer({
-                url: `ws://${host}/api/stream/${cameraIP}?token=${token}`,
+                url: `ws://${host}/camera/stream/${cameraIP}?token=${token}`,
                 canvas: canvas,
                 wasmMemorySize: 64 * 1024 * 1024,
                 disableGl: true,
@@ -170,7 +170,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
-        url: `http://${location.host}/check-ping`,
+        url: `http://${location.host}/camera/check-ping`,
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(ipAddresses),

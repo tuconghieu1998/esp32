@@ -158,7 +158,7 @@ $(document).ready(function () {
     }
 
     $.ajax({
-        url: `http://${location.host}/check-ping`,
+        url: `http://${location.host}/camera/check-ping`,
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(ipAddresses),
