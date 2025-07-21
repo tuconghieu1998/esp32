@@ -9,6 +9,7 @@ function renderTimeline(containerSelector, data) {
     let data_blocks = [];
 
     data.forEach(block => {
+        if(!block.start_time || !block.end_time) return; 
         const start = new Date(block.start_time && block.start_time.replace('Z', ''));
         const end = new Date(block.end_time && block.end_time.replace('Z', ''));
 
@@ -105,6 +106,7 @@ function loadLast5Timelines(machine_id, date) {
             data: { machine_id, date: param },
             dataType: "json",
             success: function (response) {
+                console.log(response.data);
                 renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
             }
         });

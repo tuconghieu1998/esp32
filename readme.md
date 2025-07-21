@@ -51,6 +51,7 @@ Click Apply.
 5. SQL Server
 - Enable Properties>Security>SQL Server and Windows Mode
 - Open SQL Config Manager > Enable TCP/IP > Restart
+- SQL Agent: set Start Mode Automatic
 
 6. Check port
 netstat -ano | findStr "port_number"
