@@ -161,7 +161,7 @@
                 createPageNumber('pagination', response.current_page, response.total_pages);
 
                 // Handle Pagination Clicks
-                $(document).on("click", ".page-link", function (event) {
+                $(document).off("click", ".page-link").on("click", ".page-link", function (event) {
                     event.preventDefault();
                     let page = $(this).data("page");
                     loadPage(page);
@@ -390,7 +390,7 @@
             method: "GET",
             success: function (response) {
                 let hasChange = response.has_change;
-                console.log("checkSyncConfig", hasChange); 
+                console.log("checkSyncConfig", hasChange);
                 handleNotifySyncConfig(hasChange);
             },
             error: function (xhr) {

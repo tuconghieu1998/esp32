@@ -195,7 +195,7 @@
                     // Create pagination buttons
                     createPageNumber('pagination', response.currentPage, response.totalPages);
                     // Handle Pagination Clicks
-                    $(document).on("click", ".page-link", function (event) {
+                    $(document).off("click", ".page-link").on("click", ".page-link", function (event) {
                         event.preventDefault();
                         let page = $(this).data("page");
                         loadPage(page);
@@ -224,7 +224,7 @@
         }
 
         // Handle Pagination Clicks
-        $(document).on("click", ".page-link", function (event) {
+        $(document).off("click", ".page-link").on("click", ".page-link", function (event) {
             event.preventDefault();
             let page = $(this).data("page");
             loadPage(page);
