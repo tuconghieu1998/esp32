@@ -246,10 +246,11 @@
                     rowDiv.appendChild(lineLabel);
 
                     row.forEach(machineId => {
-                        const runningHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].running_hours : 0);
-                        const stoppedHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].stopped_hours : 0);
-                        const changeoverHours = convertHoursToHHMM(data[machineId - 1] ? data[machineId - 1].changeover_hours : 0);
-                        const runningPercent = data[machineId - 1] ? data[machineId - 1].percent_running : Math.floor(Math.random() * 61) + 40;
+                        let index = data.findIndex((item) => item.machine_id == machineId);
+                        const runningHours = convertHoursToHHMM(data[index] ? data[index].running_hours : 0);
+                        const stoppedHours = convertHoursToHHMM(data[index] ? data[index].stopped_hours : 0);
+                        const changeoverHours = convertHoursToHHMM(data[index] ? data[index].changeover_hours : 0);
+                        const runningPercent = data[index] ? data[index].percent_running : Math.floor(Math.random() * 61) + 40;
                         const opacity = Math.max(0, (runningPercent - runningPercentBaseline) / (100 - runningPercentBaseline));
 
                         const box = document.createElement('div');

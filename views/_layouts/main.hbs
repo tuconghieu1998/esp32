@@ -82,7 +82,8 @@
 					</li>
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/machine/ws2-fullscreen">
-							<i class="align-middle" data-feather="server"></i> <span class="align-middle">WS2 Fullscreen</span>
+							<i class="align-middle" data-feather="server"></i> <span class="align-middle">WS2
+								Fullscreen</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
@@ -308,32 +309,13 @@
 								</div>
 							</div>
 						</li>
-						<li class="nav-item dropdown auth-only">
-							<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#"
-								data-bs-toggle="dropdown">
-								<i class="align-middle" data-feather="settings"></i>
-							</a>
-
-							<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#"
-								data-bs-toggle="dropdown">
+						<li class="nav-item auth-only">
+							<a class="nav-link d-none d-sm-inline-block" href="/account/profile">
 								<img src="/img/avatars/avatar.jpg" class="avatar img-fluid rounded me-1"
-									alt="Charles Hall" /> <span class="text-dark">Charles Hall</span>
+									alt="avatar" /> <span class="text-dark">Admin</span>
 							</a>
-							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1"
-										data-feather="user"></i> Profile</a>
-								<a class="dropdown-item" href="#"><i class="align-middle me-1"
-										data-feather="pie-chart"></i> Analytics</a>
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="index.html"><i class="align-middle me-1"
-										data-feather="settings"></i> Settings & Privacy</a>
-								<a class="dropdown-item" href="#"><i class="align-middle me-1"
-										data-feather="help-circle"></i> Help Center</a>
-								<div class="dropdown-divider"></div>
-							</div>
 						</li>
 						<li class="nav-item dropdown">
-							<button type="button" class="btn btn-outline-danger auth-only" id="logout">Log out</button>
 							<button type="button" class="btn btn-outline-danger" id="login" style="display: none;">Log in</button>
 						</li>
 					</ul>
@@ -394,19 +376,6 @@
 	<script>
 		document.getElementById("login").addEventListener("click", () => {
 			window.location.href = "/account/login";
-		});
-		document.getElementById("logout").addEventListener("click", () => {
-			fetch('/account/logout', { method: 'POST', credentials: 'include' }) // Notify server to destroy session
-				.then(() => {
-					localStorage.removeItem("pnsmrotoken"); // Remove JWT token
-					window.location.href = "/account/login"; // Redirect to login page
-				})
-				.catch(error => {
-					console.error("Logout failed:", error);
-					localStorage.removeItem("pnsmrotoken"); // Remove JWT token
-					window.location.href = "/account/login"; // Redirect to login page
-				}
-				);
 		});
 	</script>
 	<script>

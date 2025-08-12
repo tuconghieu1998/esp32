@@ -91,4 +91,8 @@ router.post('/logout', (req, res) => {
     }
 });
 
+router.get('/profile', (req, res) => {
+    return res.render('account/profile.hbs');
+});
+
 export default router;
