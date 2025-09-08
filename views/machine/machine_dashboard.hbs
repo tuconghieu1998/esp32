@@ -8,9 +8,13 @@
                 value="{{formatMachineId machine_id}}" placeholder="Machine No">
         </div>
         <div class="col-md-3">
-            <label for="time" class="form-label"><strong>Date</strong></label>
+            <label for="from" class="form-label"><strong>From Date</strong></label>
+            <input type="text" name="from" id="from-date" class="form-control" placeholder="Date">
+        </div>
+        <div class="col-md-3">
+            <label for="to" class="form-label"><strong>To Date</strong></label>
             <div class="input-group date">
-                <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                <input type="text" name="to" id="to-date" class="form-control" placeholder="Date">
                 <button type="submit" class="btn btn-primary" id="search-btn"><i class="bi bi-funnel"></i>
                     Search</button>
             </div>
@@ -34,10 +38,10 @@
                     <div class="d-flex justify-content-center align-items-center gap-4">
                         <!-- Left: Main percent -->
                         <p id="percent-running" class="card-text display-4 mb-0 mr-3">
-                            {{percent_running}}%
+                            0%
                         </p>
                         <p id="sub-percent" class="card-text display-4 mb-0 mr-3">
-                            (-{{sub_percent}}%)
+                            0%
                         </p>
                     </div>
 
@@ -51,7 +55,7 @@
             <div class="card border-success">
                 <div class="card-body">
                     <h5 class="card-title text-success">Hours Running</h5>
-                    <p id="time-running" class="card-text display-4">{{convertDecimalHoursToTime running_hours}}</p>
+                    <p id="time-running" class="card-text display-4">0</p>
                 </div>
             </div>
         </div>
@@ -61,7 +65,7 @@
             <div class="card border-danger">
                 <div class="card-body">
                     <h5 class="card-title text-danger">Hours Stopped</h5>
-                    <p id="time-stopped" class="card-text display-4">{{convertDecimalHoursToTime stopped_hours}}</p>
+                    <p id="time-stopped" class="card-text display-4">0</p>
                 </div>
             </div>
         </div>
@@ -71,9 +75,7 @@
             <div class="card border-warning">
                 <div class="card-body">
                     <h5 class="card-title text-warning">Change Over</h5>
-                    <p id="time-changeover" class="card-text display-4">{{convertDecimalHoursToTime
-                        changeover_hours}}
-                    </p>
+                    <p id="time-changeover" class="card-text display-4">0</p>
                 </div>
             </div>
         </div>
@@ -127,7 +129,12 @@
     }
 
     $(document).ready(function () {
-        $('#time').datepicker({
+        $('#from-date').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+        $('#to-date').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
             todayHighlight: true
@@ -140,64 +147,88 @@
             autoclose: true
         }).datepicker('setDate', new Date());
 
-        $('#search-btn').click(function (e) {
-            e.preventDefault();
-            let date = $("#time").val();
-            let machine_id = getMachineId();
-            if (machine_id == '') return;
+        const machine_id = 1;
+        $("#machine-id").val(formatMachineId(machine_id));
+        let from_date = $("#from-date").val();
+        let to_date = $("#to-date").val();
 
-            $.ajax({
-                url: `/machine/api/machine-dashboard`,
-                method: "GET",
-                data: { machine_id, date },
-                dataType: "json",
-                success: function (response) {
-                    console.log(response.workingTime);
-                    if (response.workingTime) {
-                        const {
-                            percentRunning,
-                            timeRunning,
-                            timeStopped,
-                            timeDisconnected,
-                            timeChangeOver
-                        } = response.workingTime;
-
-                        $('#machine-id').val(formatMachineId(machine_id));
-
-                        const percent = getMaxPercentPassedToday(date);
-                        $("#max-percent").text(percent + "%").fadeIn(200);
-                        $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
-                        const e1 = $('#percent-running');
-                        e1.fadeOut(200, function () {
-                            $(this).text(percentRunning + '%').fadeIn(200);
-                        });
-
-                        const e2 = $('#time-running');
-                        e2.fadeOut(200, function () {
-                            $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
-                        });
-
-                        const e3 = $('#time-stopped');
-                        e3.fadeOut(200, function () {
-                            $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
-                        });
-
-                        const e4 = $('#time-changeover');
-                        e4.fadeOut(200, function () {
-                            $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
-                        });
-                    }
-                }
-            });
-
-            loadLast5Timelines(machine_id, date);
-            handleLoadRunningPercentInMonth(machine_id);
-        });
-
-        let machineId = '1';
-        loadLast5Timelines(machineId, getTodayFormatted());
-        loadPercentRunningMonth(machineId, getCurrentMonth() - 1, getCurrentYear());
+        loadMachineOverview(machine_id, from_date, to_date);
+        loadLast5Timelines(machine_id, to_date);
+        handleLoadRunningPercentInMonth(machine_id);
     });
+
+    function formatMachineId(id) {
+        return '#' + String(id).padStart(3, '0');
+    }
+
+    function getMachineId() {
+        let machineIdStr = $("#machine-id").val();
+        machineIdStr = machineIdStr.replace('#', '');
+        if (isNaN(Number(machineIdStr))) {
+            alert("Machine ID invalid!");
+            return '';
+        }
+        return Number(machineIdStr);
+    }
+
+    $('#search-btn').click(function (e) {
+        e.preventDefault();
+        let from_date = $("#from-date").val();
+        let to_date = $("#to-date").val();
+        let machine_id = getMachineId();
+        if (machine_id == '') return;
+
+
+        loadMachineOverview(machine_id, from_date, to_date);
+        loadLast5Timelines(machine_id, to_date);
+        handleLoadRunningPercentInMonth(machine_id);
+    });
+
+    function loadMachineOverview(machine_id, from_date, to_date) {
+        $.ajax({
+            url: `/machine/api/machine-dashboard`,
+            method: "GET",
+            data: { machine_id, from_date, to_date },
+            dataType: "json",
+            success: function (response) {
+                if (response.workingTime) {
+                    const {
+                        percentRunning,
+                        timeRunning,
+                        timeStopped,
+                        timeDisconnected,
+                        timeChangeOver
+                    } = response.workingTime;
+
+                    $('#machine-id').val(formatMachineId(machine_id));
+
+                    const percent = getMaxPercentPassedToday(to_date);
+                    $("#max-percent").text(percent + "%").fadeIn(200);
+                    $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
+
+                    const e1 = $('#percent-running');
+                    e1.fadeOut(200, function () {
+                        $(this).text(percentRunning + '%').fadeIn(200);
+                    });
+
+                    const e2 = $('#time-running');
+                    e2.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeRunning)).fadeIn(200);
+                    });
+
+                    const e3 = $('#time-stopped');
+                    e3.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeStopped)).fadeIn(200);
+                    });
+
+                    const e4 = $('#time-changeover');
+                    e4.fadeOut(200, function () {
+                        $(this).text(convertDecimalHoursToTime(timeChangeOver)).fadeIn(200);
+                    });
+                }
+            }
+        });
+    }
 
     $('#btn-search-month').on('click', function () {
         let machine_id = getMachineId();
@@ -259,8 +290,8 @@
         if (isToday) {
             cell.classList.add('today');
         }
-        
-        if(Number(running) + Number(stopped) + Number(changeover) > 100) {
+
+        if (Number(running) + Number(stopped) + Number(changeover) > 100) {
             stopped = 100 - running - changeover; // ensure 100%
         }
 

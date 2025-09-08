@@ -106,7 +106,6 @@ function loadLast5Timelines(machine_id, date) {
             data: { machine_id, date: param },
             dataType: "json",
             success: function (response) {
-                console.log(response.data);
                 renderTimeline(`#timeline-${display.replaceAll('/', '')}`, response.data);
             }
         });
