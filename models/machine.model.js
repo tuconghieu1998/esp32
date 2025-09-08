@@ -130,21 +130,22 @@ export async function deleteSensorConfig(id) {
     }
 }
 
-export async function getHoursMachineWorkingByStatus(machineId, date) {
+export async function getHoursMachineWorkingByStatus(machineId, fromDate, toDate) {
     let pool;
     try {
         pool = await getConnection();
         const result = await pool.request().query(`
 DECLARE @machineId VARCHAR(50) = '${machineId}';
-DECLARE @date DATE = '${date}';
+DECLARE @from_date DATE = '${fromDate}';
+DECLARE @to_date DATE = '${toDate}';
 
 ;WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
     WHERE machine_id = @machineId
-      AND timestamp >= @date 
-      AND timestamp < DATEADD(DAY, 2, @date)
+      AND timestamp >= @from_date 
+      AND timestamp < DATEADD(DAY, 2, @to_date)
 ),
 
 StatusExpanded AS (
@@ -167,7 +168,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60 AND CAST(start_time AS DATE) = @date
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
@@ -194,7 +195,7 @@ FULL OUTER JOIN ws2_working_date wd
     ON wd.machine_id = d.machine_id AND wd.[date] = d.[date]
 WHERE 
     COALESCE(d.machine_id, wd.machine_id) = @machineId
-    AND COALESCE(d.[date], wd.[date]) = @date;
+    AND COALESCE(d.[date], wd.[date]) >= @from_date AND COALESCE(d.[date], wd.[date]) <= @to_date;
         `);
 
         return result.recordset || [];

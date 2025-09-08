@@ -95,17 +95,18 @@ router.get('/ws2-fullscreen', async (req, res, next) => {
     }
 });
 
-async function getMachineWorkingTimeByStatus(machineId, date) {
-    const workingData = await getHoursMachineWorkingByStatus(machineId, date);
-    let timeRunning = 0, timeStopped = 0, timeChangeOver = 0;
+async function getMachineWorkingTimeByStatus(machineId, fromDate, toDate) {
+    const workingData = await getHoursMachineWorkingByStatus(machineId, fromDate, toDate);
+    let timeRunning = 0, timeStopped = 0, timeChangeOver = 0, count = 0;
 
     for(const row of workingData) {
-        timeRunning = row['running_hours'];
-        timeStopped = row['stopped_hours'];
-        timeChangeOver = row['changeover_hours'];
+        timeRunning += row['running_hours'];
+        timeStopped += row['stopped_hours'];
+        timeChangeOver += row['changeover_hours'];
+        count++;
     }
     
-    let percentRunning = Math.min(100, (timeRunning / 24 * 100).toFixed(2));
+    let percentRunning = Math.min(100, (timeRunning / (24 * Math.max(count, 1)) * 100).toFixed(2));
 
     return {
         percentRunning,
@@ -139,12 +140,16 @@ router.get('/machine-dashboard/:machine_id', async (req, res, next) => {
 
 router.get("/api/machine-dashboard", async (req, res) => {
     try {
-        let { machine_id, date } = req.query;
+        let { machine_id, from_date, to_date } = req.query;
         let dateFormat = new Date().toISOString().split('T')[0];
-        if (date && date != '') {
-            dateFormat = convertDateFormat(date);
+        let fromDate = dateFormat, toDate = dateFormat;
+        if (from_date && from_date != '') {
+            fromDate = convertDateFormat(from_date);
         }
-        const workingTime = await getMachineWorkingTimeByStatus(machine_id, dateFormat);
+        if (to_date && to_date != '') {
+            toDate = convertDateFormat(to_date);
+        }
+        const workingTime = await getMachineWorkingTimeByStatus(machine_id, fromDate, toDate);
         res.json({
             workingTime
         });
