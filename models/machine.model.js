@@ -469,19 +469,20 @@ WHERE COALESCE(c.date, w.date) BETWEEN @monthStart AND @monthEnd
     }
 }
 
-export async function getTimeWorkshop2RunningInDate(date) {
+export async function getTimeWorkshop2RunningInDate(fromDate, toDate) {
     let pool;
     try {
         pool = await getConnection();
         const result = await pool.request().query(`
-DECLARE @targetDate DATE = '${date}';
+DECLARE @fromDate DATE = '${fromDate}';
+DECLARE @toDate DATE = '${toDate}';
 
 ;WITH StatusWithLead AS (
     SELECT *,
         LEAD(timestamp) OVER (PARTITION BY machine_id ORDER BY timestamp) AS next_timestamp
     FROM ws2_working_status
-    WHERE timestamp >= @targetDate 
-      AND timestamp < DATEADD(DAY, 2, @targetDate)
+    WHERE timestamp >= @fromDate 
+      AND timestamp < DATEADD(DAY, 2, @toDate)
 ),
 
 StatusExpanded AS (
@@ -502,7 +503,7 @@ FilteredStatus AS (
     SELECT *,
         DATEDIFF(SECOND, start_time, end_time) AS duration_seconds
     FROM StatusExpanded
-    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60 AND CAST(start_time AS DATE) = @targetDate
+    WHERE DATEDIFF(MINUTE, start_time, end_time) <= 60
 ),
 
 DailyCalculated AS (
@@ -524,7 +525,7 @@ StoredSummary AS (
         SUM(changeover_hours) AS changeover_hours,
         SUM(stopped_hours) AS stopped_hours
     FROM ws2_working_date
-    WHERE CAST(date AS DATE) = @targetDate
+    WHERE CAST(date AS DATE) >= @fromDate and CAST(date AS DATE) <= @toDate
     GROUP BY [date]
 )
 
@@ -542,7 +543,8 @@ SELECT
 FROM DailyCalculated c
 FULL OUTER JOIN StoredSummary w
     ON c.date = w.date
-WHERE COALESCE(c.date, w.date) = @targetDate
+WHERE 
+	COALESCE(c.[date], w.[date]) >= @fromDate AND COALESCE(c.[date], w.[date]) <= @toDate;
         `);
         return result.recordset || [];
     } catch (err) {

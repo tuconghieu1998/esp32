@@ -187,12 +187,16 @@ router.get("/api/machine-month", async (req, res) => {
 
 router.get("/api/workshop2-date", async (req, res) => {
     try {
-        let { date } = req.query;
+        let { from_date, to_date } = req.query;
         let dateFormat = new Date().toISOString().split('T')[0];
-        if (date && date != '') {
-            dateFormat = convertDateFormat(date);
+        let fromDate = dateFormat, toDate = dateFormat;
+        if (from_date && from_date != '') {
+            fromDate = convertDateFormat(from_date);
         }
-        const data = await getTimeWorkshop2RunningInDate(dateFormat);
+        if (to_date && to_date != '') {
+            toDate = convertDateFormat(to_date);
+        }
+        const data = await getTimeWorkshop2RunningInDate(fromDate, toDate);
         res.json({
             data
         });
@@ -223,18 +227,7 @@ router.get("/api/workshop2-month", async (req, res) => {
 
 router.get('/workshop-dashboard', async (req, res, next) => {
     try {
-        const date = getCurrentDate();
-        const data = await getTimeWorkshop2RunningInDate(date);
-        let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
-        if (data && data[0]) {
-            percent_running = data[0].percent_running;
-            running_hours = data[0].running_hours;
-            stopped_hours = data[0].stopped_hours;
-            changeover_hours = data[0].changeover_hours;
-        }
-        let max_percent = getMaxPercentPassedToday();
-        let sub_percent = (max_percent - percent_running).toFixed(2);
-        res.render('machine/workshop_dashboard.hbs', { percent_running, running_hours, stopped_hours, changeover_hours, max_percent, sub_percent });
+        res.render('machine/workshop_dashboard.hbs');
     }
     catch (e) {
         console.log(e);
@@ -269,16 +262,6 @@ router.get('/api/workshop-heatmap', async (req, res, next) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-function getMaxPercentPassedToday() {
-    // Expecting format 'dd/mm/yyyy'
-    const now = new Date();
-    const secondsPerDay = 86400;
-    const secondsSinceMidnight =
-        now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    const percent = (secondsSinceMidnight / secondsPerDay) * 100;
-    return percent.toFixed(2);
-}
 
 router.get('/sensor-config', authenticate, async (req, res, next) => {
     try {

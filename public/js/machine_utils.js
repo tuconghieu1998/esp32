@@ -60,10 +60,15 @@ function convertHoursToHHMM(decimalHours) {
 }
 
 // format dd/mm/yyyy
-function getMaxPercentPassedToday(dateStr) {
+function getMaxPercentPassedToday(fromDateStr, toDateStr) {
     // Expecting format 'dd/mm/yyyy'
-    const [day, month, year] = dateStr.split('/').map(Number);
+    const [fromDay, fromMonth, fromYear] = fromDateStr.split('/').map(Number);
+    const [day, month, year] = toDateStr.split('/').map(Number);
+    const fromDate = new Date(fromYear, fromMonth - 1, fromDay);
     const target = new Date(year, month - 1, day); // month is 0-based
+
+    const diffMilliseconds = target.getTime() - fromDate.getTime();
+
     const now = new Date();
     const secondsPerDay = 86400;
 
@@ -75,7 +80,7 @@ function getMaxPercentPassedToday(dateStr) {
     if (isToday) {
         const secondsSinceMidnight =
             now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-        const percent = (secondsSinceMidnight / secondsPerDay) * 100;
+        const percent = ((diffMilliseconds/1000 + secondsSinceMidnight) / (diffMilliseconds/1000 + secondsPerDay)) * 100;
         return percent.toFixed(2);
     } else {
         return "100.00";
