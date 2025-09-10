@@ -345,10 +345,9 @@
         $.ajax({
             url: `/machine/api/workshop2-date`,
             method: "GET",
-            data: { date },
+            data: { from_date: date, to_date: date },
             dataType: "json",
             success: function (response) {
-                console.log("loadDataModal", response.data);
                 let percent_running = 0, running_hours = 0, stopped_hours = 0, changeover_hours = 0;
                 if (response.data && response.data[0]) {
                     percent_running = response.data[0].percent_running;
