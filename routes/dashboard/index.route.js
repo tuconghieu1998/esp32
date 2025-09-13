@@ -82,13 +82,13 @@ router.get('/', authenticate, async (req, res, next) => {
 router.get('/weather', async (req, res) => {
     try {
         
-        // const lat = 15.211005;
-        // const lon = 108.782677;
+        const lat = 15.211005;
+        const lon = 108.782677;
         // http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${ACCUWEATHER_KEY}&q=15.211005,108.782677
-        const url = `http://dataservice.accuweather.com/currentconditions/v1/416393?apikey=${ACCUWEATHER_KEY}&details=true`;
+        //const url = `http://dataservice.accuweather.com/currentconditions/v1/416393?apikey=${ACCUWEATHER_KEY}&details=true`;
         //const url = `https://weather.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_API_KEY}&location.latitude=${lat}&location.longitude=${lon}`;
-        // const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}&units=metric&lang=en`;
-        // console.log('/weather', url);
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}&units=metric&lang=en`;
+        console.log('/weather', url);
         const response = await axios.get(url);
         // console.log(response.data);
         res.json(response.data);
