@@ -710,6 +710,7 @@
                     let temp = Math.round(data.main.temp);
                     let icon = data.weather[0].icon;
                     let iconString = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+                    let windSpeed = Math.round(data.wind.speed * 3.6); // Convert m/s to km/h
 
                     $("#weather-result").html(`
                         <div class="me-3">
@@ -721,7 +722,7 @@
                         <div class="text-start">
                             <p class="mb-0" style="font-size: small;">${data.weather[0].main}</p>
                             <p class="mb-0" style="font-size: small;">Humidity: ${data.main.humidity}%</p>
-                            <p class="mb-0" style="font-size: small;">Wind: ${(data.wind.speed * 3.6)} km/h</p>
+                            <p class="mb-0" style="font-size: small;">Wind: ${windSpeed} km/h</p>
                         </div>
                     `);
                 }
