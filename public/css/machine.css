@@ -92,3 +92,32 @@
     z-index: 999;
     white-space: pre-line;
 }
+
+.machine-side-panel {
+    border-style: solid;
+    border-width: 2px;
+    border-color: #EF7722;
+    border-radius: 8px;
+    height: 800px;
+    padding: 20px;
+}
+
+.machine-side-panel .title {
+    font-weight: bold;
+    font-size: 24px;
+    text-align: center; 
+}
+
+.machine-side-panel .value {
+    font-weight: bold;
+    font-size: 64px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.machine-side-panel .value-total {
+    font-weight: bold;
+    font-size: 48px;
+    text-align: center;
+    margin-top: 20px;
+}

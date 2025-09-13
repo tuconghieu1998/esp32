@@ -1,28 +1,51 @@
 <main class="content">
     <div class="container-fluid p-0">
-        <h2 class="h3 mb-3">Machine for Workshop 2</h2>
-        <div class="mb-3" id="statusFilterGroup">
-            <label class="form-check form-check-inline px-3">
-                <input class="form-check-input" type="radio" name="statusFilter" value="all" checked>
-                <span class="form-check-label">All</span>
-            </label>
-            <label class="form-check form-check-inline px-3">
-                <input class="form-check-input" type="radio" name="statusFilter" value="running">
-                <span>Running</span>
-                <div class="legend-box-filter running"></div>
-            </label>
-            <label class="form-check form-check-inline px-3">
-                <input class="form-check-input" type="radio" name="statusFilter" value="stopped">
-                <span>Stopped</span>
-                <div class="legend-box-filter stopped"></div>
-            </label>
-            <label class="form-check form-check-inline px-3">
-                <input class="form-check-input" type="radio" name="statusFilter" value="changeover">
-                <span>Changeover</span>
-                <div class="legend-box-filter changeover"></div>
-            </label>
+        <div class="row">
+            <div class="col-9">
+                <h2 class="h3 mb-3">Machine for Workshop 2</h2>
+                <div class="mb-3" id="statusFilterGroup">
+                    <label class="form-check form-check-inline px-3">
+                        <input class="form-check-input" type="radio" name="statusFilter" value="all" checked>
+                        <span class="form-check-label">All</span>
+                    </label>
+                    <label class="form-check form-check-inline px-3">
+                        <input class="form-check-input" type="radio" name="statusFilter" value="running">
+                        <span>Running</span>
+                        <div class="legend-box-filter running"></div>
+                    </label>
+                    <label class="form-check form-check-inline px-3">
+                        <input class="form-check-input" type="radio" name="statusFilter" value="stopped">
+                        <span>Stopped</span>
+                        <div class="legend-box-filter stopped"></div>
+                    </label>
+                    <label class="form-check form-check-inline px-3">
+                        <input class="form-check-input" type="radio" name="statusFilter" value="changeover">
+                        <span>Changeover</span>
+                        <div class="legend-box-filter changeover"></div>
+                    </label>
+                </div>
+                <div class="row g-2" id="machineGrid"></div>
+            </div>
+            <div class="col-3 machine-side-panel">
+                <div class="title" style="color: #22bb33;">
+                    Running
+                </div>
+                <div class="value" id="running-count">0</div>
+                <div class="title" style="color: #bb2124;">
+                    Stopped
+                </div>
+                <div class="value" id="stopped-count">0</div>
+                <div class="title" style="color: #f0ad4e;">
+                    Change Over
+                </div>
+                <div class="value" id="changeover-count">0</div>
+                <div class="title" style="color: #22bb33;">
+                    Total Running
+                </div>
+                <div class="value-total" id="total-running">0 hours</div>
+                <div class="value-total" id="total-percent">(0%)</div>
+            </div>
         </div>
-        <div class="row g-2" id="machineGrid"></div>
     </div>
     <!-- Machine Detail Modal -->
     <div class="modal fade" id="machineDashboardModal" tabindex="-1" aria-labelledby="machineDashboardModalLabel"
@@ -41,9 +64,13 @@
                                 placeholder="Machine No">
                         </div>
                         <div class="col-md-3">
-                            <label for="time" class="form-label"><strong>Date</strong></label>
+                            <label for="from" class="form-label"><strong>From Date</strong></label>
+                            <input type="text" name="from" id="from-date" class="form-control" placeholder="Date">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="to" class="form-label"><strong>To Date</strong></label>
                             <div class="input-group date">
-                                <input type="text" name="time" id="time" class="form-control" placeholder="Date">
+                                <input type="text" name="to" id="to-date" class="form-control" placeholder="Date">
                                 <button type="submit" class="btn btn-primary" id="search-btn"><i
                                         class="bi bi-funnel"></i>
                                     Search</button>
@@ -200,6 +227,22 @@
         return `status-${status}`;
     }
 
+    function showOverviewInfo(running_count, stopped_count, changeover_count) {
+        let runningElement = document.getElementById("running-count");
+        let stoppedElement = document.getElementById("stopped-count");
+        let changeoverElement = document.getElementById("changeover-count");
+
+        if(runningElement) {
+            runningElement.innerHTML = running_count.toString();
+        }
+        if(stoppedElement) {
+            stoppedElement.innerHTML = stopped_count.toString();
+        }
+        if(changeoverElement) {
+            changeoverElement.innerHTML = changeover_count.toString();
+        }
+    }
+
     const grid = document.getElementById('machineGrid');
     let current_filter = 'all';
 
@@ -293,6 +336,7 @@
         //console.log("DATA: ", data);
         let machine_states = data.machine_states;
         time_server = data.time_server;
+        let running_count = 0, stopped_count = 0, changeover_count = 0; 
         for (let i = 0; i < machine_states.length; i++) {
             let machine_id = machine_states[i].machine_id;
             let index = machines.findIndex((item) => item.machine_id == machine_id);
@@ -301,10 +345,52 @@
                 machines[index].machine_id = machine_states[i].machine_id;
                 machines[index].status = machine_states[i].status;
                 machines[index].update_time = machine_states[i].update_time;
+
+                switch(machine_states[i].status) {
+                    case "running":
+                        running_count++;
+                        break;
+                    case "stopped":
+                        stopped_count++;
+                        break;
+                    case "changeover":
+                        changeover_count++;
+                        break;
+                }
             }
         }
         renderMachines(current_filter);
+        showOverviewInfo(running_count, stopped_count, changeover_count);
     });
+
+    function loadOverView(date) {
+        $.ajax({
+            url: `/machine/api/workshop2-date`,
+            method: "GET",
+            data: { date },
+            dataType: "json",
+            success: function (response) {
+                console.log("loadOverView", response.data);
+                let percent_running = 0, running_hours = 0;
+                if (response.data && response.data[0]) {
+                    percent_running = response.data[0].percent_running;
+                    running_hours = response.data[0].running_hours;
+                }
+
+                let total_running = document.getElementById('total-running');
+                let total_percent = document.getElementById('total-percent');
+
+                total_running.innerHTML = `${Math.floor(running_hours)} hours`;
+                total_percent.innerHTML = `(${Math.round(percent_running)}%)`;
+            },
+            error: function () {
+                alert('Failed to load running data.');
+            }
+        });
+    }
+
+    loadOverView();
+    setInterval(loadOverView, 900000); // 15 minutes
 
     // Initial render
     renderMachines();
@@ -320,7 +406,12 @@
 
     $('#machineDashboardModal').on('show.bs.modal', function (e) {
         if (e.target != this) return;
-        $('#time').datepicker({
+        $('#from-date').datepicker({
+            format: 'dd/mm/yyyy', // Format to match your filter
+            autoclose: true,
+            todayHighlight: true
+        }).datepicker('setDate', new Date());
+        $('#to-date').datepicker({
             format: 'dd/mm/yyyy', // Format to match your filter
             autoclose: true,
             todayHighlight: true
@@ -335,11 +426,12 @@
 
         const machine_id = $('#machineDashboardModal').attr("data-id");
         $("#machine-id").val(formatMachineId(machine_id));
-        let date = $("#time").val();
-        console.log("Modal Show: ", machine_id, date);
+        let from_date = $("#from-date").val();
+        let to_date = $("#to-date").val();
+        console.log("Modal Show: ", machine_id, from_date, to_date);
 
-        loadMachineOverview(machine_id, date);
-        loadLast5Timelines(machine_id, date);
+        loadMachineOverview(machine_id, from_date, to_date);
+        loadLast5Timelines(machine_id, to_date);
         handleLoadRunningPercentInMonth(machine_id);
     });
 
@@ -359,21 +451,22 @@
 
     $('#search-btn').click(function (e) {
         e.preventDefault();
-        let date = $("#time").val();
+        let from_date = $("#from-date").val();
+        let to_date = $("#to-date").val();
         let machine_id = getMachineId();
         if (machine_id == '') return;
 
 
-        loadMachineOverview(machine_id, date);
-        loadLast5Timelines(machine_id, date);
+        loadMachineOverview(machine_id, from_date, to_date);
+        loadLast5Timelines(machine_id, to_date);
         handleLoadRunningPercentInMonth(machine_id);
     });
 
-    function loadMachineOverview(machine_id, date) {
+    function loadMachineOverview(machine_id, from_date, to_date) {
         $.ajax({
             url: `/machine/api/machine-dashboard`,
             method: "GET",
-            data: { machine_id, date },
+            data: { machine_id, from_date, to_date },
             dataType: "json",
             success: function (response) {
                 console.log(response.workingTime);
@@ -388,7 +481,7 @@
 
                     $('#machine-id').val(formatMachineId(machine_id));
 
-                    const percent = getMaxPercentPassedToday(date);
+                    const percent = getMaxPercentPassedToday(to_date);
                     $("#max-percent").text(percent + "%").fadeIn(200);
                     $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
 
