@@ -449,7 +449,7 @@
 
                         $('#machine-id').val(formatMachineId(machine_id));
 
-                        const percent = getMaxPercentPassedToday(date);
+                        const percent = getMaxPercentPassedToday(date, date);
                         $("#max-percent").text(percent + "%").fadeIn(200);
                         $("#sub-percent").text("(" + -(percent - percentRunning).toFixed(2) + "%)").fadeIn(200);
 
